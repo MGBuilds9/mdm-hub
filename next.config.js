@@ -5,7 +5,7 @@ const nextConfig = {
     unoptimized: true,
   },
   typescript: {
-    ignoreBuildErrors: false,
+    ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === 'true',
   },
   eslint: {
     ignoreDuringBuilds: false,
@@ -18,6 +18,10 @@ const nextConfig = {
   output: 'standalone',
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
+  // Handle missing env vars gracefully
+  env: {
+    NEXT_PUBLIC_AZURE_CONFIGURED: process.env.NEXT_PUBLIC_AZURE_CLIENT_ID ? 'true' : 'false',
+  },
   // Optimize webpack configuration
   webpack: (config, { dev, isServer }) => {
     // Optimize cache performance

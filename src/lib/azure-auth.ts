@@ -1,3 +1,4 @@
+// src/lib/azure-auth.ts
 import {
   PublicClientApplication,
   Configuration,
@@ -10,9 +11,8 @@ import {
   BrowserAuthError,
   LogLevel,
 } from '@azure/msal-browser';
-import { telemetry } from './telemetry';
 
-// Azure AD configuration validation
+// Azure AD configuration validation with graceful handling
 export interface AzureConfig {
   clientId: string;
   authority: string;
@@ -20,19 +20,24 @@ export interface AzureConfig {
   tenantId?: string;
 }
 
-export interface AzureAuthState {
-  isConfigured: boolean;
-  isInitialized: boolean;
-  hasAccount: boolean;
-  error: Error | null;
-}
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
 
-// Validate Azure AD configuration
+// Validate Azure AD configuration without throwing during build
 export function validateAzureConfig(): {
   isValid: boolean;
   config: AzureConfig | null;
   errors: string[];
 } {
+  // Skip validation during build/SSR
+  if (!isBrowser) {
+    return {
+      isValid: false,
+      config: null,
+      errors: ['Not in browser environment'],
+    };
+  }
+
   const errors: string[] = [];
 
   const clientId = process.env.NEXT_PUBLIC_AZURE_CLIENT_ID;
@@ -44,48 +49,52 @@ export function validateAzureConfig(): {
     errors.push('NEXT_PUBLIC_AZURE_CLIENT_ID is required');
   }
 
-  if (!authority) {
-    errors.push('NEXT_PUBLIC_AZURE_AUTHORITY is required');
+  if (!authority && !tenantId) {
+    errors.push(
+      'NEXT_PUBLIC_AZURE_AUTHORITY or NEXT_PUBLIC_AZURE_TENANT_ID is required'
+    );
   }
 
   if (!redirectUri) {
     errors.push('NEXT_PUBLIC_AZURE_REDIRECT_URI is required');
   }
 
-  if (!tenantId) {
-    errors.push('NEXT_PUBLIC_AZURE_TENANT_ID is required');
-  }
-
   const isValid = errors.length === 0;
 
   if (!isValid) {
-    telemetry.trackError(
-      new Error(`Azure AD configuration invalid: ${errors.join(', ')}`),
-      'azure_config_validation'
-    );
+    // Don't track errors during build
+    if (isBrowser && typeof window !== 'undefined') {
+      console.warn('Azure AD configuration incomplete:', errors);
+    }
     return { isValid: false, config: null, errors };
   }
 
+  // Construct authority from tenant ID if not provided
+  const finalAuthority =
+    authority ||
+    (tenantId ? `https://login.microsoftonline.com/${tenantId}` : '');
+
   const config: AzureConfig = {
     clientId: clientId!,
-    authority: authority!,
+    authority: finalAuthority,
     redirectUri: redirectUri!,
     ...(tenantId ? { tenantId } : {}),
-  } as AzureConfig;
+  };
 
   return { isValid: true, config, errors: [] };
 }
 
-// Check if Azure is configured using the configuration service
-export function isAzureConfiguredFromService(): boolean {
-  try {
-    const { getAzureConfig } = require('@/services/config.service');
-    const azureConfig = getAzureConfig();
-    return azureConfig.enabled;
-  } catch {
-    // Fallback to direct validation if config service not available
-    return isAzureConfigured();
-  }
+// Create MSAL instance with error handling
+let msalInstance: PublicClientApplication | null = null;
+let initializationPromise: Promise<boolean> | null = null;
+
+export function getMsalInstance(): PublicClientApplication | null {
+  return msalInstance;
+}
+
+export function isAzureConfigured(): boolean {
+  if (!isBrowser) return false;
+  return validateAzureConfig().isValid;
 }
 
 // Get Azure AD configuration
@@ -124,18 +133,6 @@ function getAzureConfig(): Configuration | null {
   };
 }
 
-// Create MSAL instance with error handling
-let msalInstance: PublicClientApplication | null = null;
-let initializationPromise: Promise<boolean> | null = null;
-
-export function getMsalInstance(): PublicClientApplication | null {
-  return msalInstance;
-}
-
-export function isAzureConfigured(): boolean {
-  return validateAzureConfig().isValid;
-}
-
 // Scopes for Microsoft Graph API
 export const graphScopes = [
   'https://graph.microsoft.com/User.Read',
@@ -144,6 +141,11 @@ export const graphScopes = [
 
 // Initialize MSAL with proper error handling
 export const initializeMsal = async (): Promise<boolean> => {
+  // Skip initialization if not in browser
+  if (!isBrowser) {
+    return false;
+  }
+
   // Return existing promise if already initializing
   if (initializationPromise) {
     return initializationPromise;
@@ -153,22 +155,15 @@ export const initializeMsal = async (): Promise<boolean> => {
     try {
       const config = getAzureConfig();
       if (!config) {
-        const error = new Error('Azure AD configuration is invalid');
-        telemetry.trackError(error, 'azure_msal_init');
-        throw error;
+        console.warn('Azure AD configuration is not available');
+        return false;
       }
 
       msalInstance = new PublicClientApplication(config);
       await msalInstance.initialize();
 
-      telemetry.track({
-        event: 'azure_msal_initialized',
-        properties: { success: true },
-      });
-
       return true;
     } catch (error) {
-      telemetry.trackError(error as Error, 'azure_msal_init');
       console.error('Failed to initialize MSAL:', error);
       msalInstance = null;
       return false;
@@ -186,10 +181,9 @@ export const getCurrentAzureAccount = (): AccountInfo | null => {
 
   try {
     const accounts = msalInstance.getAllAccounts();
-    // With noUncheckedIndexedAccess, accounts[0] can be undefined
     return accounts[0] ?? null;
   } catch (error) {
-    telemetry.trackError(error as Error, 'azure_get_account');
+    console.error('Failed to get current account:', error);
     return null;
   }
 };
@@ -209,11 +203,12 @@ export const signInWithAzure = async (): Promise<{
     // Ensure MSAL is initialized
     const initialized = await initializeMsal();
     if (!initialized || !msalInstance) {
-      const error = new Error(
-        'Azure AD is not properly configured or initialized'
-      );
-      telemetry.trackError(error, 'azure_signin_init');
-      return { success: false, error };
+      return {
+        success: false,
+        error: new Error(
+          'Azure AD is not configured. Please contact your administrator.'
+        ),
+      };
     }
 
     const loginRequest: PopupRequest = {
@@ -221,20 +216,9 @@ export const signInWithAzure = async (): Promise<{
       prompt: 'select_account',
     };
 
-    telemetry.track({
-      event: 'azure_signin_attempt',
-      properties: { method: 'popup' },
-    });
-
     try {
       // Try popup first
       const response = await msalInstance.loginPopup(loginRequest);
-
-      telemetry.track({
-        event: 'azure_signin_success',
-        properties: { method: 'popup' },
-      });
-
       return { success: true, account: response.account };
     } catch (popupError) {
       // Check if popup was blocked
@@ -244,67 +228,33 @@ export const signInWithAzure = async (): Promise<{
           popupError.errorCode === 'user_cancelled' ||
           popupError.message.includes('popup'))
       ) {
-        telemetry.track({
-          event: 'azure_signin_popup_blocked',
-          properties: { error: popupError.message },
-        });
-
         // Fallback to redirect
-        return await signInWithAzureRedirect();
+        const redirectRequest: RedirectRequest = {
+          scopes: graphScopes,
+          prompt: 'select_account',
+        };
+
+        await msalInstance.loginRedirect(redirectRequest);
+        return { success: true };
       }
 
       // Re-throw other errors
       throw popupError;
     }
   } catch (error) {
-    telemetry.trackError(error as Error, 'azure_signin');
     console.error('Azure AD sign in failed:', error);
     return { success: false, error: error as Error };
   }
 };
 
-// Sign in with Azure AD using redirect flow
-export const signInWithAzureRedirect = async (): Promise<{
-  success: boolean;
-  account?: AccountInfo;
-  error?: Error;
-}> => {
-  try {
-    if (!msalInstance) {
-      const error = new Error('Azure AD is not initialized');
-      return { success: false, error };
-    }
-
-    const loginRequest: RedirectRequest = {
-      scopes: graphScopes,
-      prompt: 'select_account',
-    };
-
-    telemetry.track({
-      event: 'azure_signin_attempt',
-      properties: { method: 'redirect' },
-    });
-
-    await msalInstance.loginRedirect(loginRequest);
-
-    // Redirect flow doesn't return immediately
-    return { success: true };
-  } catch (error) {
-    telemetry.trackError(error as Error, 'azure_signin_redirect');
-    console.error('Azure AD redirect sign in failed:', error);
-    return { success: false, error: error as Error };
-  }
-};
-
-// Sign out from Azure AD with popup/redirect fallback
+// Sign out from Azure AD
 export const signOutFromAzure = async (): Promise<{
   success: boolean;
   error?: Error;
 }> => {
   try {
     if (!msalInstance) {
-      const error = new Error('Azure AD is not initialized');
-      return { success: false, error };
+      return { success: true }; // Already signed out
     }
 
     const accounts = msalInstance.getAllAccounts();
@@ -312,134 +262,51 @@ export const signOutFromAzure = async (): Promise<{
       return { success: true };
     }
 
-    telemetry.track({
-      event: 'azure_signout_attempt',
-      properties: { method: 'popup' },
+    await msalInstance.logoutPopup({
+      account: accounts[0] || null,
+      postLogoutRedirectUri: window.location.origin,
     });
 
-    try {
-      // Try popup logout first
-      await msalInstance.logoutPopup({
-        account: accounts[0]!,
-        postLogoutRedirectUri: window.location.origin,
-      });
-
-      telemetry.track({
-        event: 'azure_signout_success',
-        properties: { method: 'popup' },
-      });
-
-      return { success: true };
-    } catch (popupError) {
-      // Check if popup was blocked
-      if (
-        popupError instanceof BrowserAuthError &&
-        (popupError.errorCode === 'popup_window_error' ||
-          popupError.message.includes('popup'))
-      ) {
-        telemetry.track({
-          event: 'azure_signout_popup_blocked',
-          properties: { error: popupError.message },
-        });
-
-        // Fallback to redirect logout
-        await msalInstance.logoutRedirect({
-          account: accounts[0]!,
-          postLogoutRedirectUri: window.location.origin,
-        });
-
-        return { success: true };
-      }
-
-      throw popupError;
-    }
+    return { success: true };
   } catch (error) {
-    telemetry.trackError(error as Error, 'azure_signout');
     console.error('Azure AD sign out failed:', error);
     return { success: false, error: error as Error };
   }
 };
 
-// Get access token for Microsoft Graph with proper caching and refresh
+// Get access token for Microsoft Graph
 export const getAccessToken = async (): Promise<{
   token: string | null;
   error?: Error;
 }> => {
+  if (!msalInstance) {
+    return { token: null, error: new Error('MSAL not initialized') };
+  }
+
+  const account = getCurrentAzureAccount();
+  if (!account) {
+    return { token: null, error: new Error('No authenticated account') };
+  }
+
+  const silentRequest: SilentRequest = {
+    scopes: graphScopes,
+    account,
+  };
+
   try {
-    if (!msalInstance) {
-      const error = new Error('Azure AD is not initialized');
-      return { token: null, error };
-    }
-
-    const account = getCurrentAzureAccount();
-    if (!account) {
-      return { token: null, error: new Error('No Azure AD account found') };
-    }
-
-    const tokenRequest: SilentRequest = {
-      scopes: graphScopes,
-      account: account,
-    };
-
-    telemetry.track({
-      event: 'azure_token_request',
-      properties: { method: 'silent' },
-    });
-
-    try {
-      // Try to get token silently first (from cache)
-      const response = await msalInstance.acquireTokenSilent(tokenRequest);
-
-      telemetry.track({
-        event: 'azure_token_success',
-        properties: { method: 'silent' },
-      });
-
-      return { token: response.accessToken };
-    } catch (silentError) {
-      // If silent token acquisition fails, try interactive
-      if (silentError instanceof InteractionRequiredAuthError) {
-        telemetry.track({
-          event: 'azure_token_interactive_required',
-          properties: { error: silentError.message },
-        });
-
-        try {
-          // Try popup first
-          const response = await msalInstance.acquireTokenPopup(tokenRequest);
-
-          telemetry.track({
-            event: 'azure_token_success',
-            properties: { method: 'popup' },
-          });
-
-          return { token: response.accessToken };
-        } catch (popupError) {
-          // Check if popup was blocked
-          if (
-            popupError instanceof BrowserAuthError &&
-            (popupError.errorCode === 'popup_window_error' ||
-              popupError.message.includes('popup'))
-          ) {
-            telemetry.track({
-              event: 'azure_token_popup_blocked',
-              properties: { error: popupError.message },
-            });
-
-            // Fallback to redirect
-            await msalInstance.acquireTokenRedirect(tokenRequest);
-            return { token: null }; // Redirect doesn't return immediately
-          }
-
-          throw popupError;
-        }
-      }
-
-      throw silentError;
-    }
+    const response = await msalInstance.acquireTokenSilent(silentRequest);
+    return { token: response.accessToken };
   } catch (error) {
-    telemetry.trackError(error as Error, 'azure_token_acquisition');
-    console.error('Failed to acquire token:', error);
+    if (error instanceof InteractionRequiredAuthError) {
+      try {
+        const response = await msalInstance.acquireTokenPopup({
+          scopes: graphScopes,
+        });
+        return { token: response.accessToken };
+      } catch (popupError) {
+        return { token: null, error: popupError as Error };
+      }
+    }
     return { token: null, error: error as Error };
   }
 };
@@ -449,20 +316,13 @@ export const getUserProfile = async (): Promise<{
   profile: any | null;
   error?: Error;
 }> => {
+  const { token, error } = await getAccessToken();
+
+  if (!token || error) {
+    return { profile: null, error: error || new Error('No access token') };
+  }
+
   try {
-    const { token, error } = await getAccessToken();
-    if (error || !token) {
-      return {
-        profile: null,
-        error: error || new Error('No access token available'),
-      };
-    }
-
-    telemetry.track({
-      event: 'azure_graph_request',
-      properties: { endpoint: 'me' },
-    });
-
     const response = await fetch('https://graph.microsoft.com/v1.0/me', {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -470,102 +330,83 @@ export const getUserProfile = async (): Promise<{
     });
 
     if (!response.ok) {
-      const error = new Error(
-        `Failed to fetch user profile: ${response.status} ${response.statusText}`
-      );
-      telemetry.trackError(error, 'azure_graph_request');
-      return { profile: null, error };
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const profile = await response.json();
-
-    telemetry.track({
-      event: 'azure_graph_success',
-      properties: { endpoint: 'me' },
-    });
-
     return { profile };
   } catch (error) {
-    telemetry.trackError(error as Error, 'azure_graph_request');
-    console.error('Failed to get user profile:', error);
+    console.error('Failed to fetch user profile:', error);
     return { profile: null, error: error as Error };
   }
 };
 
-// Handle Azure AD callback for redirect flow
+// Azure auth state interface
+export interface AzureAuthState {
+  isConfigured: boolean;
+  isInitialized: boolean;
+  hasAccount: boolean;
+  error: Error | null;
+}
+
+// Get current Azure auth state
+export const getAzureAuthState = (): AzureAuthState => {
+  return {
+    isConfigured: isAzureConfigured(),
+    isInitialized: msalInstance !== null,
+    hasAccount: isAzureAuthenticated(),
+    error: null,
+  };
+};
+
+// Handle Azure callback after redirect
 export const handleAzureCallback = async (): Promise<{
   success: boolean;
   account?: AccountInfo;
   error?: Error;
 }> => {
   try {
-    if (!msalInstance) {
-      const error = new Error('Azure AD is not initialized');
-      return { success: false, error };
+    const initialized = await initializeMsal();
+    if (!initialized || !msalInstance) {
+      return {
+        success: false,
+        error: new Error('Azure AD is not configured'),
+      };
     }
 
-    telemetry.track({
-      event: 'azure_callback_handling',
-      properties: { method: 'redirect' },
-    });
-
     const response = await msalInstance.handleRedirectPromise();
-    if (response && response.account) {
-      telemetry.track({
-        event: 'azure_callback_success',
-        properties: { method: 'redirect' },
-      });
+    if (response) {
       return { success: true, account: response.account };
     }
 
-    return { success: false };
+    return { success: true };
   } catch (error) {
-    telemetry.trackError(error as Error, 'azure_callback');
-    console.error('Azure AD callback failed:', error);
+    console.error('Azure callback handling failed:', error);
     return { success: false, error: error as Error };
   }
 };
 
-// Get Azure AD authentication state
-export const getAzureAuthState = (): AzureAuthState => {
-  const isConfigured = isAzureConfigured();
-  const isInitialized = msalInstance !== null;
-  const hasAccount = isAzureAuthenticated();
-
-  return {
-    isConfigured,
-    isInitialized,
-    hasAccount,
-    error: null,
-  };
-};
-
-// Clear Azure AD cache
+// Clear Azure cache
 export const clearAzureCache = async (): Promise<{
   success: boolean;
   error?: Error;
 }> => {
+  if (!msalInstance) {
+    return { success: true };
+  }
+
   try {
-    if (!msalInstance) {
-      return { success: true };
-    }
-
+    // Clear all accounts by logging out
     const accounts = msalInstance.getAllAccounts();
-    for (const account of accounts) {
-      const tokenCache: any = msalInstance.getTokenCache();
-      if (typeof tokenCache.removeAccount === 'function') {
-        await tokenCache.removeAccount(account);
-      }
+    if (accounts.length > 0) {
+      await msalInstance.logoutPopup({
+        account: accounts[0] || null,
+        postLogoutRedirectUri: window.location.origin,
+      });
     }
-
-    telemetry.track({
-      event: 'azure_cache_cleared',
-      properties: { accountCount: accounts.length },
-    });
-
     return { success: true };
   } catch (error) {
-    telemetry.trackError(error as Error, 'azure_cache_clear');
+    console.error('Failed to clear Azure cache:', error);
     return { success: false, error: error as Error };
   }
 };
