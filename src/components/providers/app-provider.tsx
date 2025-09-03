@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { QueryProvider } from './query-provider';
-import { AuthProvider } from '@/contexts/auth-context';
+import { AuthProviderWrapper } from '@/components/auth/auth-provider-wrapper';
 import { ToastProvider } from '@/components/ui/toast-provider';
 
 interface AppProviderProps {
@@ -12,9 +12,9 @@ interface AppProviderProps {
 export function AppProvider({ children }: AppProviderProps) {
   return (
     <QueryProvider>
-      <AuthProvider>
+      <AuthProviderWrapper>
         <ToastProvider>{children}</ToastProvider>
-      </AuthProvider>
+      </AuthProviderWrapper>
     </QueryProvider>
   );
 }

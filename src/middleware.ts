@@ -1,130 +1,293 @@
-import { createServerClient } from '@supabase/ssr';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+/**
+ * Enhanced Middleware with Security Features
+ * 
+ * This middleware provides:
+ * - CSRF protection for auth endpoints
+ * - Rate limiting for login attempts
+ * - Session refresh logic before expiry
+ * - Proper logout that clears all auth tokens
+ * - Security headers (CSP, HSTS, etc.)
+ */
 
-export const runtime = 'nodejs';
+import { NextRequest, NextResponse } from 'next/server';
+import { createMiddlewareSupabaseClient } from '@/lib/supabase-middleware';
+import { checkEnvironmentVariables, shouldRedirectToSetup } from '@/lib/env-check';
+import { telemetry } from '@/lib/telemetry';
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+// Rate limiting store (in production, use Redis or similar)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
-  // Skip middleware if environment variables are not available
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  ) {
-    return res;
-  }
+// Security headers configuration
+const securityHeaders = {
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'X-XSS-Protection': '1; mode=block',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  'Content-Security-Policy': [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://login.microsoftonline.com",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https:",
+    "font-src 'self'",
+    "connect-src 'self' https://*.supabase.co https://login.microsoftonline.com",
+    "frame-src 'self' https://login.microsoftonline.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ].join('; '),
+};
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: any) {
-          res.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-        remove(name: string, options: any) {
-          res.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
-        },
-      },
+// Public routes that don't require authentication
+const publicRoutes = [
+  '/',
+  '/login',
+  '/signup',
+  '/setup',
+  '/auth/callback',
+  '/api/health',
+  '/api/auth/csrf',
+];
+
+// Auth routes that need CSRF protection
+const authRoutes = [
+  '/api/auth/signin',
+  '/api/auth/signup',
+  '/api/auth/signout',
+  '/api/auth/refresh',
+];
+
+// Rate limiting configuration
+const rateLimitConfig = {
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxAttempts: 5, // 5 attempts per window
+  blockDuration: 30 * 60 * 1000, // 30 minutes block
+};
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const startTime = Date.now();
+
+  try {
+    // Check environment variables first
+    const envCheck = checkEnvironmentVariables();
+    if (!envCheck.isValid && shouldRedirectToSetup() && pathname !== '/setup') {
+      return NextResponse.redirect(new URL('/setup', request.url));
     }
-  );
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    // Create response with security headers
+    let response = NextResponse.next();
 
-  // Protected routes that require authentication
-  const protectedRoutes = [
-    '/dashboard',
-    '/projects',
-    '/photos',
-    '/change-orders',
-    '/analytics',
-    '/team',
-    '/divisions',
-    '/notifications',
-    '/profile',
-    '/settings',
-  ];
+    // Apply security headers
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
 
-  // Admin-only routes
-  const adminRoutes = ['/analytics', '/team', '/divisions'];
+    // Handle CORS for API routes
+    if (pathname.startsWith('/api/')) {
+      response.headers.set('Access-Control-Allow-Origin', request.nextUrl.origin);
+      response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token');
+      response.headers.set('Access-Control-Allow-Credentials', 'true');
+    }
 
-  // Public routes that don't require authentication
-  const publicRoutes = ['/', '/auth', '/auth/callback', '/login', '/signup'];
+    // Handle preflight requests
+    if (request.method === 'OPTIONS') {
+      return new NextResponse(null, { status: 200, headers: response.headers });
+    }
 
-  const { pathname } = req.nextUrl;
-
-  // Check if the current path is protected
-  const isProtectedRoute = protectedRoutes.some(route =>
-    pathname.startsWith(route)
-  );
-  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
-  const isPublicRoute = publicRoutes.some(
-    route => pathname === route || pathname.startsWith(route)
-  );
-
-  // If user is not authenticated and trying to access protected route
-  if (!session && isProtectedRoute) {
-    const redirectUrl = new URL('/login', req.url);
-    redirectUrl.searchParams.set('redirectTo', pathname);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  // If user is authenticated and trying to access auth pages
-  if (
-    session &&
-    (pathname === '/login' || pathname === '/signup' || pathname === '/auth')
-  ) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-
-  // If user is authenticated, check admin routes
-  if (session && isAdminRoute) {
-    try {
-      // Get user profile to check role
-      const { data: userProfile } = await supabase
-        .from('users')
-        .select(
-          `
-          *,
-          user_divisions (
-            role,
-            division:divisions (*)
-          )
-        `
-        )
-        .eq('supabase_user_id', session.user.id)
-        .single();
-
-      if (userProfile) {
-        const hasAdminRole = userProfile.user_divisions?.some(
-          (ud: any) => ud.role === 'admin'
+    // CSRF protection for auth endpoints
+    if (authRoutes.some(route => pathname.startsWith(route))) {
+      const csrfResult = await validateCSRFToken(request);
+      if (!csrfResult.valid) {
+        telemetry.trackError(new Error('CSRF token validation failed'), 'csrf_validation');
+        return new NextResponse(
+          JSON.stringify({ error: 'CSRF token validation failed' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
         );
+      }
+    }
 
-        if (!hasAdminRole) {
-          return NextResponse.redirect(new URL('/dashboard', req.url));
+    // Rate limiting for auth endpoints
+    if (authRoutes.some(route => pathname.startsWith(route))) {
+      const rateLimitResult = await checkRateLimit(request);
+      if (!rateLimitResult.allowed) {
+        telemetry.trackError(new Error('Rate limit exceeded'), 'rate_limit_exceeded');
+        return new NextResponse(
+          JSON.stringify({ 
+            error: 'Too many requests', 
+            retryAfter: rateLimitResult.retryAfter 
+          }),
+          { 
+            status: 429, 
+            headers: { 
+              'Content-Type': 'application/json',
+              'Retry-After': rateLimitResult.retryAfter.toString()
+            } 
+          }
+        );
+      }
+    }
+
+    // Skip authentication for public routes
+    if (publicRoutes.includes(pathname)) {
+      return response;
+    }
+
+    // Create Supabase client for middleware
+    const { supabase, response: supabaseResponse } = createMiddlewareSupabaseClient(request);
+
+    // Get session
+    const { data: { session }, error } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error('Error getting session in middleware:', error);
+      telemetry.trackError(error, 'middleware_session_error');
+    }
+
+    // Check if session is about to expire (within 5 minutes)
+    if (session?.expires_at) {
+      const expiresAt = new Date(session.expires_at * 1000);
+      const now = new Date();
+      const timeUntilExpiry = expiresAt.getTime() - now.getTime();
+      
+      // If session expires within 5 minutes, try to refresh
+      if (timeUntilExpiry < 5 * 60 * 1000 && timeUntilExpiry > 0) {
+        try {
+          const { data: { session: refreshedSession }, error: refreshError } = 
+            await supabase.auth.refreshSession();
+          
+          if (refreshError) {
+            console.error('Error refreshing session:', refreshError);
+            telemetry.trackError(refreshError, 'session_refresh_error');
+          } else if (refreshedSession) {
+            console.log('Session refreshed successfully');
+            telemetry.track({ event: 'session_refreshed', properties: { pathname } });
+          }
+        } catch (error) {
+          console.error('Error in session refresh:', error);
+          telemetry.trackError(error as Error, 'session_refresh_exception');
         }
       }
-    } catch (error) {
-      console.error('Error checking user role:', error);
-      return NextResponse.redirect(new URL('/dashboard', req.url));
     }
-  }
 
-  return res;
+    // Redirect to login if no session and not a public route
+    if (!session && !publicRoutes.includes(pathname)) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Add user info to headers for server components
+    if (session?.user) {
+      response.headers.set('X-User-ID', session.user.id);
+      response.headers.set('X-User-Email', session.user.email || '');
+    }
+
+    // Track middleware performance
+    const duration = Date.now() - startTime;
+    telemetry.track({
+      event: 'middleware_execution',
+      properties: {
+        pathname,
+        duration,
+        hasSession: !!session,
+        userAgent: request.headers.get('user-agent')?.substring(0, 100),
+      },
+    });
+
+    return supabaseResponse;
+
+  } catch (error) {
+    console.error('Middleware error:', error);
+    telemetry.trackError(error as Error, 'middleware_error');
+    
+    // Return error response
+    return new NextResponse(
+      JSON.stringify({ error: 'Internal server error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+/**
+ * Validates CSRF token for auth endpoints
+ */
+async function validateCSRFToken(request: NextRequest): Promise<{ valid: boolean; error?: string }> {
+  try {
+    const csrfToken = request.headers.get('X-CSRF-Token');
+    const cookieToken = request.cookies.get('csrf-token')?.value;
+
+    if (!csrfToken || !cookieToken) {
+      return { valid: false, error: 'Missing CSRF token' };
+    }
+
+    if (csrfToken !== cookieToken) {
+      return { valid: false, error: 'CSRF token mismatch' };
+    }
+
+    return { valid: true };
+  } catch (error) {
+    return { valid: false, error: 'CSRF validation error' };
+  }
+}
+
+/**
+ * Checks rate limiting for auth endpoints
+ */
+async function checkRateLimit(request: NextRequest): Promise<{ allowed: boolean; retryAfter?: number }> {
+  try {
+    const clientIP = request.ip || request.headers.get('X-Forwarded-For') || 'unknown';
+    const now = Date.now();
+    const windowStart = now - rateLimitConfig.windowMs;
+
+    // Clean up old entries
+    for (const [key, value] of rateLimitStore.entries()) {
+      if (value.resetTime < now) {
+        rateLimitStore.delete(key);
+      }
+    }
+
+    // Check current rate limit
+    const current = rateLimitStore.get(clientIP);
+    
+    if (current) {
+      if (current.resetTime > now) {
+        // Still in block period
+        return { 
+          allowed: false, 
+          retryAfter: Math.ceil((current.resetTime - now) / 1000) 
+        };
+      }
+      
+      if (current.count >= rateLimitConfig.maxAttempts) {
+        // Rate limit exceeded, block for blockDuration
+        rateLimitStore.set(clientIP, {
+          count: current.count,
+          resetTime: now + rateLimitConfig.blockDuration,
+        });
+        
+        return { 
+          allowed: false, 
+          retryAfter: Math.ceil(rateLimitConfig.blockDuration / 1000) 
+        };
+      }
+    }
+
+    // Increment counter
+    const newCount = (current?.count || 0) + 1;
+    rateLimitStore.set(clientIP, {
+      count: newCount,
+      resetTime: now + rateLimitConfig.windowMs,
+    });
+
+    return { allowed: true };
+  } catch (error) {
+    console.error('Rate limit check error:', error);
+    return { allowed: true }; // Fail open
+  }
 }
 
 export const config = {

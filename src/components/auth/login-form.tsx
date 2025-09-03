@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth-context';
+import { useAzureAuth } from '@/hooks/use-azure-auth';
+import { useConfig } from '@/services/config.service';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import {
@@ -12,7 +14,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { Building2, Mail, Lock, User, Phone, AlertCircle } from 'lucide-react';
+import { Building2, Mail, Lock, User, Phone, AlertCircle, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LoginFormProps {
@@ -21,7 +23,15 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess, className }: LoginFormProps) {
-  const { signInWithEmail, signInWithAzure, signUp } = useAuth();
+  const { signInWithEmail, signUp } = useAuth();
+  const { 
+    isConfigured: isAzureConfigured, 
+    isLoading: isAzureLoading, 
+    error: azureError, 
+    signIn: signInWithAzure 
+  } = useAzureAuth();
+  const { config, loading: configLoading, error: configError, isFeatureEnabled } = useConfig();
+  
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,9 +115,11 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
     setLoading(true);
     setError(null);
 
-    const { error } = await signInWithAzure();
+    const { success, error } = await signInWithAzure();
 
-    if (error) {
+    if (success) {
+      onSuccess?.();
+    } else if (error) {
       setError(error.message || 'Failed to sign in with Azure AD');
     }
 
@@ -156,10 +168,12 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
               </TabsTrigger>
             </TabsList>
 
-            {error && (
+            {(error || azureError || configError) && (
               <Alert className="mt-4" variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>
+                  {error || azureError?.message || configError?.message || 'An error occurred'}
+                </AlertDescription>
               </Alert>
             )}
 
@@ -217,15 +231,33 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                 </div>
               </div>
 
-              <Button
-                variant="outline"
-                className="w-full h-12 border-primary-200 hover:bg-primary-50 hover:border-primary-300 rounded-xl transition-all duration-200"
-                onClick={handleAzureSignIn}
-                disabled={loading}
-              >
-                <Building2 className="mr-2 h-4 w-4 text-primary-600" />
-                Sign in with Microsoft
-              </Button>
+              {isFeatureEnabled('azureAuth') ? (
+                <Button
+                  variant="outline"
+                  className="w-full h-12 border-primary-200 hover:bg-primary-50 hover:border-primary-300 rounded-xl transition-all duration-200"
+                  onClick={handleAzureSignIn}
+                  disabled={loading || isAzureLoading || configLoading}
+                >
+                  <Building2 className="mr-2 h-4 w-4 text-primary-600" />
+                  {isAzureLoading ? 'Connecting...' : 'Sign in with Microsoft'}
+                </Button>
+              ) : (
+                <div className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 border-gray-200 bg-gray-50 text-gray-400 rounded-xl cursor-not-allowed"
+                    disabled={true}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Azure SSO Not Configured
+                  </Button>
+                  {config?.app.debugMode && (
+                    <p className="text-xs text-gray-500 mt-2 text-center">
+                      Configure Azure AD environment variables to enable SSO
+                    </p>
+                  )}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="signup" className="space-y-6">
