@@ -84,9 +84,16 @@ export function ClientDashboard() {
 
             {/* CTA Button */}
             <button
-              onClick={async () => {
+                            onClick={async () => {
                 try {
                   console.log('Creating user profile...');
+                  
+                  // Ensure we have required data
+                  if (!supabaseUser.email || !supabaseUser.id) {
+                    alert('Missing required user information');
+                    return;
+                  }
+                  
                   const { data, error } = await supabase.from('users').insert({
                     email: supabaseUser.email,
                     first_name:
@@ -97,7 +104,7 @@ export function ClientDashboard() {
                     is_internal: true,
                     is_active: true,
                   });
-
+                  
                   if (error) {
                     console.error('Error creating profile:', error);
                     alert('Error creating profile: ' + error.message);

@@ -19,6 +19,11 @@ export async function createUserProfile() {
     console.log('Creating profile for user:', user.email);
 
     // Create user profile
+    if (!user.email || !user.id) {
+      console.error('Missing required user information');
+      return;
+    }
+
     const { data: profileData, error: profileError } = await supabase
       .from('users')
       .insert({
