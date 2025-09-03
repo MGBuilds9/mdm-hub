@@ -19,6 +19,7 @@ This guide will help you set up the complete database schema for your MDM Hub ap
 ## 📋 What This Schema Creates
 
 ### Core Tables
+
 - **users** - User profiles (extends Supabase auth.users)
 - **divisions** - 5 MDM divisions (Group, Contracting, Homes, Wood, Telecom)
 - **user_divisions** - Many-to-many relationship between users and divisions
@@ -32,6 +33,7 @@ This guide will help you set up the complete database schema for your MDM Hub ap
 - **audit_logs** - Comprehensive audit trail
 
 ### Key Features
+
 - ✅ **Row Level Security (RLS)** - Comprehensive security policies
 - ✅ **Audit Logging** - Automatic tracking of all changes
 - ✅ **Performance Indexes** - Optimized for fast queries
@@ -42,6 +44,7 @@ This guide will help you set up the complete database schema for your MDM Hub ap
 ## 🔐 Security Features
 
 ### Row Level Security Policies
+
 - Users can only see data from their divisions
 - Project members can only access their projects
 - Managers have elevated permissions
@@ -49,6 +52,7 @@ This guide will help you set up the complete database schema for your MDM Hub ap
 - Audit logs are service-role only
 
 ### User Roles
+
 - **admin** - Full system access
 - **manager** - Division/project management
 - **supervisor** - Team supervision
@@ -59,6 +63,7 @@ This guide will help you set up the complete database schema for your MDM Hub ap
 ## 📊 Data Structure
 
 ### Divisions (Pre-populated)
+
 1. **MDM Group** (GRP) - Parent company and administrative
 2. **MDM Contracting** (CON) - General contracting and construction
 3. **MDM Homes** (HOM) - Residential construction and home building
@@ -66,11 +71,13 @@ This guide will help you set up the complete database schema for your MDM Hub ap
 5. **MDM Telecom** (TEL) - Telecommunications infrastructure
 
 ### Project Status Flow
+
 - **planning** → **active** → **completed**
 - **on_hold** (can be set at any time)
 - **cancelled** (can be set at any time)
 
 ### Task Management
+
 - **Priority levels**: low, medium, high, urgent
 - **Status tracking**: pending → in_progress → review → completed
 - **Time tracking**: estimated vs actual hours
@@ -79,22 +86,24 @@ This guide will help you set up the complete database schema for your MDM Hub ap
 ## 🔧 Helper Functions
 
 ### Available Functions
+
 - `get_current_user_id()` - Get current user's internal ID
 - `user_has_division_role(user_id, division_id, role)` - Check division permissions
 - `user_has_project_access(user_id, project_id)` - Check project access
 
 ### Usage Examples
+
 ```sql
 -- Check if current user is a manager in division
 SELECT user_has_division_role(
-  get_current_user_id(), 
-  'division-uuid', 
+  get_current_user_id(),
+  'division-uuid',
   'manager'::user_role
 );
 
 -- Check if user has access to a project
 SELECT user_has_project_access(
-  get_current_user_id(), 
+  get_current_user_id(),
   'project-uuid'
 );
 ```
@@ -102,12 +111,14 @@ SELECT user_has_project_access(
 ## 📸 File Management
 
 ### Photos Table
+
 - **Storage**: Supabase Storage integration
 - **Metadata**: EXIF data, GPS location, dimensions
 - **Organization**: Project and task association
 - **Tags**: Flexible tagging system
 
 ### Documents Table
+
 - **Storage**: Supabase Storage + SharePoint integration
 - **Versioning**: Built-in version tracking
 - **Metadata**: File type, size, upload tracking
@@ -116,12 +127,14 @@ SELECT user_has_project_access(
 ## 🔔 Notifications System
 
 ### Notification Types
+
 - **info** - General information
 - **warning** - Important notices
 - **error** - Error alerts
 - **success** - Success confirmations
 
 ### Features
+
 - User-specific notifications
 - Read/unread tracking
 - Rich data payload support
@@ -130,6 +143,7 @@ SELECT user_has_project_access(
 ## 📈 Performance Optimizations
 
 ### Indexes Created
+
 - **User lookups**: email, supabase_user_id, role, is_active
 - **Project queries**: division_id, status, manager_id, dates
 - **Task management**: project_id, assigned_to, status, priority
@@ -137,6 +151,7 @@ SELECT user_has_project_access(
 - **Composite indexes**: user_divisions, project_members
 
 ### Query Optimization
+
 - **Materialized views**: For complex reporting (can be added)
 - **Partial indexes**: For active records only
 - **Covering indexes**: For common query patterns
@@ -144,11 +159,13 @@ SELECT user_has_project_access(
 ## 🚨 Important Notes
 
 ### Before Running
+
 1. **Backup existing data** if you have any
 2. **Test in development** first
 3. **Verify environment variables** are set correctly
 
 ### After Running
+
 1. **Check the success message** in the SQL output
 2. **Verify RLS policies** are enabled
 3. **Test user permissions** with different roles
@@ -167,21 +184,23 @@ If you have an existing schema:
 ## 🆘 Troubleshooting
 
 ### Common Issues
+
 - **Permission errors**: Ensure service role has proper access
 - **RLS blocking queries**: Check user context and policies
 - **Type mismatches**: Update application types to match schema
 - **Missing indexes**: Re-run the schema if indexes are missing
 
 ### Verification Queries
+
 ```sql
 -- Check if all tables exist
-SELECT table_name FROM information_schema.tables 
-WHERE table_schema = 'public' 
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public'
 ORDER BY table_name;
 
 -- Check RLS status
-SELECT schemaname, tablename, rowsecurity 
-FROM pg_tables 
+SELECT schemaname, tablename, rowsecurity
+FROM pg_tables
 WHERE schemaname = 'public';
 
 -- Check divisions were created
@@ -191,6 +210,7 @@ SELECT name, code FROM divisions ORDER BY name;
 ## 📞 Support
 
 If you encounter any issues:
+
 1. Check the Supabase logs for detailed error messages
 2. Verify all environment variables are set correctly
 3. Ensure your Supabase project has the necessary permissions

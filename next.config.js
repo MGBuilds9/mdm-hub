@@ -20,7 +20,9 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
   // Handle missing env vars gracefully
   env: {
-    NEXT_PUBLIC_AZURE_CONFIGURED: process.env.NEXT_PUBLIC_AZURE_CLIENT_ID ? 'true' : 'false',
+    NEXT_PUBLIC_AZURE_CONFIGURED: process.env.NEXT_PUBLIC_AZURE_CLIENT_ID
+      ? 'true'
+      : 'false',
   },
   // Optimize webpack configuration
   webpack: (config, { dev, isServer }) => {
