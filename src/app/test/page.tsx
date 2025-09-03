@@ -2,8 +2,8 @@
 
 import { useAuth } from '@/contexts/auth-context'
 import { useDivisions } from '@/hooks/use-database'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/Button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Loading } from '@/components/ui/loading'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 
