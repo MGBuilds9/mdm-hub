@@ -44,7 +44,7 @@ export function ClientDashboard() {
 
             {/* Welcome Text */}
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent mb-3">
-              Welcome to MDM Hub
+              Welcome to MDM
             </h1>
             <p className="text-charcoal-600 text-lg mb-2">
               Your construction project management platform
@@ -84,16 +84,16 @@ export function ClientDashboard() {
 
             {/* CTA Button */}
             <button
-                            onClick={async () => {
+              onClick={async () => {
                 try {
                   console.log('Creating user profile...');
-                  
+
                   // Ensure we have required data
                   if (!supabaseUser.email || !supabaseUser.id) {
                     alert('Missing required user information');
                     return;
                   }
-                  
+
                   const { data, error } = await supabase.from('users').insert({
                     email: supabaseUser.email,
                     first_name:
@@ -104,7 +104,7 @@ export function ClientDashboard() {
                     is_internal: true,
                     is_active: true,
                   });
-                  
+
                   if (error) {
                     console.error('Error creating profile:', error);
                     alert('Error creating profile: ' + error.message);

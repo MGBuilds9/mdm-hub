@@ -54,7 +54,7 @@ export function ServerDashboard() {
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-12">
                 <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-charcoal-900 via-primary-600 to-primary-800 bg-clip-text text-transparent mb-4">
-                  Welcome to MDM Hub
+                  Welcome to MDM Contracting Hub
                 </h1>
                 <p className="text-xl text-charcoal-600 max-w-2xl mx-auto">
                   Your comprehensive construction project management platform

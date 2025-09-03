@@ -185,7 +185,7 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
               </div>
               <div>
                 <span className="text-xl font-bold bg-gradient-to-r from-charcoal-900 to-primary-600 bg-clip-text text-transparent">
-                  MDM Hub
+                  MDM
                 </span>
                 <p className="text-xs text-charcoal-500">Construction Hub</p>
               </div>
