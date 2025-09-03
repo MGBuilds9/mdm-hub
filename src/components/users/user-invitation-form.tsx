@@ -199,8 +199,10 @@ export function UserInvitationForm({
                 render={({ field }) => (
                   <div className="flex flex-row items-start space-x-3 space-y-0">
                     <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
+                      checked={field.value ?? false}
+                      onCheckedChange={checked =>
+                        field.onChange(checked === true)
+                      }
                     />
                     <div className="space-y-1 leading-none">
                       <Label>Internal Staff Member</Label>
