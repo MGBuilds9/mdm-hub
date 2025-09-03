@@ -63,10 +63,10 @@ CREATE OR REPLACE FUNCTION get_user_divisions(user_id UUID)
 RETURNS TABLE(division_id UUID, division_name TEXT, role TEXT) AS $$
 BEGIN
   RETURN QUERY
-  SELECT d.id, d.name, pm.role
+  SELECT d.id, d.name, ud.role
   FROM divisions d
-  JOIN project_members pm ON d.id = pm.division_id
-  WHERE pm.user_id = user_id;
+  JOIN user_divisions ud ON d.id = ud.division_id
+  WHERE ud.user_id = user_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
