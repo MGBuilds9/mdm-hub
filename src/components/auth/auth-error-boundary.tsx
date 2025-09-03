@@ -3,7 +3,13 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { telemetry } from '@/lib/telemetry';
 
@@ -29,13 +35,15 @@ function AuthErrorFallback({ error, resetError }: AuthErrorFallbackProps) {
   };
 
   // Determine if this is a network/connection error
-  const isNetworkError = error.message.toLowerCase().includes('network') ||
-                        error.message.toLowerCase().includes('connection') ||
-                        error.message.toLowerCase().includes('fetch');
+  const isNetworkError =
+    error.message.toLowerCase().includes('network') ||
+    error.message.toLowerCase().includes('connection') ||
+    error.message.toLowerCase().includes('fetch');
 
-  const isAuthError = error.message.toLowerCase().includes('auth') ||
-                     error.message.toLowerCase().includes('jwt') ||
-                     error.message.toLowerCase().includes('token');
+  const isAuthError =
+    error.message.toLowerCase().includes('auth') ||
+    error.message.toLowerCase().includes('jwt') ||
+    error.message.toLowerCase().includes('token');
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -45,16 +53,18 @@ function AuthErrorFallback({ error, resetError }: AuthErrorFallbackProps) {
             <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
           <CardTitle className="text-red-900">
-            {isNetworkError ? 'Connection Error' : 
-             isAuthError ? 'Authentication Error' : 
-             'Authentication Failed'}
+            {isNetworkError
+              ? 'Connection Error'
+              : isAuthError
+                ? 'Authentication Error'
+                : 'Authentication Failed'}
           </CardTitle>
           <CardDescription>
-            {isNetworkError ? 
-              'Unable to connect to the authentication service. Please check your internet connection.' :
-              isAuthError ?
-              'There was a problem with your authentication session. Please sign in again.' :
-              'An unexpected error occurred during authentication. Please try again.'}
+            {isNetworkError
+              ? 'Unable to connect to the authentication service. Please check your internet connection.'
+              : isAuthError
+                ? 'There was a problem with your authentication session. Please sign in again.'
+                : 'An unexpected error occurred during authentication. Please try again.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -74,33 +84,29 @@ function AuthErrorFallback({ error, resetError }: AuthErrorFallbackProps) {
               </pre>
             </details>
           )}
-          
+
           <div className="space-y-2">
             <Button onClick={handleRetry} className="w-full">
               <RefreshCw className="mr-2 h-4 w-4" />
               Try Again
             </Button>
-            
+
             {isAuthError && (
-              <Button 
-                variant="outline" 
-                onClick={handleGoToLogin} 
+              <Button
+                variant="outline"
+                onClick={handleGoToLogin}
                 className="w-full"
               >
                 <LogIn className="mr-2 h-4 w-4" />
                 Sign In Again
               </Button>
             )}
-            
-            <Button 
-              variant="outline" 
-              onClick={handleReload} 
-              className="w-full"
-            >
+
+            <Button variant="outline" onClick={handleReload} className="w-full">
               Reload Page
             </Button>
           </div>
-          
+
           <div className="text-center">
             <p className="text-xs text-gray-500">
               If this problem persists, please contact support.
@@ -117,7 +123,10 @@ interface AuthErrorBoundaryProps {
   fallback?: React.ComponentType<AuthErrorFallbackProps>;
 }
 
-export function AuthErrorBoundary({ children, fallback }: AuthErrorBoundaryProps) {
+export function AuthErrorBoundary({
+  children,
+  fallback,
+}: AuthErrorBoundaryProps) {
   const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
     telemetry.trackError(error, 'auth_error_boundary', {
       componentStack: errorInfo.componentStack,

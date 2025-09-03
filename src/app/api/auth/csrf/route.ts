@@ -1,6 +1,6 @@
 /**
  * CSRF Token API Route
- * 
+ *
  * Provides CSRF tokens for authentication endpoints
  */
 
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     // Generate a secure random CSRF token
     const csrfToken = randomBytes(32).toString('hex');
-    
+
     // Set the token in a secure, httpOnly cookie
     const cookieStore = cookies();
     cookieStore.set('csrf-token', csrfToken, {
@@ -24,11 +24,14 @@ export async function GET(request: NextRequest) {
     });
 
     // Return the token in the response body
-    return NextResponse.json({ csrfToken }, {
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      },
-    });
+    return NextResponse.json(
+      { csrfToken },
+      {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error generating CSRF token:', error);
     return NextResponse.json(

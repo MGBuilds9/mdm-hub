@@ -32,12 +32,14 @@ src/
 ### Core Features
 
 #### 1. Environment Variable Validation
+
 - Validates all required environment variables on startup
 - Provides detailed error messages for missing configuration
 - Supports development vs production validation rules
 - Telemetry integration for configuration issues
 
 #### 2. Typed Configuration Objects
+
 ```typescript
 interface Configuration {
   app: AppConfig;
@@ -50,6 +52,7 @@ interface Configuration {
 ```
 
 #### 3. Feature Flags
+
 ```typescript
 interface FeatureFlags {
   azureAuth: boolean;
@@ -63,6 +66,7 @@ interface FeatureFlags {
 ```
 
 #### 4. Runtime Validation
+
 - Continuous validation of configuration state
 - Cached validation results for performance
 - Error tracking and telemetry integration
@@ -70,8 +74,13 @@ interface FeatureFlags {
 ### Usage Examples
 
 #### Basic Configuration Access
+
 ```typescript
-import { configService, getConfig, isFeatureEnabled } from '@/services/config.service';
+import {
+  configService,
+  getConfig,
+  isFeatureEnabled,
+} from '@/services/config.service';
 
 // Get complete configuration
 const config = await configService.validateAndGetConfig();
@@ -87,6 +96,7 @@ const azureConfig = config.azure;
 ```
 
 #### React Hook Usage
+
 ```typescript
 import { useConfig } from '@/services/config.service';
 
@@ -110,8 +120,12 @@ function MyComponent() {
 ```
 
 #### Configuration Validation
+
 ```typescript
-import { validateConfig, ConfigValidationError } from '@/services/config.service';
+import {
+  validateConfig,
+  ConfigValidationError,
+} from '@/services/config.service';
 
 try {
   const config = await validateConfig();
@@ -131,6 +145,7 @@ try {
 The health check API provides comprehensive monitoring for production environments.
 
 #### Response Format
+
 ```typescript
 interface HealthCheckResult {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -152,6 +167,7 @@ interface HealthCheckResult {
 ```
 
 #### Health Check Status Codes
+
 - **200 (Healthy)**: All systems operational
 - **200 (Degraded)**: System operational but with warnings
 - **503 (Unhealthy)**: Service unavailable due to critical issues
@@ -159,21 +175,25 @@ interface HealthCheckResult {
 ### Health Checks Performed
 
 #### 1. Configuration Check
+
 - Validates all environment variables
 - Checks configuration consistency
 - Reports warnings for optional features
 
 #### 2. Supabase Check
+
 - Tests Supabase connection
 - Validates authentication keys
 - Checks database accessibility
 
 #### 3. Azure AD Check
+
 - Validates Azure AD configuration
 - Tests authority endpoint connectivity
 - Checks redirect URI configuration
 
 #### 4. Database Check
+
 - Tests database connectivity
 - Validates service role permissions
 - Checks query execution
@@ -181,11 +201,13 @@ interface HealthCheckResult {
 ### Usage Examples
 
 #### Basic Health Check
+
 ```bash
 curl https://your-app.com/api/health
 ```
 
 #### Health Check Response (Healthy)
+
 ```json
 {
   "status": "healthy",
@@ -226,6 +248,7 @@ curl https://your-app.com/api/health
 ```
 
 #### Health Check Response (Unhealthy)
+
 ```json
 {
   "status": "unhealthy",
@@ -269,6 +292,7 @@ curl https://your-app.com/api/health
 The `ConfigStatus` component provides a visual representation of the current configuration state.
 
 ### Features
+
 - Real-time configuration status
 - Feature flag visualization
 - Environment variable status
@@ -276,6 +300,7 @@ The `ConfigStatus` component provides a visual representation of the current con
 - Responsive design
 
 ### Usage
+
 ```typescript
 import { ConfigStatus } from '@/components/config/config-status';
 
@@ -292,6 +317,7 @@ function SetupPage() {
 ## 🔄 Integration Examples
 
 ### Updated Login Form
+
 The login form now uses the configuration service to determine which authentication methods are available:
 
 ```typescript
@@ -314,6 +340,7 @@ function LoginForm() {
 ```
 
 ### Environment Setup Page
+
 The setup page now shows comprehensive configuration status:
 
 ```typescript
@@ -332,31 +359,37 @@ function SetupPage() {
 ## 🚀 Benefits
 
 ### 1. **Centralized Configuration**
+
 - Single source of truth for all environment variables
 - Consistent validation across the application
 - Easy configuration management
 
 ### 2. **Type Safety**
+
 - Fully typed configuration objects
 - Compile-time error detection
 - IntelliSense support
 
 ### 3. **Feature Flags**
+
 - Runtime feature toggling
 - Easy A/B testing
 - Gradual feature rollouts
 
 ### 4. **Production Monitoring**
+
 - Comprehensive health checks
 - Real-time system status
 - Quick issue diagnosis
 
 ### 5. **Error Prevention**
+
 - Early validation prevents runtime errors
 - Clear error messages for debugging
 - Telemetry integration for monitoring
 
 ### 6. **Developer Experience**
+
 - Easy-to-use React hooks
 - Visual configuration status
 - Comprehensive documentation
@@ -364,6 +397,7 @@ function SetupPage() {
 ## 🛠️ Environment Variables
 
 ### Required Variables
+
 ```bash
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -388,12 +422,14 @@ NEXT_PUBLIC_TELEMETRY_ENABLED=true
 ## 📊 Monitoring and Observability
 
 ### Telemetry Events
+
 - `config_validation`: Configuration validation results
 - `health_check`: Health check execution
 - `config_validation_failed`: Configuration validation failures
 - `health_check_critical_error`: Critical health check errors
 
 ### Health Check Metrics
+
 - Response time for each check
 - Overall system uptime
 - Configuration validation status
@@ -430,10 +466,13 @@ NEXT_PUBLIC_TELEMETRY_ENABLED=true
    - Verify environment variable values
 
 ### Debug Mode
+
 Enable debug logging by setting `NODE_ENV=development` or `NEXT_PUBLIC_DEBUG=true` to see detailed configuration and health check logs.
 
 ### Health Check Debugging
+
 Access the health check endpoint directly to see detailed status information:
+
 ```bash
 curl -v https://your-app.com/api/health
 ```

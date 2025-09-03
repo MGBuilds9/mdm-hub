@@ -38,17 +38,21 @@ function sleep(ms: number): Promise<void> {
 /**
  * Calculate delay with exponential backoff and optional jitter
  */
-function calculateDelay(attempt: number, options: Required<RetryOptions>): number {
-  const exponentialDelay = options.baseDelay * Math.pow(options.backoffMultiplier, attempt - 1);
+function calculateDelay(
+  attempt: number,
+  options: Required<RetryOptions>
+): number {
+  const exponentialDelay =
+    options.baseDelay * Math.pow(options.backoffMultiplier, attempt - 1);
   const cappedDelay = Math.min(exponentialDelay, options.maxDelay);
-  
+
   if (options.jitter) {
     // Add random jitter (±25% of the delay)
     const jitterRange = cappedDelay * 0.25;
     const jitter = (Math.random() - 0.5) * 2 * jitterRange;
     return Math.max(0, cappedDelay + jitter);
   }
-  
+
   return cappedDelay;
 }
 
@@ -74,7 +78,7 @@ export async function retry<T>(
       };
     } catch (error) {
       lastError = error as Error;
-      
+
       // Check if we should retry this error
       if (!opts.retryCondition(lastError)) {
         return {
@@ -84,11 +88,13 @@ export async function retry<T>(
           totalDuration: Date.now() - startTime,
         };
       }
-      
+
       // Don't wait after the last attempt
       if (attempt < opts.maxAttempts) {
         const delay = calculateDelay(attempt, opts);
-        console.log(`Retry attempt ${attempt} failed, waiting ${delay}ms before retry ${attempt + 1}...`);
+        console.log(
+          `Retry attempt ${attempt} failed, waiting ${delay}ms before retry ${attempt + 1}...`
+        );
         await sleep(delay);
       }
     }
@@ -115,7 +121,7 @@ export const isRetryableError = (error: Error): boolean => {
     'ECONNREFUSED',
     'ETIMEDOUT',
   ];
-  
+
   const retryableMessages = [
     'network',
     'timeout',
@@ -126,12 +132,14 @@ export const isRetryableError = (error: Error): boolean => {
     'bad gateway',
     'gateway timeout',
   ];
-  
+
   const errorName = error.name.toLowerCase();
   const errorMessage = error.message.toLowerCase();
-  
-  return retryableErrors.some(err => errorName.includes(err.toLowerCase())) ||
-         retryableMessages.some(msg => errorMessage.includes(msg));
+
+  return (
+    retryableErrors.some(err => errorName.includes(err.toLowerCase())) ||
+    retryableMessages.some(msg => errorMessage.includes(msg))
+  );
 };
 
 /**
@@ -143,7 +151,7 @@ export const isSupabaseRetryableError = (error: Error): boolean => {
     'PGRST301', // Connection error
     'PGRST116', // Connection timeout
   ];
-  
+
   const errorMessage = error.message.toUpperCase();
   return supabaseRetryableErrors.some(err => errorMessage.includes(err));
 };
@@ -157,7 +165,7 @@ export const isAuthRetryableError = (error: Error): boolean => {
     'INVALID_JWT',
     'TOKEN_REFRESH_FAILED',
   ];
-  
+
   const errorMessage = error.message.toUpperCase();
   return authRetryableErrors.some(err => errorMessage.includes(err));
 };

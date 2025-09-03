@@ -36,11 +36,13 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 After configuring your environment variables, you'll need to set up your database schema:
 
 1. **Run the main schema**
+
    ```sql
    -- Execute the contents of supabase/schema.sql in your Supabase SQL editor
    ```
 
 2. **Create user profiles**
+
    ```sql
    -- Execute the contents of create-user-profile.sql
    ```
@@ -53,6 +55,7 @@ After configuring your environment variables, you'll need to set up your databas
 ## Troubleshooting
 
 ### Missing Environment Variables
+
 If you see errors about missing environment variables:
 
 1. Visit `/setup` in your browser for a guided setup process
@@ -60,11 +63,13 @@ If you see errors about missing environment variables:
 3. Restart your development server after making changes
 
 ### Invalid API Key Errors
+
 - Verify your Supabase project URL and keys are correct
 - Ensure you're using the right keys (anon key vs service role key)
 - Check that your Supabase project is active and not paused
 
 ### Development vs Production
+
 - In development: Missing env vars will redirect to `/setup`
 - In production: Missing env vars will cause the application to fail immediately
 

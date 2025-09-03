@@ -11,7 +11,12 @@ export interface TelemetryEvent {
 }
 
 export interface AuthTelemetryEvent extends TelemetryEvent {
-  event: 'auth_init_start' | 'auth_init_success' | 'auth_init_failure' | 'auth_retry' | 'auth_timeout';
+  event:
+    | 'auth_init_start'
+    | 'auth_init_success'
+    | 'auth_init_failure'
+    | 'auth_retry'
+    | 'auth_timeout';
   properties: {
     error?: string;
     errorCode?: string;
@@ -70,7 +75,11 @@ class TelemetryService {
   /**
    * Track errors
    */
-  trackError(error: Error, context?: string, properties?: Record<string, any>): void {
+  trackError(
+    error: Error,
+    context?: string,
+    properties?: Record<string, any>
+  ): void {
     this.track({
       event: 'error',
       properties: {
@@ -109,7 +118,7 @@ class TelemetryService {
   private async sendToAnalytics(event: TelemetryEvent): Promise<void> {
     // Implement your analytics service integration here
     // Examples: Google Analytics, Mixpanel, PostHog, etc.
-    
+
     try {
       // Example implementation:
       // await fetch('/api/analytics', {
@@ -134,14 +143,20 @@ export const trackAuthInit = (method: string = 'session_check') => {
   });
 };
 
-export const trackAuthSuccess = (duration: number, method: string = 'session_check') => {
+export const trackAuthSuccess = (
+  duration: number,
+  method: string = 'session_check'
+) => {
   telemetry.trackAuth({
     event: 'auth_init_success',
     properties: { duration, method },
   });
 };
 
-export const trackAuthFailure = (error: Error, method: string = 'session_check') => {
+export const trackAuthFailure = (
+  error: Error,
+  method: string = 'session_check'
+) => {
   telemetry.trackAuth({
     event: 'auth_init_failure',
     properties: {
@@ -152,7 +167,10 @@ export const trackAuthFailure = (error: Error, method: string = 'session_check')
   });
 };
 
-export const trackAuthRetry = (retryCount: number, method: string = 'session_check') => {
+export const trackAuthRetry = (
+  retryCount: number,
+  method: string = 'session_check'
+) => {
   telemetry.trackAuth({
     event: 'auth_retry',
     properties: { retryCount, method },

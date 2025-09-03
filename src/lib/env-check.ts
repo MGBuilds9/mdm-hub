@@ -12,38 +12,38 @@ export const REQUIRED_ENV_VARS: EnvVarConfig[] = [
   {
     name: 'NEXT_PUBLIC_SUPABASE_URL',
     required: true,
-    description: 'Your Supabase project URL'
+    description: 'Your Supabase project URL',
   },
   {
     name: 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
     required: true,
-    description: 'Your Supabase anonymous key'
+    description: 'Your Supabase anonymous key',
   },
   {
     name: 'SUPABASE_SERVICE_ROLE_KEY',
     required: true,
-    description: 'Your Supabase service role key'
+    description: 'Your Supabase service role key',
   },
   {
     name: 'NEXT_PUBLIC_AZURE_CLIENT_ID',
     required: true,
-    description: 'Your Azure Active Directory client ID'
+    description: 'Your Azure Active Directory client ID',
   },
   {
     name: 'NEXT_PUBLIC_AZURE_TENANT_ID',
     required: true,
-    description: 'Your Azure Active Directory tenant ID'
+    description: 'Your Azure Active Directory tenant ID',
   },
   {
     name: 'NEXT_PUBLIC_AZURE_AUTHORITY',
     required: true,
-    description: 'Your Azure Active Directory authority URL'
+    description: 'Your Azure Active Directory authority URL',
   },
   {
     name: 'NEXT_PUBLIC_AZURE_REDIRECT_URI',
     required: true,
-    description: 'Your Azure Active Directory redirect URI'
-  }
+    description: 'Your Azure Active Directory redirect URI',
+  },
 ];
 
 export interface EnvCheckResult {
@@ -69,7 +69,7 @@ export function checkEnvironmentVariables(): EnvCheckResult {
   return {
     isValid: missingVars.length === 0,
     missingVars,
-    errors
+    errors,
   };
 }
 
@@ -82,7 +82,7 @@ export function getEnvVarStatus() {
     value: process.env[envVar.name],
     required: envVar.required,
     description: envVar.description,
-    isConfigured: !!process.env[envVar.name]
+    isConfigured: !!process.env[envVar.name],
   }));
 }
 
@@ -102,36 +102,40 @@ export function shouldRedirectToSetup(): boolean {
  * Generate environment file template
  */
 export function generateEnvFileTemplate(): string {
-  const supabaseVars = REQUIRED_ENV_VARS.filter(envVar => 
+  const supabaseVars = REQUIRED_ENV_VARS.filter(envVar =>
     envVar.name.includes('SUPABASE')
   );
-  const azureVars = REQUIRED_ENV_VARS.filter(envVar => 
+  const azureVars = REQUIRED_ENV_VARS.filter(envVar =>
     envVar.name.includes('AZURE')
   );
 
-  const supabaseTemplate = supabaseVars.map(envVar => {
-    const exampleValue = envVar.name.includes('URL') 
-      ? 'https://your-project-id.supabase.co'
-      : envVar.name.includes('SERVICE_ROLE')
-      ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-      : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
-    
-    return `${envVar.name}=${exampleValue}`;
-  }).join('\n');
+  const supabaseTemplate = supabaseVars
+    .map(envVar => {
+      const exampleValue = envVar.name.includes('URL')
+        ? 'https://your-project-id.supabase.co'
+        : envVar.name.includes('SERVICE_ROLE')
+          ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+          : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 
-  const azureTemplate = azureVars.map(envVar => {
-    const exampleValue = envVar.name.includes('CLIENT_ID')
-      ? '[YOUR_AZURE_CLIENT_ID]'
-      : envVar.name.includes('TENANT_ID')
-      ? '[YOUR_AZURE_TENANT_ID]'
-      : envVar.name.includes('AUTHORITY')
-      ? 'https://login.microsoftonline.com/[YOUR_TENANT_ID]'
-      : envVar.name.includes('REDIRECT_URI')
-      ? 'http://localhost:3000/auth/callback'
-      : '[YOUR_VALUE]';
-    
-    return `${envVar.name}=${exampleValue}`;
-  }).join('\n');
+      return `${envVar.name}=${exampleValue}`;
+    })
+    .join('\n');
+
+  const azureTemplate = azureVars
+    .map(envVar => {
+      const exampleValue = envVar.name.includes('CLIENT_ID')
+        ? '[YOUR_AZURE_CLIENT_ID]'
+        : envVar.name.includes('TENANT_ID')
+          ? '[YOUR_AZURE_TENANT_ID]'
+          : envVar.name.includes('AUTHORITY')
+            ? 'https://login.microsoftonline.com/[YOUR_TENANT_ID]'
+            : envVar.name.includes('REDIRECT_URI')
+              ? 'http://localhost:3000/auth/callback'
+              : '[YOUR_VALUE]';
+
+      return `${envVar.name}=${exampleValue}`;
+    })
+    .join('\n');
 
   return `# Supabase Configuration
 # Get these values from your Supabase project dashboard: https://supabase.com/dashboard

@@ -14,7 +14,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { Building2, Mail, Lock, User, Phone, AlertCircle, Settings } from 'lucide-react';
+import {
+  Building2,
+  Mail,
+  Lock,
+  User,
+  Phone,
+  AlertCircle,
+  Settings,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LoginFormProps {
@@ -24,14 +32,19 @@ interface LoginFormProps {
 
 export function LoginForm({ onSuccess, className }: LoginFormProps) {
   const { signInWithEmail, signUp } = useAuth();
-  const { 
-    isConfigured: isAzureConfigured, 
-    isLoading: isAzureLoading, 
-    error: azureError, 
-    signIn: signInWithAzure 
+  const {
+    isConfigured: isAzureConfigured,
+    isLoading: isAzureLoading,
+    error: azureError,
+    signIn: signInWithAzure,
   } = useAzureAuth();
-  const { config, loading: configLoading, error: configError, isFeatureEnabled } = useConfig();
-  
+  const {
+    config,
+    loading: configLoading,
+    error: configError,
+    isFeatureEnabled,
+  } = useConfig();
+
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -172,7 +185,10 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
               <Alert className="mt-4" variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  {error || azureError?.message || configError?.message || 'An error occurred'}
+                  {error ||
+                    azureError?.message ||
+                    configError?.message ||
+                    'An error occurred'}
                 </AlertDescription>
               </Alert>
             )}

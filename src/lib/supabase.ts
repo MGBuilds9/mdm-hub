@@ -1,6 +1,6 @@
 /**
  * Client-side Supabase configuration
- * 
+ *
  * This file provides the Supabase client instances for client-side usage only.
  * Server-side operations are handled in supabase-server.ts
  */
@@ -66,7 +66,7 @@ export function createBrowserSupabaseClient() {
       detectSessionInUrl: true,
     },
   });
-  
+
   return clientInstance;
 }
 

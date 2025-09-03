@@ -1,6 +1,6 @@
 /**
  * Monitoring and Error Tracking Setup
- * 
+ *
  * This file provides comprehensive monitoring including:
  * - Sentry integration for error tracking
  * - Performance monitoring for database queries
@@ -63,7 +63,7 @@ class MonitoringService {
       if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SENTRY_DSN) {
         const SentryModule = await import('@sentry/nextjs');
         Sentry = SentryModule;
-        
+
         Sentry.init({
           dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
           environment: process.env.NODE_ENV,
@@ -72,7 +72,10 @@ class MonitoringService {
             // Filter out non-critical errors in production
             if (process.env.NODE_ENV === 'production') {
               const error = event.exception?.values?.[0];
-              if (error?.type === 'ChunkLoadError' || error?.type === 'Loading chunk failed') {
+              if (
+                error?.type === 'ChunkLoadError' ||
+                error?.type === 'Loading chunk failed'
+              ) {
                 return null; // Don't send chunk load errors
               }
             }
@@ -101,12 +104,18 @@ class MonitoringService {
 
     // Monitor page load performance
     window.addEventListener('load', () => {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const navigation = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming;
       if (navigation) {
-        this.recordPerformanceMetric('page_load', navigation.loadEventEnd - navigation.fetchStart, {
-          url: window.location.href,
-          userAgent: navigator.userAgent,
-        });
+        this.recordPerformanceMetric(
+          'page_load',
+          navigation.loadEventEnd - navigation.fetchStart,
+          {
+            url: window.location.href,
+            userAgent: navigator.userAgent,
+          }
+        );
       }
     });
 
@@ -131,10 +140,10 @@ class MonitoringService {
   private setupCustomMetrics() {
     // Track authentication events
     this.trackAuthEvents();
-    
+
     // Track user interactions
     this.trackUserInteractions();
-    
+
     // Track API usage
     this.trackAPIUsage();
   }
@@ -154,7 +163,7 @@ class MonitoringService {
     if (typeof window === 'undefined') return;
 
     // Track button clicks
-    document.addEventListener('click', (event) => {
+    document.addEventListener('click', event => {
       const target = event.target as HTMLElement;
       if (target.tagName === 'BUTTON' || target.closest('button')) {
         this.recordCustomMetric('button_click', 1, {
@@ -165,7 +174,7 @@ class MonitoringService {
     });
 
     // Track form submissions
-    document.addEventListener('submit', (event) => {
+    document.addEventListener('submit', event => {
       const form = event.target as HTMLFormElement;
       this.recordCustomMetric('form_submission', 1, {
         form_id: form.id || 'unknown',
@@ -186,27 +195,27 @@ class MonitoringService {
     window.fetch = async (...args) => {
       const startTime = performance.now();
       const url = args[0]?.toString() || 'unknown';
-      
+
       try {
         const response = await originalFetch(...args);
         const duration = performance.now() - startTime;
-        
+
         this.recordCustomMetric('api_request', 1, {
           url: url.substring(0, 100),
           status: response.status.toString(),
           duration: duration.toString(),
         });
-        
+
         return response;
       } catch (error) {
         const duration = performance.now() - startTime;
-        
+
         this.recordCustomMetric('api_error', 1, {
           url: url.substring(0, 100),
           error: error instanceof Error ? error.message : 'unknown',
           duration: duration.toString(),
         });
-        
+
         throw error;
       }
     };
@@ -219,7 +228,9 @@ class MonitoringService {
     this.alerts = [
       {
         name: 'api_key_failure',
-        condition: (metric) => metric.name === 'api_error' && metric.tags?.error?.includes('API key'),
+        condition: metric =>
+          metric.name === 'api_error' &&
+          metric.tags?.error?.includes('API key'),
         severity: 'critical',
         message: 'API key authentication failure detected',
         action: () => {
@@ -229,10 +240,10 @@ class MonitoringService {
       },
       {
         name: 'high_error_rate',
-        condition: (metric) => {
+        condition: metric => {
           const recentErrors = this.customMetrics.filter(
-            m => m.name === 'api_error' && 
-            Date.now() - m.timestamp < 5 * 60 * 1000 // Last 5 minutes
+            m =>
+              m.name === 'api_error' && Date.now() - m.timestamp < 5 * 60 * 1000 // Last 5 minutes
           );
           return recentErrors.length > 10;
         },
@@ -241,7 +252,7 @@ class MonitoringService {
       },
       {
         name: 'slow_database_queries',
-        condition: (metric) => metric.name === 'db_query' && metric.value > 5000, // 5 seconds
+        condition: metric => metric.name === 'db_query' && metric.value > 5000, // 5 seconds
         severity: 'medium',
         message: 'Slow database query detected',
       },
@@ -251,7 +262,11 @@ class MonitoringService {
   /**
    * Record a performance metric
    */
-  recordPerformanceMetric(name: string, duration: number, metadata?: Record<string, any>) {
+  recordPerformanceMetric(
+    name: string,
+    duration: number,
+    metadata?: Record<string, any>
+  ) {
     const metric: PerformanceMetric = {
       name,
       duration,
@@ -260,7 +275,7 @@ class MonitoringService {
     };
 
     this.performanceMetrics.push(metric);
-    
+
     // Keep only last 1000 metrics
     if (this.performanceMetrics.length > 1000) {
       this.performanceMetrics = this.performanceMetrics.slice(-1000);
@@ -283,7 +298,11 @@ class MonitoringService {
   /**
    * Record a custom metric
    */
-  recordCustomMetric(name: string, value: number, tags?: Record<string, string>) {
+  recordCustomMetric(
+    name: string,
+    value: number,
+    tags?: Record<string, string>
+  ) {
     const metric: CustomMetric = {
       name,
       value,
@@ -292,7 +311,7 @@ class MonitoringService {
     };
 
     this.customMetrics.push(metric);
-    
+
     // Keep only last 1000 metrics
     if (this.customMetrics.length > 1000) {
       this.customMetrics = this.customMetrics.slice(-1000);
@@ -318,8 +337,10 @@ class MonitoringService {
   private checkAlerts(metric: PerformanceMetric | CustomMetric) {
     for (const alert of this.alerts) {
       if (alert.condition(metric)) {
-        console.warn(`ALERT [${alert.severity.toUpperCase()}]: ${alert.message}`);
-        
+        console.warn(
+          `ALERT [${alert.severity.toUpperCase()}]: ${alert.message}`
+        );
+
         // Send alert to telemetry
         telemetry.track({
           event: 'alert_triggered',
@@ -344,7 +365,7 @@ class MonitoringService {
    */
   setUser(userId: string, userInfo?: Record<string, any>) {
     this.userId = userId;
-    
+
     if (isSentryInitialized && Sentry) {
       Sentry.setUser({
         id: userId,
@@ -457,7 +478,10 @@ class MonitoringService {
   /**
    * Capture message with Sentry
    */
-  captureMessage(message: string, level: 'info' | 'warning' | 'error' = 'info') {
+  captureMessage(
+    message: string,
+    level: 'info' | 'warning' | 'error' = 'info'
+  ) {
     if (isSentryInitialized && Sentry) {
       Sentry.captureMessage(message, level);
     }
@@ -477,11 +501,19 @@ class MonitoringService {
 export const monitoring = new MonitoringService();
 
 // Export convenience functions
-export const trackPerformance = (name: string, duration: number, metadata?: Record<string, any>) => {
+export const trackPerformance = (
+  name: string,
+  duration: number,
+  metadata?: Record<string, any>
+) => {
   monitoring.recordPerformanceMetric(name, duration, metadata);
 };
 
-export const trackMetric = (name: string, value: number, tags?: Record<string, string>) => {
+export const trackMetric = (
+  name: string,
+  value: number,
+  tags?: Record<string, string>
+) => {
   monitoring.recordCustomMetric(name, value, tags);
 };
 
@@ -489,19 +521,33 @@ export const trackAuthSuccess = (method: string, userId?: string) => {
   monitoring.trackAuthSuccess(method, userId);
 };
 
-export const trackAuthFailure = (method: string, error: string, userId?: string) => {
+export const trackAuthFailure = (
+  method: string,
+  error: string,
+  userId?: string
+) => {
   monitoring.trackAuthFailure(method, error, userId);
 };
 
-export const trackDatabaseQuery = (query: string, duration: number, success: boolean) => {
+export const trackDatabaseQuery = (
+  query: string,
+  duration: number,
+  success: boolean
+) => {
   monitoring.trackDatabaseQuery(query, duration, success);
 };
 
-export const captureException = (error: Error, context?: Record<string, any>) => {
+export const captureException = (
+  error: Error,
+  context?: Record<string, any>
+) => {
   monitoring.captureException(error, context);
 };
 
-export const captureMessage = (message: string, level: 'info' | 'warning' | 'error' = 'info') => {
+export const captureMessage = (
+  message: string,
+  level: 'info' | 'warning' | 'error' = 'info'
+) => {
   monitoring.captureMessage(message, level);
 };
 

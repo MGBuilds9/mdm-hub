@@ -11,7 +11,9 @@ import { AlertCircle, CheckCircle } from 'lucide-react';
 export default function AuthCallbackPage() {
   const router = useRouter();
   const { isConfigured, isInitialized, error } = useAzureAuth();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  );
   const [message, setMessage] = useState('Processing authentication...');
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function AuthCallbackPage() {
         setTimeout(() => {
           setStatus('success');
           setMessage('Authentication successful! Redirecting...');
-          
+
           // Redirect to dashboard after a short delay
           setTimeout(() => {
             router.push('/dashboard');
@@ -50,12 +52,7 @@ export default function AuthCallbackPage() {
   }, [isConfigured, isInitialized, router]);
 
   if (status === 'loading') {
-    return (
-      <LoadingPage 
-        text={message}
-        className="min-h-screen"
-      />
-    );
+    return <LoadingPage text={message} className="min-h-screen" />;
   }
 
   if (status === 'error') {
@@ -64,19 +61,14 @@ export default function AuthCallbackPage() {
         <div className="w-full max-w-md">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="mt-2">
-              {message}
-            </AlertDescription>
+            <AlertDescription className="mt-2">{message}</AlertDescription>
           </Alert>
-          
+
           <div className="mt-4 space-y-2">
-            <Button 
-              onClick={() => router.push('/login')}
-              className="w-full"
-            >
+            <Button onClick={() => router.push('/login')} className="w-full">
               Back to Login
             </Button>
-            <Button 
+            <Button
               variant="outline"
               onClick={() => router.push('/')}
               className="w-full"
@@ -98,9 +90,7 @@ export default function AuthCallbackPage() {
         <h2 className="text-xl font-semibold text-gray-900 mb-2">
           Authentication Successful
         </h2>
-        <p className="text-gray-600 mb-4">
-          {message}
-        </p>
+        <p className="text-gray-600 mb-4">{message}</p>
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
       </div>
     </div>

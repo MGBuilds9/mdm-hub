@@ -1,6 +1,6 @@
 /**
  * Configuration Service
- * 
+ *
  * Centralizes environment variable validation, typed configuration objects,
  * feature flags, and runtime configuration management.
  */
@@ -100,7 +100,7 @@ class ConfigService {
 
     // Start new validation
     this.validationPromise = this.performValidation();
-    
+
     try {
       this.config = await this.validationPromise;
       return this.config;
@@ -126,7 +126,9 @@ class ConfigService {
 
     const missingVars = requiredVars.filter(varName => !process.env[varName]);
     if (missingVars.length > 0) {
-      errors.push(`Missing required environment variables: ${missingVars.join(', ')}`);
+      errors.push(
+        `Missing required environment variables: ${missingVars.join(', ')}`
+      );
     }
 
     // Validate Azure AD configuration
@@ -139,7 +141,9 @@ class ConfigService {
 
     const missingAzureVars = azureVars.filter(varName => !process.env[varName]);
     if (missingAzureVars.length > 0) {
-      warnings.push(`Azure AD not fully configured: ${missingAzureVars.join(', ')}`);
+      warnings.push(
+        `Azure AD not fully configured: ${missingAzureVars.join(', ')}`
+      );
     }
 
     // Validate URL formats
@@ -172,17 +176,23 @@ class ConfigService {
     // Build configuration objects
     const appConfig: AppConfig = {
       environment: (process.env.NODE_ENV as any) || 'development',
-      baseUrl: process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : ''),
+      baseUrl:
+        process.env.NEXT_PUBLIC_BASE_URL ||
+        (typeof window !== 'undefined' ? window.location.origin : ''),
       apiUrl: process.env.NEXT_PUBLIC_API_URL || '/api',
       debugMode: isDevelopment || process.env.NEXT_PUBLIC_DEBUG === 'true',
-      logLevel: (process.env.LOG_LEVEL as any) || (isDevelopment ? 'debug' : 'error'),
+      logLevel:
+        (process.env.LOG_LEVEL as any) || (isDevelopment ? 'debug' : 'error'),
     };
 
     const supabaseConfig: SupabaseConfig = {
       url: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
       anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
       serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-      enabled: !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+      enabled: !!(
+        process.env.NEXT_PUBLIC_SUPABASE_URL &&
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      ),
     };
 
     const azureConfig: AzureConfig = {
@@ -190,10 +200,12 @@ class ConfigService {
       tenantId: process.env.NEXT_PUBLIC_AZURE_TENANT_ID || '',
       authority: process.env.NEXT_PUBLIC_AZURE_AUTHORITY || '',
       redirectUri: process.env.NEXT_PUBLIC_AZURE_REDIRECT_URI || '',
-      enabled: !!(process.env.NEXT_PUBLIC_AZURE_CLIENT_ID && 
-                  process.env.NEXT_PUBLIC_AZURE_TENANT_ID && 
-                  process.env.NEXT_PUBLIC_AZURE_AUTHORITY && 
-                  process.env.NEXT_PUBLIC_AZURE_REDIRECT_URI),
+      enabled: !!(
+        process.env.NEXT_PUBLIC_AZURE_CLIENT_ID &&
+        process.env.NEXT_PUBLIC_AZURE_TENANT_ID &&
+        process.env.NEXT_PUBLIC_AZURE_AUTHORITY &&
+        process.env.NEXT_PUBLIC_AZURE_REDIRECT_URI
+      ),
     };
 
     const databaseConfig: DatabaseConfig = {
@@ -236,7 +248,7 @@ class ConfigService {
         errors,
         warnings
       );
-      
+
       telemetry.trackError(error, 'config_validation_failed');
       throw error;
     }
@@ -273,7 +285,9 @@ class ConfigService {
    */
   getConfig(): Configuration {
     if (!this.config) {
-      throw new Error('Configuration not validated. Call validateAndGetConfig() first.');
+      throw new Error(
+        'Configuration not validated. Call validateAndGetConfig() first.'
+      );
     }
     return this.config;
   }
@@ -337,7 +351,8 @@ export const configService = new ConfigService();
 // Convenience functions
 export const validateConfig = () => configService.validateAndGetConfig();
 export const getConfig = () => configService.getConfig();
-export const isFeatureEnabled = (feature: keyof FeatureFlags) => configService.isFeatureEnabled(feature);
+export const isFeatureEnabled = (feature: keyof FeatureFlags) =>
+  configService.isFeatureEnabled(feature);
 export const getSupabaseConfig = () => configService.getSupabaseConfig();
 export const getAzureConfig = () => configService.getAzureConfig();
 export const getAppConfig = () => configService.getAppConfig();
@@ -372,7 +387,8 @@ export function useConfig() {
     config,
     loading,
     error,
-    isFeatureEnabled: (feature: keyof FeatureFlags) => config?.features[feature] ?? false,
+    isFeatureEnabled: (feature: keyof FeatureFlags) =>
+      config?.features[feature] ?? false,
     refresh: async () => {
       configService.reset();
       const validatedConfig = await configService.validateAndGetConfig();

@@ -1,16 +1,22 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { User, UserWithDivisions } from '@/types/database';
 import { retry, retryAuth, isAuthRetryableError } from '@/lib/retry';
-import { 
-  telemetry, 
-  trackAuthInit, 
-  trackAuthSuccess, 
-  trackAuthFailure, 
-  trackAuthRetry 
+import {
+  telemetry,
+  trackAuthInit,
+  trackAuthSuccess,
+  trackAuthFailure,
+  trackAuthRetry,
 } from '@/lib/telemetry';
 
 export interface AuthState {
@@ -71,46 +77,50 @@ export function AuthProvider({ children }: AuthProviderProps) {
     updateAuthState({ error: null });
   }, [updateAuthState]);
 
-  const fetchUserProfile = useCallback(async (
-    supabaseUserId: string
-  ): Promise<UserWithDivisions | null> => {
-    try {
-      console.log('Fetching user profile for:', supabaseUserId);
-      
-      const result = await retryAuth(async () => {
-        const { data, error } = await supabase
-          .from('users')
-          .select(
-            `
+  const fetchUserProfile = useCallback(
+    async (supabaseUserId: string): Promise<UserWithDivisions | null> => {
+      try {
+        console.log('Fetching user profile for:', supabaseUserId);
+
+        const result = await retryAuth(async () => {
+          const { data, error } = await supabase
+            .from('users')
+            .select(
+              `
             *,
             user_divisions (
               *,
               division (*)
             )
           `
-          )
-          .eq('supabase_user_id', supabaseUserId)
-          .single();
+            )
+            .eq('supabase_user_id', supabaseUserId)
+            .single();
 
-        if (error) {
-          throw new Error(`Failed to fetch user profile: ${error.message}`);
+          if (error) {
+            throw new Error(`Failed to fetch user profile: ${error.message}`);
+          }
+
+          return data as unknown as UserWithDivisions;
+        });
+
+        if (result.success) {
+          console.log('User profile fetched successfully:', result.data);
+          return result.data;
+        } else {
+          console.error(
+            'Error fetching user profile after retries:',
+            result.error
+          );
+          return null;
         }
-
-        return data as unknown as UserWithDivisions;
-      });
-
-      if (result.success) {
-        console.log('User profile fetched successfully:', result.data);
-        return result.data;
-      } else {
-        console.error('Error fetching user profile after retries:', result.error);
+      } catch (error) {
+        console.error('Error in fetchUserProfile:', error);
         return null;
       }
-    } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
-      return null;
-    }
-  }, []);
+    },
+    []
+  );
 
   const refreshUser = useCallback(async () => {
     if (authState.supabaseUser) {
@@ -122,24 +132,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const initializeAuth = useCallback(async () => {
     const startTime = Date.now();
     trackAuthInit('session_check');
-    
+
     try {
       const result = await retryAuth(async () => {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
         if (error) {
           throw new Error(`Failed to get session: ${error.message}`);
         }
-        
+
         return session;
       });
 
       if (result.success) {
         const session = result.data;
-        updateAuthState({ 
-          session, 
+        updateAuthState({
+          session,
           supabaseUser: session?.user ?? null,
-          error: null 
+          error: null,
         });
 
         if (session?.user) {
@@ -150,7 +163,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           console.log('No user in session');
           updateAuthState({ user: null });
         }
-        
+
         const duration = Date.now() - startTime;
         trackAuthSuccess(duration, 'session_check');
         updateAuthState({ loading: false, isRetrying: false });
@@ -160,84 +173,92 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       const duration = Date.now() - startTime;
       trackAuthFailure(error as Error, 'session_check');
-      updateAuthState({ 
+      updateAuthState({
         error: error as Error,
         loading: false,
-        isRetrying: false 
+        isRetrying: false,
       });
     }
   }, [fetchUserProfile, updateAuthState]);
 
   const retryAuth = useCallback(async () => {
     if (authState.isRetrying) return;
-    
-    updateAuthState({ 
-      isRetrying: true, 
+
+    updateAuthState({
+      isRetrying: true,
       retryCount: authState.retryCount + 1,
-      error: null 
+      error: null,
     });
-    
+
     trackAuthRetry(authState.retryCount + 1);
-    
+
     try {
       await initializeAuth();
     } catch (error) {
-      updateAuthState({ 
+      updateAuthState({
         error: error as Error,
-        isRetrying: false 
+        isRetrying: false,
       });
     }
-  }, [authState.isRetrying, authState.retryCount, updateAuthState, initializeAuth]);
+  }, [
+    authState.isRetrying,
+    authState.retryCount,
+    updateAuthState,
+    initializeAuth,
+  ]);
 
-  const signInWithEmail = useCallback(async (email: string, password: string) => {
-    try {
-      clearError();
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+  const signInWithEmail = useCallback(
+    async (email: string, password: string) => {
+      try {
+        clearError();
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (error) {
+        if (error) {
+          return { error };
+        }
+
+        if (data.user) {
+          const userProfile = await fetchUserProfile(data.user.id);
+          updateAuthState({
+            user: userProfile,
+            supabaseUser: data.user,
+            session: data.session,
+          });
+        }
+
+        return { error: null };
+      } catch (error) {
+        updateAuthState({ error: error as Error });
         return { error };
       }
-
-      if (data.user) {
-        const userProfile = await fetchUserProfile(data.user.id);
-        updateAuthState({ 
-          user: userProfile,
-          supabaseUser: data.user,
-          session: data.session 
-        });
-      }
-
-      return { error: null };
-    } catch (error) {
-      updateAuthState({ error: error as Error });
-      return { error };
-    }
-  }, [clearError, fetchUserProfile, updateAuthState]);
+    },
+    [clearError, fetchUserProfile, updateAuthState]
+  );
 
   const signInWithAzure = useCallback(async () => {
     try {
       clearError();
-      
+
       // Import Azure auth functions dynamically to avoid SSR issues
       const { signInWithAzure: azureSignIn } = await import('@/lib/azure-auth');
-      
+
       const result = await azureSignIn();
-      
+
       if (result.success && result.account) {
         // Create or update user profile in Supabase
         // This would typically involve calling your backend API
         // to sync the Azure AD user with your Supabase user
         console.log('Azure AD sign in successful:', result.account);
-        
+
         // For now, we'll just return success
         // In a real implementation, you'd want to:
         // 1. Get the Azure user profile
         // 2. Create/update the user in your Supabase users table
         // 3. Set up the session
-        
+
         return { error: null };
       } else {
         return { error: result.error || new Error('Azure AD sign in failed') };
@@ -248,61 +269,60 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [clearError, updateAuthState]);
 
-  const signUp = useCallback(async (
-    email: string,
-    password: string,
-    userData: Partial<User>
-  ) => {
-    try {
-      clearError();
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name: userData.first_name,
-            last_name: userData.last_name,
-            phone: userData.phone,
-            is_internal: userData.is_internal || false,
+  const signUp = useCallback(
+    async (email: string, password: string, userData: Partial<User>) => {
+      try {
+        clearError();
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              first_name: userData.first_name,
+              last_name: userData.last_name,
+              phone: userData.phone,
+              is_internal: userData.is_internal || false,
+            },
           },
-        },
-      });
-
-      if (error) {
-        return { error };
-      }
-
-      if (data.user) {
-        // Create user profile in our custom users table
-        const { error: profileError } = await supabase.from('users').insert({
-          email: userData.email || email,
-          first_name: userData.first_name || '',
-          last_name: userData.last_name || '',
-          phone: userData.phone || null,
-          is_internal: userData.is_internal || false,
-          supabase_user_id: data.user.id,
         });
 
-        if (profileError) {
-          console.error('Error creating user profile:', profileError);
+        if (error) {
+          return { error };
         }
-      }
 
-      return { error: null };
-    } catch (error) {
-      updateAuthState({ error: error as Error });
-      return { error };
-    }
-  }, [clearError, updateAuthState]);
+        if (data.user) {
+          // Create user profile in our custom users table
+          const { error: profileError } = await supabase.from('users').insert({
+            email: userData.email || email,
+            first_name: userData.first_name || '',
+            last_name: userData.last_name || '',
+            phone: userData.phone || null,
+            is_internal: userData.is_internal || false,
+            supabase_user_id: data.user.id,
+          });
+
+          if (profileError) {
+            console.error('Error creating user profile:', profileError);
+          }
+        }
+
+        return { error: null };
+      } catch (error) {
+        updateAuthState({ error: error as Error });
+        return { error };
+      }
+    },
+    [clearError, updateAuthState]
+  );
 
   const signOut = useCallback(async () => {
     try {
       clearError();
       const { error } = await supabase.auth.signOut();
-      updateAuthState({ 
+      updateAuthState({
         user: null,
         supabaseUser: null,
-        session: null 
+        session: null,
       });
       return { error };
     } catch (error) {
@@ -311,34 +331,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [clearError, updateAuthState]);
 
-  const updateProfile = useCallback(async (updates: Partial<User>) => {
-    if (!authState.user) {
-      return { error: new Error('No user logged in') };
-    }
-
-    try {
-      clearError();
-      const { error } = await supabase
-        .from('users')
-        .update(updates)
-        .eq('id', authState.user.id);
-
-      if (error) {
-        return { error };
+  const updateProfile = useCallback(
+    async (updates: Partial<User>) => {
+      if (!authState.user) {
+        return { error: new Error('No user logged in') };
       }
 
-      // Refresh user data
-      await refreshUser();
-      return { error: null };
-    } catch (error) {
-      updateAuthState({ error: error as Error });
-      return { error };
-    }
-  }, [authState.user, clearError, refreshUser, updateAuthState]);
+      try {
+        clearError();
+        const { error } = await supabase
+          .from('users')
+          .update(updates)
+          .eq('id', authState.user.id);
+
+        if (error) {
+          return { error };
+        }
+
+        // Refresh user data
+        await refreshUser();
+        return { error: null };
+      } catch (error) {
+        updateAuthState({ error: error as Error });
+        return { error };
+      }
+    },
+    [authState.user, clearError, refreshUser, updateAuthState]
+  );
 
   useEffect(() => {
     console.log('Auth context initializing...');
-    
+
     // Initialize authentication
     initializeAuth();
 
@@ -347,10 +370,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.email);
-      
-      updateAuthState({ 
-        session, 
-        supabaseUser: session?.user ?? null 
+
+      updateAuthState({
+        session,
+        supabaseUser: session?.user ?? null,
       });
 
       if (session?.user) {
@@ -359,9 +382,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           updateAuthState({ user: userProfile });
         } catch (error) {
           console.error('Error fetching user profile on auth change:', error);
-          updateAuthState({ 
+          updateAuthState({
             user: null,
-            error: error as Error 
+            error: error as Error,
           });
         }
       } else {

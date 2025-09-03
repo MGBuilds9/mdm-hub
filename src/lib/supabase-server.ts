@@ -1,6 +1,6 @@
 /**
  * Server-side Supabase utilities
- * 
+ *
  * This file contains server-only Supabase functions that use the service role key.
  * These functions should NEVER be used in client-side code.
  */
@@ -12,13 +12,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Build-time check to ensure this file is not bundled in client code
 if (typeof window !== 'undefined') {
-  throw new Error('supabase-server.ts should never be imported in client-side code');
+  throw new Error(
+    'supabase-server.ts should never be imported in client-side code'
+  );
 }
 
 // Validate that service role key is available
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!serviceRoleKey) {
-  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for server-side operations');
+  throw new Error(
+    'SUPABASE_SERVICE_ROLE_KEY is required for server-side operations'
+  );
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -45,20 +49,24 @@ export function createServiceClient() {
  */
 export function createServerSupabaseClient() {
   const cookieStore = cookies();
-  
-  return createServerClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value;
+
+  return createServerClient(
+    supabaseUrl,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: any) {
+          cookieStore.set({ name, value, ...options });
+        },
+        remove(name: string, options: any) {
+          cookieStore.set({ name, value: '', ...options });
+        },
       },
-      set(name: string, value: string, options: any) {
-        cookieStore.set({ name, value, ...options });
-      },
-      remove(name: string, options: any) {
-        cookieStore.set({ name, value: '', ...options });
-      },
-    },
-  });
+    }
+  );
 }
 
 /**
@@ -66,16 +74,19 @@ export function createServerSupabaseClient() {
  */
 export async function getServerSession() {
   'use server';
-  
+
   try {
     const supabase = createServerSupabaseClient();
-    const { data: { session }, error } = await supabase.auth.getSession();
-    
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
     if (error) {
       console.error('Error getting server session:', error);
       return { session: null, error };
     }
-    
+
     return { session, error: null };
   } catch (error) {
     console.error('Error in getServerSession:', error);
@@ -88,16 +99,16 @@ export async function getServerSession() {
  */
 export async function signOutServer() {
   'use server';
-  
+
   try {
     const supabase = createServerSupabaseClient();
     const { error } = await supabase.auth.signOut();
-    
+
     if (error) {
       console.error('Error signing out:', error);
       return { success: false, error };
     }
-    
+
     return { success: true, error: null };
   } catch (error) {
     console.error('Error in signOutServer:', error);
@@ -110,16 +121,19 @@ export async function signOutServer() {
  */
 export async function refreshServerSession() {
   'use server';
-  
+
   try {
     const supabase = createServerSupabaseClient();
-    const { data: { session }, error } = await supabase.auth.refreshSession();
-    
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.refreshSession();
+
     if (error) {
       console.error('Error refreshing session:', error);
       return { session: null, error };
     }
-    
+
     return { session, error: null };
   } catch (error) {
     console.error('Error in refreshServerSession:', error);
@@ -132,7 +146,7 @@ export async function refreshServerSession() {
  */
 export async function getUserProfileServer(userId: string) {
   'use server';
-  
+
   try {
     const supabase = createServerSupabaseClient();
     const { data, error } = await supabase
@@ -140,12 +154,12 @@ export async function getUserProfileServer(userId: string) {
       .select('*')
       .eq('id', userId)
       .single();
-    
+
     if (error) {
       console.error('Error getting user profile:', error);
       return { profile: null, error };
     }
-    
+
     return { profile: data, error: null };
   } catch (error) {
     console.error('Error in getUserProfileServer:', error);
@@ -158,7 +172,7 @@ export async function getUserProfileServer(userId: string) {
  */
 export async function updateUserProfileServer(userId: string, updates: any) {
   'use server';
-  
+
   try {
     const supabase = createServerSupabaseClient();
     const { data, error } = await supabase
@@ -167,12 +181,12 @@ export async function updateUserProfileServer(userId: string, updates: any) {
       .eq('id', userId)
       .select()
       .single();
-    
+
     if (error) {
       console.error('Error updating user profile:', error);
       return { profile: null, error };
     }
-    
+
     return { profile: data, error: null };
   } catch (error) {
     console.error('Error in updateUserProfileServer:', error);
@@ -192,12 +206,12 @@ export async function createUserProfileAdmin(userData: any) {
       .insert(userData)
       .select()
       .single();
-    
+
     if (error) {
       console.error('Error creating user profile (admin):', error);
       return { profile: null, error };
     }
-    
+
     return { profile: data, error: null };
   } catch (error) {
     console.error('Error in createUserProfileAdmin:', error);
@@ -212,15 +226,13 @@ export async function createUserProfileAdmin(userData: any) {
 export async function getAllUsersAdmin() {
   try {
     const supabase = createServiceClient();
-    const { data, error } = await supabase
-      .from('users')
-      .select('*');
-    
+    const { data, error } = await supabase.from('users').select('*');
+
     if (error) {
       console.error('Error getting all users (admin):', error);
       return { users: null, error };
     }
-    
+
     return { users: data, error: null };
   } catch (error) {
     console.error('Error in getAllUsersAdmin:', error);
@@ -238,7 +250,7 @@ export async function checkServerSupabaseHealth() {
       .from('users')
       .select('count')
       .limit(1);
-    
+
     if (error) {
       return {
         healthy: false,
@@ -246,7 +258,7 @@ export async function checkServerSupabaseHealth() {
         responseTime: 0,
       };
     }
-    
+
     return {
       healthy: true,
       error: null,

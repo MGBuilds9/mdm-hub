@@ -1,6 +1,6 @@
 /**
  * Health Check API Route
- * 
+ *
  * Provides comprehensive health monitoring for production environments.
  * Checks Supabase connection, Azure AD configuration, database connectivity,
  * and returns structured health status with proper error codes.
@@ -48,39 +48,54 @@ const startTime = Date.now();
 
 /**
  * GET /api/health
- * 
+ *
  * Performs comprehensive health checks and returns structured status
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const healthCheckStart = Date.now();
-  
+
   try {
     // Get configuration
     let config: Configuration;
     try {
       config = await configService.validateAndGetConfig();
     } catch (error) {
-      return createHealthResponse({
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        version: process.env.npm_package_version || '1.0.0',
-        environment: process.env.NODE_ENV || 'development',
-        checks: {
-          configuration: {
-            status: 'fail',
-            message: 'Configuration validation failed',
-            details: error instanceof Error ? error.message : 'Unknown error',
+      return createHealthResponse(
+        {
+          status: 'unhealthy',
+          timestamp: new Date().toISOString(),
+          version: process.env.npm_package_version || '1.0.0',
+          environment: process.env.NODE_ENV || 'development',
+          checks: {
+            configuration: {
+              status: 'fail',
+              message: 'Configuration validation failed',
+              details: error instanceof Error ? error.message : 'Unknown error',
+            },
+            supabase: {
+              status: 'fail',
+              message: 'Not checked - configuration invalid',
+            },
+            azure: {
+              status: 'fail',
+              message: 'Not checked - configuration invalid',
+            },
+            database: {
+              status: 'fail',
+              message: 'Not checked - configuration invalid',
+            },
+            overall: {
+              status: 'fail',
+              message: 'System unhealthy due to configuration issues',
+            },
           },
-          supabase: { status: 'fail', message: 'Not checked - configuration invalid' },
-          azure: { status: 'fail', message: 'Not checked - configuration invalid' },
-          database: { status: 'fail', message: 'Not checked - configuration invalid' },
-          overall: { status: 'fail', message: 'System unhealthy due to configuration issues' },
+          metrics: {
+            responseTime: Date.now() - healthCheckStart,
+            uptime: Date.now() - startTime,
+          },
         },
-        metrics: {
-          responseTime: Date.now() - healthCheckStart,
-          uptime: Date.now() - startTime,
-        },
-      }, 'unhealthy');
+        'unhealthy'
+      );
     }
 
     // Perform health checks
@@ -116,28 +131,33 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
 
     return createHealthResponse(healthResult, overallStatus);
-
   } catch (error) {
     // Critical error during health check
     telemetry.trackError(error as Error, 'health_check_critical_error');
-    
-    return createHealthResponse({
-      status: 'unhealthy',
-      timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || '1.0.0',
-      environment: process.env.NODE_ENV || 'development',
-      checks: {
-        configuration: { status: 'fail', message: 'Critical error during health check' },
-        supabase: { status: 'fail', message: 'Not checked - critical error' },
-        azure: { status: 'fail', message: 'Not checked - critical error' },
-        database: { status: 'fail', message: 'Not checked - critical error' },
-        overall: { status: 'fail', message: 'Critical system error' },
+
+    return createHealthResponse(
+      {
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        version: process.env.npm_package_version || '1.0.0',
+        environment: process.env.NODE_ENV || 'development',
+        checks: {
+          configuration: {
+            status: 'fail',
+            message: 'Critical error during health check',
+          },
+          supabase: { status: 'fail', message: 'Not checked - critical error' },
+          azure: { status: 'fail', message: 'Not checked - critical error' },
+          database: { status: 'fail', message: 'Not checked - critical error' },
+          overall: { status: 'fail', message: 'Critical system error' },
+        },
+        metrics: {
+          responseTime: Date.now() - healthCheckStart,
+          uptime: Date.now() - startTime,
+        },
       },
-      metrics: {
-        responseTime: Date.now() - healthCheckStart,
-        uptime: Date.now() - startTime,
-      },
-    }, 'unhealthy');
+      'unhealthy'
+    );
   }
 }
 
@@ -167,10 +187,10 @@ async function performHealthChecks(
  */
 async function checkConfiguration(config: Configuration): Promise<CheckResult> {
   const start = Date.now();
-  
+
   try {
     const validation = config.validation;
-    
+
     if (validation.isValid) {
       return {
         status: 'pass',
@@ -207,7 +227,7 @@ async function checkConfiguration(config: Configuration): Promise<CheckResult> {
  */
 async function checkSupabase(config: Configuration): Promise<CheckResult> {
   const start = Date.now();
-  
+
   if (!config.features.supabaseAuth) {
     return {
       status: 'warn',
@@ -256,7 +276,7 @@ async function checkSupabase(config: Configuration): Promise<CheckResult> {
  */
 async function checkAzure(config: Configuration): Promise<CheckResult> {
   const start = Date.now();
-  
+
   if (!config.features.azureAuth) {
     return {
       status: 'warn',
@@ -288,12 +308,15 @@ async function checkAzure(config: Configuration): Promise<CheckResult> {
     // Test Azure AD connectivity (basic validation)
     try {
       const authorityUrl = new URL(config.azure.authority);
-      const response = await fetch(`${authorityUrl.origin}/.well-known/openid_configuration`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${authorityUrl.origin}/.well-known/openid_configuration`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+          },
+        }
+      );
 
       if (!response.ok) {
         return {
@@ -310,7 +333,8 @@ async function checkAzure(config: Configuration): Promise<CheckResult> {
       return {
         status: 'warn',
         message: 'Azure AD authority check failed',
-        details: fetchError instanceof Error ? fetchError.message : 'Unknown error',
+        details:
+          fetchError instanceof Error ? fetchError.message : 'Unknown error',
         responseTime: Date.now() - start,
       };
     }
@@ -341,7 +365,7 @@ async function checkAzure(config: Configuration): Promise<CheckResult> {
  */
 async function checkDatabase(config: Configuration): Promise<CheckResult> {
   const start = Date.now();
-  
+
   if (!config.features.database) {
     return {
       status: 'warn',
@@ -354,7 +378,7 @@ async function checkDatabase(config: Configuration): Promise<CheckResult> {
     // Test database connection through Supabase
     if (config.features.supabaseAuth) {
       const { createClient } = await import('@supabase/supabase-js');
-      
+
       const supabase = createClient(
         config.supabase.url,
         config.supabase.serviceRoleKey || config.supabase.anonKey
@@ -406,30 +430,34 @@ async function checkDatabase(config: Configuration): Promise<CheckResult> {
 /**
  * Determines overall health status
  */
-function determineOverallStatus(checks: HealthCheckResult['checks']): 'healthy' | 'degraded' | 'unhealthy' {
+function determineOverallStatus(
+  checks: HealthCheckResult['checks']
+): 'healthy' | 'degraded' | 'unhealthy' {
   const statuses = Object.values(checks).map(check => check.status);
-  
+
   if (statuses.includes('fail')) {
     return 'unhealthy';
   }
-  
+
   if (statuses.includes('warn')) {
     return 'degraded';
   }
-  
+
   return 'healthy';
 }
 
 /**
  * Determines overall check result
  */
-function determineOverallCheck(checks: Omit<HealthCheckResult['checks'], 'overall'>): CheckResult {
+function determineOverallCheck(
+  checks: Omit<HealthCheckResult['checks'], 'overall'>
+): CheckResult {
   const overallStatus = determineOverallStatus(checks);
-  
+
   const failedChecks = Object.entries(checks)
     .filter(([_, check]) => check.status === 'fail')
     .map(([name, check]) => `${name}: ${check.message}`);
-  
+
   const warningChecks = Object.entries(checks)
     .filter(([_, check]) => check.status === 'warn')
     .map(([name, check]) => `${name}: ${check.message}`);
@@ -442,8 +470,12 @@ function determineOverallCheck(checks: Omit<HealthCheckResult['checks'], 'overal
   }
 
   return {
-    status: overallStatus === 'healthy' ? 'pass' : 
-            overallStatus === 'degraded' ? 'warn' : 'fail',
+    status:
+      overallStatus === 'healthy'
+        ? 'pass'
+        : overallStatus === 'degraded'
+          ? 'warn'
+          : 'fail',
     message,
     details: {
       failedChecks,
@@ -460,7 +492,7 @@ function createHealthResponse(
   status: 'healthy' | 'degraded' | 'unhealthy'
 ): NextResponse {
   const statusCode = HEALTH_STATUS_CODES[status];
-  
+
   return NextResponse.json(healthResult, {
     status: statusCode,
     headers: {

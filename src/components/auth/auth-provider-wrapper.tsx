@@ -3,10 +3,10 @@
 import React from 'react';
 import { AuthProvider } from '@/contexts/auth-context';
 import { AuthErrorBoundary } from './auth-error-boundary';
-import { 
-  AuthLoadingSkeleton, 
-  AuthInitializationSkeleton, 
-  AuthRetrySkeleton 
+import {
+  AuthLoadingSkeleton,
+  AuthInitializationSkeleton,
+  AuthRetrySkeleton,
 } from './auth-loading-skeleton';
 import { useAuth } from '@/contexts/auth-context';
 
@@ -20,8 +20,8 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   // Show retry skeleton if retrying
   if (isRetrying) {
     return (
-      <AuthRetrySkeleton 
-        retryCount={retryCount} 
+      <AuthRetrySkeleton
+        retryCount={retryCount}
         maxRetries={3}
         message="Retrying authentication..."
       />
@@ -31,9 +31,7 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   // Show initialization skeleton if loading
   if (loading) {
     return (
-      <AuthInitializationSkeleton 
-        message="Initializing authentication..."
-      />
+      <AuthInitializationSkeleton message="Initializing authentication..." />
     );
   }
 
@@ -43,14 +41,27 @@ function AuthContent({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center space-y-4">
           <div className="text-red-600">
-            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            <svg
+              className="mx-auto h-12 w-12"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
             </svg>
           </div>
           <div>
-            <h3 className="text-lg font-medium text-gray-900">Authentication Error</h3>
+            <h3 className="text-lg font-medium text-gray-900">
+              Authentication Error
+            </h3>
             <p className="text-sm text-gray-500 mt-1">
-              {error.message || 'An unexpected error occurred during authentication.'}
+              {error.message ||
+                'An unexpected error occurred during authentication.'}
             </p>
           </div>
           <div className="space-y-2">
@@ -74,9 +85,7 @@ export function AuthProviderWrapper({ children }: AuthProviderWrapperProps) {
   return (
     <AuthErrorBoundary>
       <AuthProvider>
-        <AuthContent>
-          {children}
-        </AuthContent>
+        <AuthContent>{children}</AuthContent>
       </AuthProvider>
     </AuthErrorBoundary>
   );

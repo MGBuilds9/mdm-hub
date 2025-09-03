@@ -1,20 +1,26 @@
 'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/Badge';
-import { 
-  AlertTriangle, 
-  RefreshCw, 
-  Home, 
-  Mail, 
-  Bug, 
+import {
+  AlertTriangle,
+  RefreshCw,
+  Home,
+  Mail,
+  Bug,
   Shield,
   Database,
   Globe,
-  User
+  User,
 } from 'lucide-react';
 import { telemetry } from '@/lib/telemetry';
 
@@ -70,7 +76,7 @@ interface ErrorDetails {
 
 /**
  * Comprehensive Error Boundary Component
- * 
+ *
  * Features:
  * - Catches and logs authentication errors
  * - Provides user-friendly error messages
@@ -78,7 +84,10 @@ interface ErrorDetails {
  * - Integrates with error tracking service
  * - Implements different boundaries for auth vs app errors
  */
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   private maxRetries = 3;
   private retryTimeout: NodeJS.Timeout | null = null;
 
@@ -102,7 +111,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const { onError, errorType } = this.props;
-    
+
     this.setState({
       error,
       errorInfo,
@@ -125,8 +134,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   private getErrorDetails(
-    error: Error, 
-    errorInfo: ErrorInfo, 
+    error: Error,
+    errorInfo: ErrorInfo,
     errorType?: ErrorType
   ): ErrorDetails {
     const detectedType = this.detectErrorType(error, errorType);
@@ -139,7 +148,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       stack: error.stack,
       componentStack: errorInfo.componentStack,
       timestamp: new Date().toISOString(),
-      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown',
+      userAgent:
+        typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown',
       url: typeof window !== 'undefined' ? window.location.href : 'unknown',
       userId: this.getCurrentUserId(),
     };
@@ -154,27 +164,47 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     const stack = error.stack?.toLowerCase() || '';
 
     // Authentication errors
-    if (message.includes('auth') || message.includes('login') || message.includes('session')) {
+    if (
+      message.includes('auth') ||
+      message.includes('login') ||
+      message.includes('session')
+    ) {
       return ErrorType.AUTHENTICATION;
     }
 
     // Database errors
-    if (message.includes('database') || message.includes('sql') || message.includes('supabase')) {
+    if (
+      message.includes('database') ||
+      message.includes('sql') ||
+      message.includes('supabase')
+    ) {
       return ErrorType.DATABASE;
     }
 
     // Network errors
-    if (message.includes('network') || message.includes('fetch') || message.includes('timeout')) {
+    if (
+      message.includes('network') ||
+      message.includes('fetch') ||
+      message.includes('timeout')
+    ) {
       return ErrorType.NETWORK;
     }
 
     // Validation errors
-    if (message.includes('validation') || message.includes('invalid') || message.includes('required')) {
+    if (
+      message.includes('validation') ||
+      message.includes('invalid') ||
+      message.includes('required')
+    ) {
       return ErrorType.VALIDATION;
     }
 
     // Permission errors
-    if (message.includes('permission') || message.includes('unauthorized') || message.includes('forbidden')) {
+    if (
+      message.includes('permission') ||
+      message.includes('unauthorized') ||
+      message.includes('forbidden')
+    ) {
       return ErrorType.PERMISSION;
     }
 
@@ -270,7 +300,7 @@ URL: ${window.location.href}
 Timestamp: ${new Date().toISOString()}
 User Agent: ${window.navigator.userAgent}
       `);
-      
+
       window.open(`mailto:support@example.com?subject=${subject}&body=${body}`);
     }
   };
@@ -312,11 +342,11 @@ User Agent: ${window.navigator.userAgent}
       case ErrorType.AUTHENTICATION:
         return 'There was a problem with your authentication. Please try signing in again.';
       case ErrorType.DATABASE:
-        return 'We\'re having trouble connecting to our database. Please try again in a moment.';
+        return "We're having trouble connecting to our database. Please try again in a moment.";
       case ErrorType.NETWORK:
         return 'There was a network connectivity issue. Please check your internet connection.';
       case ErrorType.PERMISSION:
-        return 'You don\'t have permission to access this resource.';
+        return "You don't have permission to access this resource.";
       case ErrorType.VALIDATION:
         return 'The data you provided is invalid. Please check your input and try again.';
       default:
@@ -334,7 +364,8 @@ User Agent: ${window.navigator.userAgent}
         icon: <RefreshCw className="h-4 w-4" />,
         onClick: this.handleRetry,
         variant: 'default' as const,
-        disabled: this.state.retryCount >= this.maxRetries || this.state.isRetrying,
+        disabled:
+          this.state.retryCount >= this.maxRetries || this.state.isRetrying,
       });
     }
 
@@ -364,7 +395,8 @@ User Agent: ${window.navigator.userAgent}
       const { error, errorInfo, isRetrying } = this.state;
       const errorType = this.detectErrorType(error!, this.props.errorType);
       const severity = this.determineSeverity(error!, errorType);
-      const showDetails = this.props.showDetails || process.env.NODE_ENV === 'development';
+      const showDetails =
+        this.props.showDetails || process.env.NODE_ENV === 'development';
 
       // Use custom fallback if provided
       if (this.props.fallback) {
@@ -389,11 +421,15 @@ User Agent: ${window.navigator.userAgent}
             <CardContent className="space-y-6">
               {/* Error severity badge */}
               <div className="flex justify-center">
-                <Badge 
+                <Badge
                   variant={
-                    severity === ErrorSeverity.CRITICAL ? 'destructive' :
-                    severity === ErrorSeverity.HIGH ? 'destructive' :
-                    severity === ErrorSeverity.MEDIUM ? 'default' : 'secondary'
+                    severity === ErrorSeverity.CRITICAL
+                      ? 'destructive'
+                      : severity === ErrorSeverity.HIGH
+                        ? 'destructive'
+                        : severity === ErrorSeverity.MEDIUM
+                          ? 'default'
+                          : 'secondary'
                   }
                 >
                   {severity.toUpperCase()} SEVERITY
@@ -417,8 +453,12 @@ User Agent: ${window.navigator.userAgent}
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
                       <div className="space-y-2">
-                        <p><strong>Error:</strong> {error?.name}</p>
-                        <p><strong>Message:</strong> {error?.message}</p>
+                        <p>
+                          <strong>Error:</strong> {error?.name}
+                        </p>
+                        <p>
+                          <strong>Message:</strong> {error?.message}
+                        </p>
                         {error?.stack && (
                           <details className="mt-2">
                             <summary className="cursor-pointer text-sm font-medium">
@@ -457,10 +497,15 @@ User Agent: ${window.navigator.userAgent}
               {/* Additional help text */}
               <div className="text-center text-sm text-gray-500">
                 {errorType === ErrorType.AUTHENTICATION && (
-                  <p>If this problem persists, please contact your administrator.</p>
+                  <p>
+                    If this problem persists, please contact your administrator.
+                  </p>
                 )}
                 {errorType === ErrorType.DATABASE && (
-                  <p>Our team has been notified and is working to resolve this issue.</p>
+                  <p>
+                    Our team has been notified and is working to resolve this
+                    issue.
+                  </p>
                 )}
                 {errorType === ErrorType.NETWORK && (
                   <p>Please check your internet connection and try again.</p>
@@ -477,22 +522,22 @@ User Agent: ${window.navigator.userAgent}
 }
 
 // Convenience components for different error types
-export const AuthErrorBoundary: React.FC<Omit<ErrorBoundaryProps, 'errorType'>> = (props) => (
-  <ErrorBoundary {...props} errorType={ErrorType.AUTHENTICATION} />
-);
+export const AuthErrorBoundary: React.FC<
+  Omit<ErrorBoundaryProps, 'errorType'>
+> = props => <ErrorBoundary {...props} errorType={ErrorType.AUTHENTICATION} />;
 
-export const DatabaseErrorBoundary: React.FC<Omit<ErrorBoundaryProps, 'errorType'>> = (props) => (
-  <ErrorBoundary {...props} errorType={ErrorType.DATABASE} />
-);
+export const DatabaseErrorBoundary: React.FC<
+  Omit<ErrorBoundaryProps, 'errorType'>
+> = props => <ErrorBoundary {...props} errorType={ErrorType.DATABASE} />;
 
-export const NetworkErrorBoundary: React.FC<Omit<ErrorBoundaryProps, 'errorType'>> = (props) => (
-  <ErrorBoundary {...props} errorType={ErrorType.NETWORK} />
-);
+export const NetworkErrorBoundary: React.FC<
+  Omit<ErrorBoundaryProps, 'errorType'>
+> = props => <ErrorBoundary {...props} errorType={ErrorType.NETWORK} />;
 
-export const ValidationErrorBoundary: React.FC<Omit<ErrorBoundaryProps, 'errorType'>> = (props) => (
-  <ErrorBoundary {...props} errorType={ErrorType.VALIDATION} />
-);
+export const ValidationErrorBoundary: React.FC<
+  Omit<ErrorBoundaryProps, 'errorType'>
+> = props => <ErrorBoundary {...props} errorType={ErrorType.VALIDATION} />;
 
-export const PermissionErrorBoundary: React.FC<Omit<ErrorBoundaryProps, 'errorType'>> = (props) => (
-  <ErrorBoundary {...props} errorType={ErrorType.PERMISSION} />
-);
+export const PermissionErrorBoundary: React.FC<
+  Omit<ErrorBoundaryProps, 'errorType'>
+> = props => <ErrorBoundary {...props} errorType={ErrorType.PERMISSION} />;

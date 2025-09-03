@@ -1,6 +1,6 @@
 /**
  * Supabase middleware client
- * 
+ *
  * This file provides Supabase client creation for middleware usage.
  */
 

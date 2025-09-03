@@ -2,10 +2,24 @@
 
 import React from 'react';
 import { useConfig } from '@/services/config.service';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/Badge';
-import { CheckCircle, XCircle, AlertTriangle, Settings, Database, Shield, Globe } from 'lucide-react';
+import {
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Settings,
+  Database,
+  Shield,
+  Globe,
+} from 'lucide-react';
 
 export function ConfigStatus() {
   const { config, loading, error, isFeatureEnabled } = useConfig();
@@ -42,9 +56,7 @@ export function ConfigStatus() {
         <CardContent>
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              {error.message}
-            </AlertDescription>
+            <AlertDescription>{error.message}</AlertDescription>
           </Alert>
         </CardContent>
       </Card>
@@ -82,7 +94,8 @@ export function ConfigStatus() {
             </Badge>
           </CardTitle>
           <CardDescription>
-            Environment: {app.environment} | Debug: {app.debugMode ? 'Enabled' : 'Disabled'}
+            Environment: {app.environment} | Debug:{' '}
+            {app.debugMode ? 'Enabled' : 'Disabled'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -101,7 +114,7 @@ export function ConfigStatus() {
               </AlertDescription>
             </Alert>
           )}
-          
+
           {validation.warnings.length > 0 && (
             <Alert className="mb-4">
               <AlertTriangle className="h-4 w-4" />
@@ -127,7 +140,9 @@ export function ConfigStatus() {
             <Shield className="h-5 w-5" />
             Feature Flags
           </CardTitle>
-          <CardDescription>Available authentication and system features</CardDescription>
+          <CardDescription>
+            Available authentication and system features
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">

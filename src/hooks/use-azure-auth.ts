@@ -25,7 +25,7 @@ export interface UseAzureAuthReturn {
   error: Error | null;
   account: AccountInfo | null;
   userProfile: any | null;
-  
+
   // Actions
   signIn: () => Promise<{ success: boolean; error?: Error }>;
   signOut: () => Promise<{ success: boolean; error?: Error }>;
@@ -49,17 +49,26 @@ export function useAzureAuth(): UseAzureAuthReturn {
   const initialize = useCallback(async () => {
     try {
       setIsLoading(true);
-      
+
       const isConfigured = isAzureConfigured();
       if (!isConfigured) {
-        setState(prev => ({ ...prev, isConfigured: false, isInitialized: false }));
+        setState(prev => ({
+          ...prev,
+          isConfigured: false,
+          isInitialized: false,
+        }));
         return;
       }
 
       const initialized = await initializeMsal();
       if (!initialized) {
         const error = new Error('Failed to initialize Azure AD');
-        setState(prev => ({ ...prev, isConfigured: true, isInitialized: false, error }));
+        setState(prev => ({
+          ...prev,
+          isConfigured: true,
+          isInitialized: false,
+          error,
+        }));
         return;
       }
 
@@ -72,11 +81,11 @@ export function useAzureAuth(): UseAzureAuthReturn {
       // Get current state
       const authState = getAzureAuthState();
       setState(authState);
-      
+
       if (authState.hasAccount) {
         const currentAccount = getCurrentAzureAccount();
         setAccount(currentAccount);
-        
+
         // Load user profile
         await loadUserProfile();
       }
@@ -107,7 +116,10 @@ export function useAzureAuth(): UseAzureAuthReturn {
   }, []);
 
   // Sign in
-  const signIn = useCallback(async (): Promise<{ success: boolean; error?: Error }> => {
+  const signIn = useCallback(async (): Promise<{
+    success: boolean;
+    error?: Error;
+  }> => {
     try {
       setIsLoading(true);
       setState(prev => ({ ...prev, error: null }));
@@ -133,7 +145,10 @@ export function useAzureAuth(): UseAzureAuthReturn {
   }, [loadUserProfile]);
 
   // Sign out
-  const signOut = useCallback(async (): Promise<{ success: boolean; error?: Error }> => {
+  const signOut = useCallback(async (): Promise<{
+    success: boolean;
+    error?: Error;
+  }> => {
     try {
       setIsLoading(true);
       setState(prev => ({ ...prev, error: null }));
@@ -169,7 +184,10 @@ export function useAzureAuth(): UseAzureAuthReturn {
   }, []);
 
   // Clear cache
-  const clearCache = useCallback(async (): Promise<{ success: boolean; error?: Error }> => {
+  const clearCache = useCallback(async (): Promise<{
+    success: boolean;
+    error?: Error;
+  }> => {
     try {
       const result = await clearAzureCache();
       if (result.success) {
@@ -199,7 +217,7 @@ export function useAzureAuth(): UseAzureAuthReturn {
     error: state.error,
     account,
     userProfile,
-    
+
     // Actions
     signIn,
     signOut,

@@ -1,6 +1,6 @@
 /**
  * Enhanced Middleware with Security Features
- * 
+ *
  * This middleware provides:
  * - CSRF protection for auth endpoints
  * - Rate limiting for login attempts
@@ -11,7 +11,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createMiddlewareSupabaseClient } from '@/lib/supabase-middleware';
-import { checkEnvironmentVariables, shouldRedirectToSetup } from '@/lib/env-check';
+import {
+  checkEnvironmentVariables,
+  shouldRedirectToSetup,
+} from '@/lib/env-check';
 import { telemetry } from '@/lib/telemetry';
 
 // Rate limiting store (in production, use Redis or similar)
@@ -87,9 +90,18 @@ export async function middleware(request: NextRequest) {
 
     // Handle CORS for API routes
     if (pathname.startsWith('/api/')) {
-      response.headers.set('Access-Control-Allow-Origin', request.nextUrl.origin);
-      response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token');
+      response.headers.set(
+        'Access-Control-Allow-Origin',
+        request.nextUrl.origin
+      );
+      response.headers.set(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, DELETE, OPTIONS'
+      );
+      response.headers.set(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization, X-CSRF-Token'
+      );
       response.headers.set('Access-Control-Allow-Credentials', 'true');
     }
 
@@ -102,7 +114,10 @@ export async function middleware(request: NextRequest) {
     if (authRoutes.some(route => pathname.startsWith(route))) {
       const csrfResult = await validateCSRFToken(request);
       if (!csrfResult.valid) {
-        telemetry.trackError(new Error('CSRF token validation failed'), 'csrf_validation');
+        telemetry.trackError(
+          new Error('CSRF token validation failed'),
+          'csrf_validation'
+        );
         return new NextResponse(
           JSON.stringify({ error: 'CSRF token validation failed' }),
           { status: 403, headers: { 'Content-Type': 'application/json' } }
@@ -114,18 +129,21 @@ export async function middleware(request: NextRequest) {
     if (authRoutes.some(route => pathname.startsWith(route))) {
       const rateLimitResult = await checkRateLimit(request);
       if (!rateLimitResult.allowed) {
-        telemetry.trackError(new Error('Rate limit exceeded'), 'rate_limit_exceeded');
+        telemetry.trackError(
+          new Error('Rate limit exceeded'),
+          'rate_limit_exceeded'
+        );
         return new NextResponse(
-          JSON.stringify({ 
-            error: 'Too many requests', 
-            retryAfter: rateLimitResult.retryAfter 
+          JSON.stringify({
+            error: 'Too many requests',
+            retryAfter: rateLimitResult.retryAfter,
           }),
-          { 
-            status: 429, 
-            headers: { 
+          {
+            status: 429,
+            headers: {
               'Content-Type': 'application/json',
-              'Retry-After': rateLimitResult.retryAfter.toString()
-            } 
+              'Retry-After': rateLimitResult.retryAfter.toString(),
+            },
           }
         );
       }
@@ -137,10 +155,14 @@ export async function middleware(request: NextRequest) {
     }
 
     // Create Supabase client for middleware
-    const { supabase, response: supabaseResponse } = createMiddlewareSupabaseClient(request);
+    const { supabase, response: supabaseResponse } =
+      createMiddlewareSupabaseClient(request);
 
     // Get session
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
 
     if (error) {
       console.error('Error getting session in middleware:', error);
@@ -152,19 +174,24 @@ export async function middleware(request: NextRequest) {
       const expiresAt = new Date(session.expires_at * 1000);
       const now = new Date();
       const timeUntilExpiry = expiresAt.getTime() - now.getTime();
-      
+
       // If session expires within 5 minutes, try to refresh
       if (timeUntilExpiry < 5 * 60 * 1000 && timeUntilExpiry > 0) {
         try {
-          const { data: { session: refreshedSession }, error: refreshError } = 
-            await supabase.auth.refreshSession();
-          
+          const {
+            data: { session: refreshedSession },
+            error: refreshError,
+          } = await supabase.auth.refreshSession();
+
           if (refreshError) {
             console.error('Error refreshing session:', refreshError);
             telemetry.trackError(refreshError, 'session_refresh_error');
           } else if (refreshedSession) {
             console.log('Session refreshed successfully');
-            telemetry.track({ event: 'session_refreshed', properties: { pathname } });
+            telemetry.track({
+              event: 'session_refreshed',
+              properties: { pathname },
+            });
           }
         } catch (error) {
           console.error('Error in session refresh:', error);
@@ -199,11 +226,10 @@ export async function middleware(request: NextRequest) {
     });
 
     return supabaseResponse;
-
   } catch (error) {
     console.error('Middleware error:', error);
     telemetry.trackError(error as Error, 'middleware_error');
-    
+
     // Return error response
     return new NextResponse(
       JSON.stringify({ error: 'Internal server error' }),
@@ -215,7 +241,9 @@ export async function middleware(request: NextRequest) {
 /**
  * Validates CSRF token for auth endpoints
  */
-async function validateCSRFToken(request: NextRequest): Promise<{ valid: boolean; error?: string }> {
+async function validateCSRFToken(
+  request: NextRequest
+): Promise<{ valid: boolean; error?: string }> {
   try {
     const csrfToken = request.headers.get('X-CSRF-Token');
     const cookieToken = request.cookies.get('csrf-token')?.value;
@@ -237,9 +265,12 @@ async function validateCSRFToken(request: NextRequest): Promise<{ valid: boolean
 /**
  * Checks rate limiting for auth endpoints
  */
-async function checkRateLimit(request: NextRequest): Promise<{ allowed: boolean; retryAfter?: number }> {
+async function checkRateLimit(
+  request: NextRequest
+): Promise<{ allowed: boolean; retryAfter?: number }> {
   try {
-    const clientIP = request.ip || request.headers.get('X-Forwarded-For') || 'unknown';
+    const clientIP =
+      request.ip || request.headers.get('X-Forwarded-For') || 'unknown';
     const now = Date.now();
     const windowStart = now - rateLimitConfig.windowMs;
 
@@ -252,26 +283,26 @@ async function checkRateLimit(request: NextRequest): Promise<{ allowed: boolean;
 
     // Check current rate limit
     const current = rateLimitStore.get(clientIP);
-    
+
     if (current) {
       if (current.resetTime > now) {
         // Still in block period
-        return { 
-          allowed: false, 
-          retryAfter: Math.ceil((current.resetTime - now) / 1000) 
+        return {
+          allowed: false,
+          retryAfter: Math.ceil((current.resetTime - now) / 1000),
         };
       }
-      
+
       if (current.count >= rateLimitConfig.maxAttempts) {
         // Rate limit exceeded, block for blockDuration
         rateLimitStore.set(clientIP, {
           count: current.count,
           resetTime: now + rateLimitConfig.blockDuration,
         });
-        
-        return { 
-          allowed: false, 
-          retryAfter: Math.ceil(rateLimitConfig.blockDuration / 1000) 
+
+        return {
+          allowed: false,
+          retryAfter: Math.ceil(rateLimitConfig.blockDuration / 1000),
         };
       }
     }

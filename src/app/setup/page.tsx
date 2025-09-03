@@ -9,7 +9,9 @@ import { getEnvVarStatus, generateEnvFileTemplate } from '@/lib/env-check';
 import { ConfigStatus } from '@/components/config/config-status';
 
 export default function SetupPage() {
-  const [envVars, setEnvVars] = useState<ReturnType<typeof getEnvVarStatus>>([]);
+  const [envVars, setEnvVars] = useState<ReturnType<typeof getEnvVarStatus>>(
+    []
+  );
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -62,7 +64,8 @@ export default function SetupPage() {
                 Configuration Complete!
               </h3>
               <p className="mt-1 text-sm text-green-700">
-                All required environment variables are configured. You can now use the application.
+                All required environment variables are configured. You can now
+                use the application.
               </p>
             </div>
           </Alert>
@@ -74,7 +77,9 @@ export default function SetupPage() {
                 Missing Configuration
               </h3>
               <p className="mt-1 text-sm text-red-700">
-                {missingVars.length} required environment variable{missingVars.length > 1 ? 's' : ''} {missingVars.length > 1 ? 'are' : 'is'} missing.
+                {missingVars.length} required environment variable
+                {missingVars.length > 1 ? 's' : ''}{' '}
+                {missingVars.length > 1 ? 'are' : 'is'} missing.
               </p>
             </div>
           </Alert>
@@ -87,7 +92,7 @@ export default function SetupPage() {
               Environment Variables Status
             </h2>
             <div className="space-y-3">
-              {envVars.map((envVar) => (
+              {envVars.map(envVar => (
                 <div key={envVar.name} className="flex items-start space-x-3">
                   <div className="flex-shrink-0 mt-1">
                     {envVar.value ? (
@@ -130,7 +135,9 @@ export default function SetupPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open('https://supabase.com/dashboard', '_blank')}
+                  onClick={() =>
+                    window.open('https://supabase.com/dashboard', '_blank')
+                  }
                   className="mb-2"
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
@@ -143,7 +150,8 @@ export default function SetupPage() {
                   2. Get Your API Keys
                 </h3>
                 <p className="text-sm text-gray-600">
-                  In your Supabase project dashboard, go to Settings → API to find your:
+                  In your Supabase project dashboard, go to Settings → API to
+                  find your:
                 </p>
                 <ul className="text-sm text-gray-600 mt-1 ml-4 list-disc">
                   <li>Project URL</li>
@@ -157,7 +165,9 @@ export default function SetupPage() {
                   3. Create Environment File
                 </h3>
                 <p className="text-sm text-gray-600 mb-2">
-                  Create a <code className="bg-gray-100 px-1 rounded">.env.local</code> file in your project root:
+                  Create a{' '}
+                  <code className="bg-gray-100 px-1 rounded">.env.local</code>{' '}
+                  file in your project root:
                 </p>
                 <div className="relative">
                   <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
@@ -179,7 +189,8 @@ export default function SetupPage() {
                   4. Restart Development Server
                 </h3>
                 <p className="text-sm text-gray-600">
-                  After creating the environment file, restart your development server:
+                  After creating the environment file, restart your development
+                  server:
                 </p>
                 <div className="bg-gray-900 text-gray-100 p-2 rounded text-xs mt-1 font-mono">
                   npm run dev
@@ -196,16 +207,32 @@ export default function SetupPage() {
           </h2>
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
-              After configuring your environment variables, you'll need to set up your database schema.
+              After configuring your environment variables, you'll need to set
+              up your database schema.
             </p>
             <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
               <h3 className="text-sm font-medium text-yellow-800 mb-2">
                 Next Steps:
               </h3>
               <ul className="text-sm text-yellow-700 space-y-1">
-                <li>• Run the SQL schema from <code className="bg-yellow-100 px-1 rounded">supabase/schema.sql</code></li>
-                <li>• Execute the user profile creation script: <code className="bg-yellow-100 px-1 rounded">create-user-profile.sql</code></li>
-                <li>• Apply RLS policies: <code className="bg-yellow-100 px-1 rounded">fix-rls-policies.sql</code></li>
+                <li>
+                  • Run the SQL schema from{' '}
+                  <code className="bg-yellow-100 px-1 rounded">
+                    supabase/schema.sql
+                  </code>
+                </li>
+                <li>
+                  • Execute the user profile creation script:{' '}
+                  <code className="bg-yellow-100 px-1 rounded">
+                    create-user-profile.sql
+                  </code>
+                </li>
+                <li>
+                  • Apply RLS policies:{' '}
+                  <code className="bg-yellow-100 px-1 rounded">
+                    fix-rls-policies.sql
+                  </code>
+                </li>
               </ul>
             </div>
           </div>
@@ -214,7 +241,7 @@ export default function SetupPage() {
         {allConfigured && (
           <div className="mt-6 text-center">
             <Button
-              onClick={() => window.location.href = '/'}
+              onClick={() => (window.location.href = '/')}
               className="bg-blue-600 hover:bg-blue-700"
             >
               Go to Application

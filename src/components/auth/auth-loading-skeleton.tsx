@@ -10,10 +10,10 @@ interface AuthLoadingSkeletonProps {
   showNavigation?: boolean;
 }
 
-export function AuthLoadingSkeleton({ 
-  variant = 'page', 
+export function AuthLoadingSkeleton({
+  variant = 'page',
   showUserInfo = true,
-  showNavigation = true 
+  showNavigation = true,
 }: AuthLoadingSkeletonProps) {
   if (variant === 'minimal') {
     return (
@@ -73,7 +73,7 @@ export function AuthLoadingSkeleton({
           </div>
         </nav>
       )}
-      
+
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="space-y-6">
@@ -82,7 +82,7 @@ export function AuthLoadingSkeleton({
               <Skeleton className="h-8 w-64" />
               <Skeleton className="h-4 w-96" />
             </div>
-            
+
             {/* Content grid skeleton */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -100,8 +100,8 @@ interface AuthInitializationSkeletonProps {
   message?: string;
 }
 
-export function AuthInitializationSkeleton({ 
-  message = 'Initializing authentication...' 
+export function AuthInitializationSkeleton({
+  message = 'Initializing authentication...',
 }: AuthInitializationSkeletonProps) {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -127,10 +127,10 @@ interface AuthRetrySkeletonProps {
   message?: string;
 }
 
-export function AuthRetrySkeleton({ 
-  retryCount, 
-  maxRetries, 
-  message = 'Retrying authentication...' 
+export function AuthRetrySkeleton({
+  retryCount,
+  maxRetries,
+  message = 'Retrying authentication...',
 }: AuthRetrySkeletonProps) {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -145,7 +145,7 @@ export function AuthRetrySkeleton({
             Attempt {retryCount} of {maxRetries}
           </p>
           <div className="w-48 bg-gray-200 rounded-full h-2 mx-auto">
-            <div 
+            <div
               className="bg-yellow-500 h-2 rounded-full transition-all duration-300"
               style={{ width: `${(retryCount / maxRetries) * 100}%` }}
             ></div>
