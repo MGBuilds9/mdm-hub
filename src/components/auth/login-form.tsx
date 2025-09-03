@@ -115,7 +115,12 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
   };
 
   return (
-    <div className={cn('min-h-screen flex items-center justify-center bg-gradient-to-br from-background-50 via-white to-primary-50 p-4', className)}>
+    <div
+      className={cn(
+        'min-h-screen flex items-center justify-center bg-gradient-to-br from-background-50 via-white to-primary-50 p-4',
+        className
+      )}
+    >
       <div className="w-full max-w-md">
         {/* Welcome Card */}
         <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-primary-100 p-8">
@@ -137,13 +142,13 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
             onValueChange={value => setActiveTab(value as 'signin' | 'signup')}
           >
             <TabsList className="grid w-full grid-cols-2 bg-primary-50 p-1 rounded-xl mb-6">
-              <TabsTrigger 
-                value="signin" 
+              <TabsTrigger
+                value="signin"
                 className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-700"
               >
                 Sign In
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="signup"
                 className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-700"
               >
@@ -192,9 +197,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     required
                   />
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg" 
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
                   loading={loading}
                 >
                   Sign In
@@ -306,9 +311,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     required
                   />
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg" 
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
                   loading={loading}
                 >
                   Create Account

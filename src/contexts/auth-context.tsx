@@ -63,7 +63,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (error) {
         console.error('Error fetching user profile:', error);
-        console.log('This might be normal if the user profile does not exist yet');
+        console.log(
+          'This might be normal if the user profile does not exist yet'
+        );
         return null;
       }
 
@@ -201,40 +203,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     console.log('Auth context initializing...');
-    
+
     // Set a timeout to prevent infinite loading
     const timeout = setTimeout(() => {
       console.warn('Auth initialization timeout - forcing loading to false');
       setLoading(false);
     }, 10000); // 10 second timeout
-    
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('Initial session check:', { session: !!session, error });
-      clearTimeout(timeout);
-      setSession(session);
-      setSupabaseUser(session?.user ?? null);
-      
-      if (session?.user) {
-        console.log('User found in session, fetching profile...');
-        fetchUserProfile(session.user.id).then((userProfile) => {
-          console.log('User profile fetched:', userProfile);
-          setUser(userProfile);
+    supabase.auth
+      .getSession()
+      .then(({ data: { session }, error }) => {
+        console.log('Initial session check:', { session: !!session, error });
+        clearTimeout(timeout);
+        setSession(session);
+        setSupabaseUser(session?.user ?? null);
+
+        if (session?.user) {
+          console.log('User found in session, fetching profile...');
+          fetchUserProfile(session.user.id)
+            .then(userProfile => {
+              console.log('User profile fetched:', userProfile);
+              setUser(userProfile);
+              setLoading(false);
+            })
+            .catch(error => {
+              console.error('Error fetching initial user profile:', error);
+              setUser(null);
+              setLoading(false);
+            });
+        } else {
+          console.log('No user in session');
           setLoading(false);
-        }).catch((error) => {
-          console.error('Error fetching initial user profile:', error);
-          setUser(null);
-          setLoading(false);
-        });
-      } else {
-        console.log('No user in session');
+        }
+      })
+      .catch(error => {
+        console.error('Error getting initial session:', error);
+        clearTimeout(timeout);
         setLoading(false);
-      }
-    }).catch((error) => {
-      console.error('Error getting initial session:', error);
-      clearTimeout(timeout);
-      setLoading(false);
-    });
+      });
 
     // Listen for auth changes
     const {

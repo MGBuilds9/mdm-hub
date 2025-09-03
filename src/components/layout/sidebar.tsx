@@ -117,18 +117,20 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
         href={item.href}
         className={cn(
           'group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 hover:bg-primary-50 hover:text-primary-700 hover:shadow-sm',
-          isActive 
-            ? 'bg-gradient-to-r from-primary-100 to-primary-50 text-primary-700 shadow-sm border border-primary-200' 
+          isActive
+            ? 'bg-gradient-to-r from-primary-100 to-primary-50 text-primary-700 shadow-sm border border-primary-200'
             : 'text-charcoal-600 hover:translate-x-1'
         )}
         onClick={() => setIsMobileOpen(false)}
       >
-        <div className={cn(
-          'p-1.5 rounded-lg transition-all duration-200',
-          isActive 
-            ? 'bg-primary-200 text-primary-700' 
-            : 'bg-charcoal-100 text-charcoal-500 group-hover:bg-primary-200 group-hover:text-primary-600'
-        )}>
+        <div
+          className={cn(
+            'p-1.5 rounded-lg transition-all duration-200',
+            isActive
+              ? 'bg-primary-200 text-primary-700'
+              : 'bg-charcoal-100 text-charcoal-500 group-hover:bg-primary-200 group-hover:text-primary-600'
+          )}
+        >
           <Icon className="h-4 w-4" />
         </div>
         <span className="flex-1">{item.title}</span>
@@ -216,23 +218,36 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col items-start">
-                      <span className="text-sm font-semibold text-charcoal-900">{user.name}</span>
+                      <span className="text-sm font-semibold text-charcoal-900">
+                        {user.name}
+                      </span>
                       <span className="text-xs text-charcoal-500">
                         {user.role}
                       </span>
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-white/95 backdrop-blur-xl border-primary-100 shadow-xl">
-                  <DropdownMenuLabel className="text-charcoal-900">My Account</DropdownMenuLabel>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 bg-white/95 backdrop-blur-xl border-primary-100 shadow-xl"
+                >
+                  <DropdownMenuLabel className="text-charcoal-900">
+                    My Account
+                  </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-primary-100" />
-                  <DropdownMenuItem asChild className="hover:bg-primary-50 focus:bg-primary-50">
+                  <DropdownMenuItem
+                    asChild
+                    className="hover:bg-primary-50 focus:bg-primary-50"
+                  >
                     <Link href="/profile" className="flex items-center gap-2">
                       <User className="h-4 w-4 text-primary-600" />
                       Profile
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="hover:bg-primary-50 focus:bg-primary-50">
+                  <DropdownMenuItem
+                    asChild
+                    className="hover:bg-primary-50 focus:bg-primary-50"
+                  >
                     <Link href="/settings" className="flex items-center gap-2">
                       <Settings className="h-4 w-4 text-primary-600" />
                       Settings

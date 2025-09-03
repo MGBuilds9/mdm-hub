@@ -34,7 +34,12 @@ function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <Card className={cn('group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:bg-white', className)}>
+    <Card
+      className={cn(
+        'group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:bg-white',
+        className
+      )}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-sm font-medium text-charcoal-600 group-hover:text-charcoal-800 transition-colors">
           {title}
@@ -58,7 +63,9 @@ function StatCard({
                 <span className="font-medium">-{Math.abs(change.value)}%</span>
               </div>
             )}
-            <span className="text-charcoal-500 ml-2 text-xs">from last {change.period}</span>
+            <span className="text-charcoal-500 ml-2 text-xs">
+              from last {change.period}
+            </span>
           </div>
         )}
       </CardContent>

@@ -6,8 +6,11 @@ import { supabase } from '@/lib/supabase';
 export async function createUserProfile() {
   try {
     // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
       console.error('No authenticated user found');
       return;
@@ -61,7 +64,6 @@ export async function createUserProfile() {
 
     // Refresh the page to load the new profile
     window.location.reload();
-
   } catch (error) {
     console.error('Error in createUserProfile:', error);
   }
