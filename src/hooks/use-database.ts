@@ -813,16 +813,3 @@ export const useGetUserDivisions = () => {
     },
   });
 };
-
-export const useSetCurrentUser = () => {
-  return useMutation({
-    mutationFn: (userId: string) => rlsService.setCurrentUser(userId),
-    onError: (error: DatabaseError) => {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
-};

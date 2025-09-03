@@ -873,6 +873,7 @@ export type ProjectWithFullDetails = ProjectWithDetails & {
   change_orders?: ChangeOrder[];
   photos?: Photo[];
   documents?: Document[];
+  milestones?: Task[]; // Using tasks table for milestones
 };
 
 export type ChangeOrderWithDetails = ChangeOrder & {

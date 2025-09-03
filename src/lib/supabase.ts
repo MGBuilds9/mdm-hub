@@ -90,40 +90,33 @@ export function resetSupabaseClient() {
   clientInstance = null;
 }
 
-// Helper function to set user context for RLS
-export const setUserContext = async (userId: string) => {
-  const client = createBrowserSupabaseClient();
-  const { error } = await client.rpc('set_current_user', {
-    user_id: userId,
-  });
-
-  if (error) {
-    console.error('Error setting user context:', error);
-    throw error;
-  }
-};
-
 // Helper function to get user divisions
 export const getUserDivisions = async (userId: string) => {
   const client = createBrowserSupabaseClient();
-  const { data, error } = await client.rpc('get_user_divisions', {
-    user_id: userId,
-  });
+  const { data, error } = await client
+    .from('user_divisions')
+    .select(
+      `
+      *,
+      division:divisions(*)
+    `
+    )
+    .eq('user_id', userId);
 
   if (error) {
     console.error('Error getting user divisions:', error);
     throw error;
   }
 
-  return data;
+  return data || [];
 };
 
 // Helper function to check project access
 export const checkProjectAccess = async (userId: string, projectId: string) => {
   const client = createBrowserSupabaseClient();
   const { data, error } = await client.rpc('user_has_project_access', {
-    user_id: userId,
-    project_id: projectId,
+    p_user_id: userId,
+    p_project_id: projectId,
   });
 
   if (error) {

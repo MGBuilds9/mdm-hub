@@ -120,7 +120,7 @@ export function ProjectForm({
                     <SelectContent>
                       {divisions?.map(division => (
                         <SelectItem key={division.id} value={division.id}>
-                          {division.display_name}
+                          {division.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

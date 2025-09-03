@@ -106,7 +106,7 @@ export function UserInvitationForm({
 
   const getDivisionName = (divisionId: string) => {
     const division = divisions?.find(d => d.id === divisionId);
-    return division?.display_name || 'Unknown Division';
+    return division?.name || 'Unknown Division';
   };
 
   return (
@@ -248,7 +248,7 @@ export function UserInvitationForm({
                   <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-charcoal-400" />
                     <Label htmlFor={division.id} className="font-medium">
-                      {division.display_name}
+                      {division.name}
                     </Label>
                   </div>
                 </div>

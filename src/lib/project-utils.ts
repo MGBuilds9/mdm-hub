@@ -1,4 +1,6 @@
-import { Project, Milestone, Task, ProjectStatus } from '@/types/database';
+import { Project, Milestone, Task, Database } from '@/types/database';
+
+type ProjectStatus = Database['public']['Enums']['project_status'];
 
 // Calculate overall project progress based on milestones and tasks
 export function calculateProjectProgress(
@@ -14,7 +16,14 @@ export function calculateProjectProgress(
   if (milestones.length > 0) {
     const totalWeight = milestones.length;
     const completedWeight = milestones.reduce((sum, milestone) => {
-      return sum + milestone.completion_percentage / 100;
+      return (
+        sum +
+        (milestone.status === 'completed'
+          ? 1
+          : milestone.status === 'in_progress'
+            ? 0.5
+            : 0)
+      );
     }, 0);
     return Math.round((completedWeight / totalWeight) * 100);
   }
@@ -35,18 +44,12 @@ export function calculateMilestoneProgress(
   milestone: Milestone,
   tasks: Task[]
 ): number {
-  const milestoneTasks = tasks.filter(
-    task => task.milestone_id === milestone.id
-  );
-
-  if (milestoneTasks.length === 0) {
-    return milestone.completion_percentage;
-  }
-
-  const completedTasks = milestoneTasks.filter(
-    task => task.status === 'completed'
-  ).length;
-  return Math.round((completedTasks / milestoneTasks.length) * 100);
+  // Since milestones and tasks are both stored in the same table,
+  // we'll use the milestone's own status for progress calculation
+  if (milestone.status === 'completed') return 100;
+  if (milestone.status === 'in_progress') return 50;
+  if (milestone.status === 'pending') return 0;
+  return 0;
 }
 
 // Get project health status
@@ -63,6 +66,7 @@ export function getProjectHealth(
 
   // Check for overdue milestones
   const overdueMilestones = milestones.filter(milestone => {
+    if (!milestone.due_date) return false;
     const dueDate = new Date(milestone.due_date);
     return dueDate < now && milestone.status !== 'completed';
   });
@@ -92,7 +96,7 @@ export function getProjectHealth(
   }
 
   // Check project status
-  if (project.status === 'on-hold' && issues.length > 0) {
+  if (project.status === 'on_hold' && issues.length > 0) {
     issues.push('Project is on hold with outstanding issues');
   }
 
@@ -193,9 +197,10 @@ export function getProjectBudgetStatus(
 // Get next milestone
 export function getNextMilestone(milestones: Milestone[]): Milestone | null {
   const upcomingMilestones = milestones
-    .filter(milestone => milestone.status !== 'completed')
+    .filter(milestone => milestone.status !== 'completed' && milestone.due_date)
     .sort(
-      (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+      (a, b) =>
+        new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime()
     );
 
   return upcomingMilestones[0] ?? null;
@@ -212,6 +217,7 @@ export function getOverdueItems(
   const now = new Date();
 
   const overdueMilestones = milestones.filter(milestone => {
+    if (!milestone.due_date) return false;
     const dueDate = new Date(milestone.due_date);
     return dueDate < now && milestone.status !== 'completed';
   });

@@ -26,7 +26,9 @@ import {
   projectStatusUpdateSchema,
   type ProjectStatusUpdateData,
 } from '@/lib/validation';
-import { Project, ProjectStatus } from '@/types/database';
+import { Project, Database } from '@/types/database';
+
+type ProjectStatus = Database['public']['Enums']['project_status'];
 import { getStatusColor } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { ArrowRight, CheckCircle, Pause, Play, Archive, X } from 'lucide-react';
@@ -38,8 +40,8 @@ interface ProjectStatusWorkflowProps {
 
 const statusTransitions: Record<ProjectStatus, ProjectStatus[]> = {
   planning: ['active', 'cancelled'],
-  active: ['on-hold', 'completed', 'cancelled'],
-  'on-hold': ['active', 'cancelled'],
+  active: ['on_hold', 'completed', 'cancelled'],
+  on_hold: ['active', 'cancelled'],
   completed: ['active'], // Allow reopening if needed
   cancelled: [], // Terminal state
 };
@@ -47,7 +49,7 @@ const statusTransitions: Record<ProjectStatus, ProjectStatus[]> = {
 const statusIcons: Record<ProjectStatus, React.ReactNode> = {
   planning: <CheckCircle className="h-4 w-4" />,
   active: <Play className="h-4 w-4" />,
-  'on-hold': <Pause className="h-4 w-4" />,
+  on_hold: <Pause className="h-4 w-4" />,
   completed: <CheckCircle className="h-4 w-4" />,
   cancelled: <X className="h-4 w-4" />,
 };
@@ -55,7 +57,7 @@ const statusIcons: Record<ProjectStatus, React.ReactNode> = {
 const statusLabels: Record<ProjectStatus, string> = {
   planning: 'Planning',
   active: 'Active',
-  'on-hold': 'On Hold',
+  on_hold: 'On Hold',
   completed: 'Completed',
   cancelled: 'Cancelled',
 };

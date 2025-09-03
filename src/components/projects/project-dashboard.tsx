@@ -38,28 +38,33 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
 
   // Calculate project metrics
-  const totalTasks = project.tasks.length;
-  const completedTasks = project.tasks.filter(
+  const tasks = project.tasks || [];
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter(
     task => task.status === 'completed'
   ).length;
   const progressPercentage =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const overdueTasks = project.tasks.filter(
+  const overdueTasks = tasks.filter(
     task =>
       task.due_date &&
       new Date(task.due_date) < new Date() &&
       task.status !== 'completed'
   ).length;
 
-  const upcomingMilestones = project.milestones
-    .filter(milestone => new Date(milestone.due_date) > new Date())
+  const upcomingMilestones = (project.milestones || [])
+    .filter(
+      milestone =>
+        milestone.due_date && new Date(milestone.due_date) > new Date()
+    )
     .sort(
-      (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+      (a, b) =>
+        new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime()
     )
     .slice(0, 3);
 
-  const recentTasks = project.tasks
+  const recentTasks = tasks
     .sort(
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -132,7 +137,7 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {project.project_users.length}
+              {(project.project_members || []).length}
             </div>
             <p className="text-xs text-muted-foreground">Active team members</p>
           </CardContent>
@@ -189,9 +194,12 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
                       className="flex items-center justify-between p-3 border rounded-lg"
                     >
                       <div>
-                        <p className="font-medium">{milestone.name}</p>
+                        <p className="font-medium">{milestone.title}</p>
                         <p className="text-sm text-charcoal-600">
-                          Due: {formatDate(milestone.due_date)}
+                          Due:{' '}
+                          {milestone.due_date
+                            ? formatDate(milestone.due_date)
+                            : 'No due date'}
                         </p>
                       </div>
                       <Badge className={getStatusColor(milestone.status)}>
@@ -218,16 +226,16 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {project.milestones.length > 0 ? (
+              {(project.milestones || []).length > 0 ? (
                 <div className="space-y-4">
-                  {project.milestones.map(milestone => (
+                  {(project.milestones || []).map(milestone => (
                     <div
                       key={milestone.id}
                       className="flex items-center justify-between p-4 border rounded-lg"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
-                          <h4 className="font-medium">{milestone.name}</h4>
+                          <h4 className="font-medium">{milestone.title}</h4>
                           <Badge className={getStatusColor(milestone.status)}>
                             {milestone.status}
                           </Badge>
@@ -238,13 +246,22 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
                           </p>
                         )}
                         <div className="flex items-center gap-4 mt-2 text-sm text-charcoal-600">
-                          <span>Due: {formatDate(milestone.due_date)}</span>
                           <span>
-                            Progress: {milestone.completion_percentage}%
+                            Due:{' '}
+                            {milestone.due_date
+                              ? formatDate(milestone.due_date)
+                              : 'No due date'}
                           </span>
+                          <span>Priority: {milestone.priority}</span>
                         </div>
                         <Progress
-                          value={milestone.completion_percentage}
+                          value={
+                            milestone.status === 'completed'
+                              ? 100
+                              : milestone.status === 'in_progress'
+                                ? 50
+                                : 0
+                          }
                           className="mt-2"
                         />
                       </div>
@@ -321,31 +338,31 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
               <CardDescription>Project team and their roles</CardDescription>
             </CardHeader>
             <CardContent>
-              {project.project_users.length > 0 ? (
+              {(project.project_members || []).length > 0 ? (
                 <div className="space-y-3">
-                  {project.project_users.map(projectUser => (
+                  {(project.project_members || []).map(projectUser => (
                     <div
                       key={projectUser.id}
                       className="flex items-center gap-3 p-3 border rounded-lg"
                     >
                       <Avatar>
                         <AvatarImage
-                          src={projectUser.user.avatar_url || undefined}
+                          src={projectUser.user?.avatar_url || undefined}
                         />
                         <AvatarFallback>
                           {getInitials(
-                            projectUser.user.first_name,
-                            projectUser.user.last_name
+                            projectUser.user?.first_name || '',
+                            projectUser.user?.last_name || ''
                           )}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <p className="font-medium">
-                          {projectUser.user.first_name}{' '}
-                          {projectUser.user.last_name}
+                          {projectUser.user?.first_name || ''}{' '}
+                          {projectUser.user?.last_name || ''}
                         </p>
                         <p className="text-sm text-charcoal-600">
-                          {projectUser.user.email}
+                          {projectUser.user?.email || ''}
                         </p>
                       </div>
                       <Badge className={getStatusColor(projectUser.role)}>

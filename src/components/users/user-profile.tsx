@@ -111,7 +111,7 @@ export function UserProfile({
               <Avatar className="h-20 w-20">
                 <AvatarImage src={user.avatar_url || undefined} />
                 <AvatarFallback className="text-xl">
-                  {getInitials(user.first_name, user.last_name)}
+                  {getInitials(user.first_name || '', user.last_name || '')}
                 </AvatarFallback>
               </Avatar>
               <div>
@@ -277,7 +277,7 @@ export function UserProfile({
                           <Building2 className="h-4 w-4 text-charcoal-400" />
                           <div>
                             <p className="font-medium">
-                              {userDivision.division?.display_name}
+                              {userDivision.division?.name}
                             </p>
                             <p className="text-sm text-charcoal-600">
                               Member since {formatDate(userDivision.created_at)}
@@ -323,7 +323,7 @@ export function UserProfile({
                     {user.user_divisions.map(userDivision => (
                       <TableRow key={userDivision.id}>
                         <TableCell className="font-medium">
-                          {userDivision.division?.display_name}
+                          {userDivision.division?.name}
                         </TableCell>
                         <TableCell>
                           <Badge className={getRoleColor(userDivision.role)}>
@@ -341,7 +341,7 @@ export function UserProfile({
                               'Manage tasks and view project details'}
                             {userDivision.role === 'worker' &&
                               'View assigned tasks and update progress'}
-                            {userDivision.role === 'viewer' &&
+                            {userDivision.role === 'client' &&
                               'View assigned projects and approve changes'}
                           </div>
                         </TableCell>

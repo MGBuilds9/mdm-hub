@@ -4,10 +4,9 @@ import {
   Project,
   Division,
   UserDivision,
-  ProjectUser,
+  ProjectMember,
   Photo,
   ChangeOrder,
-  ChangeOrderAttachment,
   Notification,
   UserWithDivisions,
   ProjectWithDetails,
@@ -990,8 +989,8 @@ export const rlsService = {
   async testProjectAccess(userId: string, projectId: string): Promise<boolean> {
     try {
       const { data, error } = await supabase.rpc('user_has_project_access', {
-        user_id: userId,
-        project_id: projectId,
+        p_user_id: userId,
+        p_project_id: projectId,
       });
 
       if (error) handleError(error, 'test project access');
@@ -1006,9 +1005,15 @@ export const rlsService = {
   // Get user divisions
   async getUserDivisions(userId: string) {
     try {
-      const { data, error } = await supabase.rpc('get_user_divisions', {
-        user_id: userId,
-      });
+      const { data, error } = await supabase
+        .from('user_divisions')
+        .select(
+          `
+          *,
+          division:divisions(*)
+        `
+        )
+        .eq('user_id', userId);
 
       if (error) handleError(error, 'get user divisions');
 
@@ -1017,18 +1022,5 @@ export const rlsService = {
       handleError(error as Error, 'get user divisions');
     }
     return [];
-  },
-
-  // Set current user context
-  async setCurrentUser(userId: string): Promise<void> {
-    try {
-      const { error } = await supabase.rpc('set_current_user', {
-        user_id: userId,
-      });
-
-      if (error) handleError(error, 'set current user');
-    } catch (error) {
-      handleError(error as Error, 'set current user');
-    }
   },
 };

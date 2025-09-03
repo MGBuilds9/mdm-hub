@@ -124,7 +124,7 @@ export function ClientTeam() {
                 <Avatar className="h-12 w-12">
                   <AvatarImage src={user.avatar_url || ''} />
                   <AvatarFallback>
-                    {getInitials(user.first_name, user.last_name)}
+                    {getInitials(user.first_name || '', user.last_name || '')}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">

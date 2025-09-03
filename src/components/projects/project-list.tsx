@@ -103,7 +103,7 @@ export function ProjectList({
 
   const getDivisionName = (divisionId: string) => {
     const division = divisions.find(d => d.id === divisionId);
-    return division?.display_name || 'Unknown Division';
+    return division?.name || 'Unknown Division';
   };
 
   return (
@@ -164,7 +164,7 @@ export function ProjectList({
                 <SelectItem value="all">All Divisions</SelectItem>
                 {divisions.map(division => (
                   <SelectItem key={division.id} value={division.id}>
-                    {division.display_name}
+                    {division.name}
                   </SelectItem>
                 ))}
               </SelectContent>

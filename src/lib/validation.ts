@@ -414,7 +414,7 @@ export const projectInvitationFormSchema = z.object({
 });
 
 export const projectStatusUpdateSchema = z.object({
-  status: z.enum(['planning', 'active', 'on-hold', 'completed', 'cancelled']),
+  status: z.enum(['planning', 'active', 'on_hold', 'completed', 'cancelled']),
   reason: z.string().optional(),
 });
 

@@ -52,11 +52,11 @@ export function MobileProjectView({
 
   const stats = getProjectStatistics(
     project,
-    project.milestones,
-    project.tasks
+    project.milestones || [],
+    project.tasks || []
   );
-  const myTasks = project.tasks.filter(task => task.assigned_to); // Filter to current user's tasks
-  const recentPhotos = project.photos.slice(0, 3);
+  const myTasks = (project.tasks || []).filter(task => task.assigned_to); // Filter to current user's tasks
+  const recentPhotos = (project.photos || []).slice(0, 3);
 
   return (
     <div className="space-y-4 p-4 max-w-md mx-auto">
@@ -245,9 +245,9 @@ export function MobileProjectView({
               <CardTitle className="text-base">All Tasks</CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              {project.tasks.length > 0 ? (
+              {(project.tasks || []).length > 0 ? (
                 <div className="space-y-2">
-                  {project.tasks.map(task => (
+                  {(project.tasks || []).map(task => (
                     <div
                       key={task.id}
                       className="flex items-center gap-3 p-3 border rounded-lg"
@@ -307,9 +307,9 @@ export function MobileProjectView({
               <CardTitle className="text-base">Project Photos</CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              {project.photos.length > 0 ? (
+              {(project.photos || []).length > 0 ? (
                 <div className="grid grid-cols-2 gap-2">
-                  {project.photos.map(photo => (
+                  {(project.photos || []).map(photo => (
                     <div
                       key={photo.id}
                       className="aspect-square bg-charcoal-100 rounded-lg flex items-center justify-center"

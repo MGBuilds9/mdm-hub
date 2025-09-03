@@ -33,14 +33,18 @@ export function ProjectTimeline({
   const [viewMode, setViewMode] = useState<ViewMode>('timeline');
 
   // Sort milestones by due date
-  const sortedMilestones = [...milestones].sort(
-    (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
-  );
+  const sortedMilestones = [...milestones].sort((a, b) => {
+    if (!a.due_date && !b.due_date) return 0;
+    if (!a.due_date) return 1;
+    if (!b.due_date) return -1;
+    return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+  });
 
-  // Group tasks by milestone
+  // Group tasks by milestone (since milestones are also tasks, we'll group by project_id for now)
   const tasksByMilestone = tasks.reduce(
     (acc, task) => {
-      const milestoneId = task.milestone_id || 'unassigned';
+      // For now, group all tasks under 'unassigned' since we don't have milestone_id
+      const milestoneId = 'unassigned';
       if (!acc[milestoneId]) {
         acc[milestoneId] = [];
       }
@@ -51,11 +55,12 @@ export function ProjectTimeline({
   );
 
   const getMilestoneStatus = (milestone: Milestone) => {
-    const now = new Date();
-    const dueDate = new Date(milestone.due_date);
-
     if (milestone.status === 'completed') return 'completed';
-    if (dueDate < now && milestone.status === 'pending') return 'overdue';
+    if (milestone.due_date) {
+      const now = new Date();
+      const dueDate = new Date(milestone.due_date);
+      if (dueDate < now && milestone.status === 'pending') return 'overdue';
+    }
     if (milestone.status === 'in_progress') return 'in_progress';
     return 'pending';
   };
@@ -210,14 +215,16 @@ export function ProjectTimeline({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-lg font-medium">
-                          {milestone.name}
+                          {milestone.title}
                         </h3>
                         <div className="flex items-center gap-2">
                           <Badge className={getStatusColor(status)}>
                             {status.replace('_', ' ')}
                           </Badge>
                           <span className="text-sm text-charcoal-600">
-                            {formatDate(milestone.due_date)}
+                            {milestone.due_date
+                              ? formatDate(milestone.due_date)
+                              : 'No due date'}
                           </span>
                         </div>
                       </div>
@@ -231,9 +238,24 @@ export function ProjectTimeline({
                       <div className="mb-3">
                         <div className="flex items-center justify-between text-sm mb-1">
                           <span>Progress</span>
-                          <span>{milestone.completion_percentage}%</span>
+                          <span>
+                            {milestone.status === 'completed'
+                              ? 100
+                              : milestone.status === 'in_progress'
+                                ? 50
+                                : 0}
+                            %
+                          </span>
                         </div>
-                        <Progress value={milestone.completion_percentage} />
+                        <Progress
+                          value={
+                            milestone.status === 'completed'
+                              ? 100
+                              : milestone.status === 'in_progress'
+                                ? 50
+                                : 0
+                          }
+                        />
                       </div>
 
                       {/* Milestone tasks */}
