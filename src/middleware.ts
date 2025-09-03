@@ -30,7 +30,7 @@ const securityHeaders = {
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://login.microsoftonline.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://login.microsoftonline.com https://vercel.live",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self'",
