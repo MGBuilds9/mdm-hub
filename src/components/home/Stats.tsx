@@ -5,7 +5,8 @@ const stats = [
     icon: Building2,
     value: '500+',
     label: 'Projects Completed',
-    description: 'Successfully delivered construction projects across various sectors',
+    description:
+      'Successfully delivered construction projects across various sectors',
   },
   {
     icon: Users,
@@ -55,9 +56,7 @@ export function Stats() {
                 <div className="text-lg font-semibold text-white mb-2">
                   {stat.label}
                 </div>
-                <div className="text-primary-100">
-                  {stat.description}
-                </div>
+                <div className="text-primary-100">{stat.description}</div>
               </div>
             );
           })}

@@ -25,23 +25,26 @@ A professional construction project management platform built with Next.js 14, T
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd mdm-construction-hub
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Copy environment variables:
+
 ```bash
 cp env.example .env.local
 ```
@@ -49,6 +52,7 @@ cp env.example .env.local
 4. Update the environment variables in `.env.local` with your actual values.
 
 5. Run the development server:
+
 ```bash
 npm run dev
 ```

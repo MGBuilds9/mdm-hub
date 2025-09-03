@@ -57,11 +57,16 @@ export function RecentProjects() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {projects.map((project) => (
-            <div key={project.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          {projects.map(project => (
+            <div
+              key={project.id}
+              className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-charcoal-950">{project.name}</h3>
+                  <h3 className="font-semibold text-charcoal-950">
+                    {project.name}
+                  </h3>
                   <Badge className={statusColors[project.status]}>
                     {project.status.replace('-', ' ')}
                   </Badge>

@@ -53,11 +53,19 @@ export function UpcomingTasks() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {tasks.map((task) => (
-            <div key={task.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          {tasks.map(task => (
+            <div
+              key={task.id}
+              className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               <div className="flex items-start justify-between mb-2">
-                <h4 className="font-medium text-charcoal-950 text-sm">{task.title}</h4>
-                <Badge className={priorityColors[task.priority]} variant="secondary">
+                <h4 className="font-medium text-charcoal-950 text-sm">
+                  {task.title}
+                </h4>
+                <Badge
+                  className={priorityColors[task.priority]}
+                  variant="secondary"
+                >
                   {task.priority}
                 </Badge>
               </div>

@@ -16,7 +16,12 @@ export interface Project {
   updatedAt: Date;
 }
 
-export type ProjectStatus = 'planning' | 'active' | 'on-hold' | 'completed' | 'cancelled';
+export type ProjectStatus =
+  | 'planning'
+  | 'active'
+  | 'on-hold'
+  | 'completed'
+  | 'cancelled';
 
 // Team Types
 export interface TeamMember {

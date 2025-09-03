@@ -53,11 +53,13 @@ export function TeamActivity() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {activities.map((activity) => {
+          {activities.map(activity => {
             const Icon = activity.icon;
             return (
               <div key={activity.id} className="flex items-start space-x-3">
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center`}>
+                <div
+                  className={`flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center`}
+                >
                   <Icon className={`w-4 h-4 ${activity.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">

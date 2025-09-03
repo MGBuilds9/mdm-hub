@@ -2,7 +2,15 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Building2, Users, Calendar, FileText, Settings } from 'lucide-react';
+import {
+  Menu,
+  X,
+  Building2,
+  Users,
+  Calendar,
+  FileText,
+  Settings,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigationItems = [
@@ -34,7 +42,7 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navigationItems.map((item) => {
+            {navigationItems.map(item => {
               const Icon = item.icon;
               return (
                 <Link
@@ -51,9 +59,7 @@ export function Navigation() {
 
           {/* User Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            <button className="btn-primary">
-              Sign In
-            </button>
+            <button className="btn-primary">Sign In</button>
           </div>
 
           {/* Mobile menu button */}
@@ -76,7 +82,7 @@ export function Navigation() {
       {isMobileMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
-            {navigationItems.map((item) => {
+            {navigationItems.map(item => {
               const Icon = item.icon;
               return (
                 <Link
@@ -91,9 +97,7 @@ export function Navigation() {
               );
             })}
             <div className="pt-4 border-t border-gray-200">
-              <button className="w-full btn-primary">
-                Sign In
-              </button>
+              <button className="w-full btn-primary">Sign In</button>
             </div>
           </div>
         </div>

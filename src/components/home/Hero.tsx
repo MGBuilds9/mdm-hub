@@ -1,5 +1,11 @@
 import Link from 'next/link';
-import { ArrowRight, Building2, Users, Calendar, TrendingUp } from 'lucide-react';
+import {
+  ArrowRight,
+  Building2,
+  Users,
+  Calendar,
+  TrendingUp,
+} from 'lucide-react';
 
 export function Hero() {
   return (
@@ -11,11 +17,15 @@ export function Hero() {
             <span className="text-primary-500 block">Project Management</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Streamline your construction projects with our comprehensive management platform.
-            Track progress, manage teams, and deliver exceptional results on time and within budget.
+            Streamline your construction projects with our comprehensive
+            management platform. Track progress, manage teams, and deliver
+            exceptional results on time and within budget.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/dashboard" className="btn-primary text-lg px-8 py-3 inline-flex items-center">
+            <Link
+              href="/dashboard"
+              className="btn-primary text-lg px-8 py-3 inline-flex items-center"
+            >
               Get Started
               <ArrowRight className="ml-2 w-5 h-5" />
             </Link>

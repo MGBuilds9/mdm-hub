@@ -49,9 +49,7 @@ export function DashboardStats() {
               <div className="text-2xl font-bold text-charcoal-950">
                 {stat.value}
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {stat.change}
-              </p>
+              <p className="text-xs text-gray-500 mt-1">{stat.change}</p>
             </CardContent>
           </Card>
         );

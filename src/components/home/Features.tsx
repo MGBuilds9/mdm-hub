@@ -1,54 +1,62 @@
-import { 
-  Calendar, 
-  Users, 
-  FileText, 
-  BarChart3, 
-  Smartphone, 
+import {
+  Calendar,
+  Users,
+  FileText,
+  BarChart3,
+  Smartphone,
   Shield,
   Clock,
-  DollarSign
+  DollarSign,
 } from 'lucide-react';
 
 const features = [
   {
     icon: Calendar,
     title: 'Project Scheduling',
-    description: 'Create detailed project timelines and track milestones with our intuitive scheduling tools.',
+    description:
+      'Create detailed project timelines and track milestones with our intuitive scheduling tools.',
   },
   {
     icon: Users,
     title: 'Team Management',
-    description: 'Manage your construction teams, assign tasks, and track individual performance.',
+    description:
+      'Manage your construction teams, assign tasks, and track individual performance.',
   },
   {
     icon: FileText,
     title: 'Document Management',
-    description: 'Store and organize all project documents, blueprints, and contracts in one place.',
+    description:
+      'Store and organize all project documents, blueprints, and contracts in one place.',
   },
   {
     icon: BarChart3,
     title: 'Progress Tracking',
-    description: 'Monitor project progress with real-time dashboards and detailed analytics.',
+    description:
+      'Monitor project progress with real-time dashboards and detailed analytics.',
   },
   {
     icon: Smartphone,
     title: 'Mobile Access',
-    description: 'Access your projects anywhere with our mobile-responsive platform.',
+    description:
+      'Access your projects anywhere with our mobile-responsive platform.',
   },
   {
     icon: Shield,
     title: 'Secure & Reliable',
-    description: 'Enterprise-grade security to protect your sensitive project data.',
+    description:
+      'Enterprise-grade security to protect your sensitive project data.',
   },
   {
     icon: Clock,
     title: 'Time Tracking',
-    description: 'Track work hours and project time with accurate time management tools.',
+    description:
+      'Track work hours and project time with accurate time management tools.',
   },
   {
     icon: DollarSign,
     title: 'Budget Management',
-    description: 'Monitor project costs and budgets with detailed financial tracking.',
+    description:
+      'Monitor project costs and budgets with detailed financial tracking.',
   },
 ];
 
@@ -61,8 +69,8 @@ export function Features() {
             Everything You Need to Manage Construction Projects
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Our comprehensive platform provides all the tools you need to successfully manage
-            construction projects from start to finish.
+            Our comprehensive platform provides all the tools you need to
+            successfully manage construction projects from start to finish.
           </p>
         </div>
 
@@ -70,16 +78,17 @@ export function Features() {
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <div key={index} className="card hover:shadow-lg transition-shadow duration-300">
+              <div
+                key={index}
+                className="card hover:shadow-lg transition-shadow duration-300"
+              >
                 <div className="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center mb-4">
                   <Icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-charcoal-950 mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600">
-                  {feature.description}
-                </p>
+                <p className="text-gray-600">{feature.description}</p>
               </div>
             );
           })}

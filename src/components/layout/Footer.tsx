@@ -15,8 +15,8 @@ export function Footer() {
               <span className="text-xl font-bold">MDM Construction</span>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
-              Professional construction project management platform designed to streamline
-              your workflow and deliver exceptional results.
+              Professional construction project management platform designed to
+              streamline your workflow and deliver exceptional results.
             </p>
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-gray-300">
@@ -39,22 +39,34 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/about" className="text-gray-300 hover:text-primary-500 transition-colors">
+                <Link
+                  href="/about"
+                  className="text-gray-300 hover:text-primary-500 transition-colors"
+                >
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/services" className="text-gray-300 hover:text-primary-500 transition-colors">
+                <Link
+                  href="/services"
+                  className="text-gray-300 hover:text-primary-500 transition-colors"
+                >
                   Services
                 </Link>
               </li>
               <li>
-                <Link href="/projects" className="text-gray-300 hover:text-primary-500 transition-colors">
+                <Link
+                  href="/projects"
+                  className="text-gray-300 hover:text-primary-500 transition-colors"
+                >
                   Projects
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-gray-300 hover:text-primary-500 transition-colors">
+                <Link
+                  href="/contact"
+                  className="text-gray-300 hover:text-primary-500 transition-colors"
+                >
                   Contact
                 </Link>
               </li>
@@ -66,22 +78,34 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-4">Support</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/help" className="text-gray-300 hover:text-primary-500 transition-colors">
+                <Link
+                  href="/help"
+                  className="text-gray-300 hover:text-primary-500 transition-colors"
+                >
                   Help Center
                 </Link>
               </li>
               <li>
-                <Link href="/docs" className="text-gray-300 hover:text-primary-500 transition-colors">
+                <Link
+                  href="/docs"
+                  className="text-gray-300 hover:text-primary-500 transition-colors"
+                >
                   Documentation
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-gray-300 hover:text-primary-500 transition-colors">
+                <Link
+                  href="/privacy"
+                  className="text-gray-300 hover:text-primary-500 transition-colors"
+                >
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-gray-300 hover:text-primary-500 transition-colors">
+                <Link
+                  href="/terms"
+                  className="text-gray-300 hover:text-primary-500 transition-colors"
+                >
                   Terms of Service
                 </Link>
               </li>
