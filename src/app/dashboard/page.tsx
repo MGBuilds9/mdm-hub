@@ -1,6 +1,8 @@
 import { DashboardStats } from '@/components/dashboard/dashboard-stats';
 import { MainLayout } from '@/components/layout/main-layout';
 
+export const dynamic = 'force-dynamic';
+
 export default function DashboardPage() {
   // Mock data for dashboard stats
   const mockStats = {

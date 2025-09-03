@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useUsers, useDivisions } from '@/hooks/use-database';
+import { useUsersWithDivisions, useDivisions } from '@/hooks/use-database';
 import { MainLayout } from '@/components/layout/main-layout';
 import { Loading } from '@/components/ui/loading';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
@@ -42,6 +42,8 @@ import {
   Building2,
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function TeamPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [divisionFilter, setDivisionFilter] = useState<string>('all');
@@ -51,7 +53,7 @@ export default function TeamPage() {
     data: users,
     isLoading: usersLoading,
     error: usersError,
-  } = useUsers();
+  } = useUsersWithDivisions();
   const { data: divisions, isLoading: divisionsLoading } = useDivisions();
 
   if (usersLoading || divisionsLoading) {
@@ -213,7 +215,7 @@ export default function TeamPage() {
                                 {user.first_name} {user.last_name}
                               </div>
                               <div className="text-sm text-charcoal-600">
-                                {user.internal
+                                {user.is_internal
                                   ? 'Internal Staff'
                                   : 'External User'}
                               </div>
@@ -256,12 +258,12 @@ export default function TeamPage() {
                         <TableCell>
                           <Badge
                             className={
-                              user.active
+                              user.is_active
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-red-100 text-red-800'
                             }
                           >
-                            {user.active ? 'Active' : 'Inactive'}
+                            {user.is_active ? 'Active' : 'Inactive'}
                           </Badge>
                         </TableCell>
                         <TableCell>{formatDate(user.created_at)}</TableCell>

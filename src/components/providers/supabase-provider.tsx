@@ -38,17 +38,32 @@ export function SupabaseProvider({ children }: SupabaseProviderProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if we're in a browser environment and have the required env vars
+    if (
+      typeof window === 'undefined' ||
+      !process.env.NEXT_PUBLIC_SUPABASE_URL
+    ) {
+      setLoading(false);
+      return;
+    }
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      } else {
-        setProfile(null);
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchUserProfile(session.user.id);
+        } else {
+          setProfile(null);
+          setLoading(false);
+        }
+      })
+      .catch(error => {
+        console.error('Error getting session:', error);
         setLoading(false);
-      }
-    });
+      });
 
     // Listen for auth changes
     const {

@@ -8,6 +8,8 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { Loading } from '@/components/ui/loading';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
+export const dynamic = 'force-dynamic';
+
 export default function ProjectsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);

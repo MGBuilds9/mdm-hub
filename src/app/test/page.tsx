@@ -13,6 +13,8 @@ import {
 import { Loading } from '@/components/ui/loading';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
+export const dynamic = 'force-dynamic';
+
 export default function TestPage() {
   const { user, loading: authLoading } = useAuth();
   const {

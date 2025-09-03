@@ -61,7 +61,7 @@ export const signOutFromAzure = async () => {
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length > 0) {
       await msalInstance.logoutPopup({
-        account: accounts[0],
+        account: accounts[0] || null,
         postLogoutRedirectUri: window.location.origin,
       });
     }
@@ -75,7 +75,7 @@ export const signOutFromAzure = async () => {
 // Get current Azure AD account
 export const getCurrentAzureAccount = (): AccountInfo | null => {
   const accounts = msalInstance.getAllAccounts();
-  return accounts.length > 0 ? accounts[0] : null;
+  return accounts.length > 0 ? accounts[0] || null : null;
 };
 
 // Get access token for Microsoft Graph

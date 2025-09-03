@@ -133,15 +133,15 @@ export function UserProfile({
                 <div className="flex items-center gap-3 mt-3">
                   <Badge
                     className={
-                      user.active
+                      user.is_active
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }
                   >
-                    {user.active ? 'Active' : 'Inactive'}
+                    {user.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                   <Badge variant="outline">
-                    {user.internal ? 'Internal Staff' : 'External User'}
+                    {user.is_internal ? 'Internal Staff' : 'External User'}
                   </Badge>
                   <span className="text-sm text-charcoal-600">
                     Member since {formatDate(user.created_at)}
@@ -254,17 +254,6 @@ export function UserProfile({
                     </div>
                   </div>
                 )}
-                {user.address && (
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-4 w-4 text-charcoal-400" />
-                    <div>
-                      <p className="font-medium">Address</p>
-                      <p className="text-sm text-charcoal-600">
-                        {user.address}
-                      </p>
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
 
@@ -346,16 +335,14 @@ export function UserProfile({
                             {/* Mock permissions based on role */}
                             {userDivision.role === 'admin' &&
                               'Full access to all features'}
-                            {userDivision.role === 'project_manager' &&
+                            {userDivision.role === 'manager' &&
                               'Manage projects, tasks, and team members'}
                             {userDivision.role === 'supervisor' &&
                               'Manage tasks and view project details'}
-                            {userDivision.role === 'estimator' &&
-                              'View projects and create estimates'}
-                            {userDivision.role === 'client' &&
-                              'View assigned projects and approve changes'}
-                            {userDivision.role === 'subcontractor' &&
+                            {userDivision.role === 'worker' &&
                               'View assigned tasks and update progress'}
+                            {userDivision.role === 'viewer' &&
+                              'View assigned projects and approve changes'}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -458,10 +445,10 @@ export function UserProfile({
                   </p>
                 </div>
                 <Button
-                  variant={user.active ? 'destructive' : 'default'}
+                  variant={user.is_active ? 'destructive' : 'default'}
                   size="sm"
                 >
-                  {user.active ? 'Deactivate' : 'Activate'} Account
+                  {user.is_active ? 'Deactivate' : 'Activate'} Account
                 </Button>
               </div>
             </CardContent>

@@ -606,7 +606,8 @@ export const changeOrderService = {
 
       if (error) handleError(error, 'create change order');
 
-      if (!data) handleError(new Error('No data returned'), 'create change order');
+      if (!data)
+        handleError(new Error('No data returned'), 'create change order');
       return data as ChangeOrder;
     } catch (error) {
       handleError(error as Error, 'create change order');
@@ -629,7 +630,8 @@ export const changeOrderService = {
 
       if (error) handleError(error, 'update change order');
 
-      if (!data) handleError(new Error('No data returned'), 'update change order');
+      if (!data)
+        handleError(new Error('No data returned'), 'update change order');
       return data as ChangeOrder;
     } catch (error) {
       handleError(error as Error, 'update change order');
@@ -653,7 +655,8 @@ export const changeOrderService = {
 
       if (error) handleError(error, 'approve change order');
 
-      if (!data) handleError(new Error('No data returned'), 'approve change order');
+      if (!data)
+        handleError(new Error('No data returned'), 'approve change order');
       return data as ChangeOrder;
     } catch (error) {
       handleError(error as Error, 'approve change order');
@@ -676,7 +679,8 @@ export const changeOrderService = {
 
       if (error) handleError(error, 'reject change order');
 
-      if (!data) handleError(new Error('No data returned'), 'reject change order');
+      if (!data)
+        handleError(new Error('No data returned'), 'reject change order');
       return data as ChangeOrder;
     } catch (error) {
       handleError(error as Error, 'reject change order');
@@ -737,7 +741,8 @@ export const notificationService = {
 
       if (error) handleError(error, 'create notification');
 
-      if (!data) handleError(new Error('No data returned'), 'create notification');
+      if (!data)
+        handleError(new Error('No data returned'), 'create notification');
       return data as Notification;
     } catch (error) {
       handleError(error as Error, 'create notification');
@@ -760,7 +765,8 @@ export const notificationService = {
 
       if (error) handleError(error, 'mark notification as read');
 
-      if (!data) handleError(new Error('No data returned'), 'mark notification as read');
+      if (!data)
+        handleError(new Error('No data returned'), 'mark notification as read');
       return data as Notification;
     } catch (error) {
       handleError(error as Error, 'mark notification as read');
@@ -944,7 +950,8 @@ export const projectInvitationService = {
 
       if (error) handleError(error, 'create invitation');
 
-      if (!data) handleError(new Error('No data returned'), 'create invitation');
+      if (!data)
+        handleError(new Error('No data returned'), 'create invitation');
       return data as unknown as ProjectInvitation;
     } catch (error) {
       handleError(error as Error, 'create invitation');
@@ -967,7 +974,8 @@ export const projectInvitationService = {
 
       if (error) handleError(error, 'update invitation');
 
-      if (!data) handleError(new Error('No data returned'), 'update invitation');
+      if (!data)
+        handleError(new Error('No data returned'), 'update invitation');
       return data as unknown as ProjectInvitation;
     } catch (error) {
       handleError(error as Error, 'update invitation');

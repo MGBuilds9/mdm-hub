@@ -6,6 +6,8 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { DashboardStats } from '@/components/dashboard/dashboard-stats';
 import { Loading } from '@/components/ui/loading';
 
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
   const { user, loading } = useAuth();
 

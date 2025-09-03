@@ -72,11 +72,8 @@ export class RealtimeService {
 
   // Subscribe to project change orders
   subscribeToProjectChangeOrders<
-    T extends Record<string, any> = Record<string, any>
-  >(
-    projectId: string,
-    callback: RealtimeCallback<T>
-  ): RealtimeChannel {
+    T extends Record<string, any> = Record<string, any>,
+  >(projectId: string, callback: RealtimeCallback<T>): RealtimeChannel {
     return this.subscribe<T>(
       'change_orders',
       callback,
@@ -86,11 +83,8 @@ export class RealtimeService {
 
   // Subscribe to user notifications
   subscribeToUserNotifications<
-    T extends Record<string, any> = Record<string, any>
-  >(
-    userId: string,
-    callback: RealtimeCallback<T>
-  ): RealtimeChannel {
+    T extends Record<string, any> = Record<string, any>,
+  >(userId: string, callback: RealtimeCallback<T>): RealtimeChannel {
     return this.subscribe<T>('notifications', callback, `user_id=eq.${userId}`);
   }
 

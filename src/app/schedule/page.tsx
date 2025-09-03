@@ -24,6 +24,8 @@ import {
 import { formatDate, getStatusColor } from '@/lib/utils';
 import { Calendar, Clock, MapPin, Users, Filter, Plus } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function SchedulePage() {
   const [viewMode, setViewMode] = useState<'calendar' | 'timeline' | 'list'>(
     'calendar'

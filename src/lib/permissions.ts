@@ -371,9 +371,7 @@ export function canApproveChangeOrders(
 
   // Project managers can approve change orders under $5,000
   if (changeOrderAmount && changeOrderAmount < 5000) {
-    return (
-      user.user_divisions?.some(ud => ud.role === 'manager') || false
-    );
+    return user.user_divisions?.some(ud => ud.role === 'manager') || false;
   }
 
   // Only admins can approve change orders over $5,000

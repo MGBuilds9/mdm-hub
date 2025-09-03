@@ -43,6 +43,8 @@ import {
   Globe,
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function SettingsPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');

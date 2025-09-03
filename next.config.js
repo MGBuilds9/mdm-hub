@@ -9,6 +9,12 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
+  experimental: {
+    serverComponentsExternalPackages: ['@supabase/supabase-js'],
+  },
+  output: 'standalone',
+  trailingSlash: false,
+  skipTrailingSlashRedirect: true,
 };
 
 module.exports = nextConfig;

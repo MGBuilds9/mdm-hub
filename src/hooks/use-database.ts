@@ -73,6 +73,13 @@ export const useUsers = () => {
   });
 };
 
+export const useUsersWithDivisions = () => {
+  return useQuery({
+    queryKey: ['users', 'with-divisions'],
+    queryFn: userService.getAllWithDivisions,
+  });
+};
+
 export const useUser = (id: string) => {
   return useQuery({
     queryKey: queryKeys.user(id),

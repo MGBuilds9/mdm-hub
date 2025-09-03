@@ -19,6 +19,8 @@ import { hasPermission } from '@/lib/permissions';
 import { toast } from '@/hooks/use-toast';
 import { FileText, CheckCircle, Clock, XCircle } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 // Mock data - in real app this would come from the database
 const mockChangeOrders = [
   {

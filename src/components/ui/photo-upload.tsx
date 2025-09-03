@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useCallback, useState } from 'react';
 import { Upload, X, Image as ImageIcon, Camera } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Button } from './Button';
 
@@ -30,18 +31,18 @@ export function PhotoUpload({
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [dragActive, setDragActive] = useState(false);
 
-  const validateFile = (file: File): string | null => {
-    if (!acceptedTypes.includes(file.type)) {
-      return 'Invalid file type. Please upload an image.';
-    }
-    if (file.size > maxSize * 1024 * 1024) {
-      return `File size must be less than ${maxSize}MB.`;
-    }
-    return null;
-  };
-
   const processFiles = useCallback(
     (newFiles: File[]) => {
+      const validateFile = (file: File): string | null => {
+        if (!acceptedTypes.includes(file.type)) {
+          return 'Invalid file type. Please upload an image.';
+        }
+        if (file.size > maxSize * 1024 * 1024) {
+          return `File size must be less than ${maxSize}MB.`;
+        }
+        return null;
+      };
+
       const validFiles: UploadedFile[] = [];
       const errors: string[] = [];
 
@@ -190,10 +191,11 @@ export function PhotoUpload({
               <div key={file.id} className="relative group">
                 <div className="aspect-square rounded-lg overflow-hidden bg-charcoal-100">
                   {file.preview ? (
-                    <img
+                    <Image
                       src={file.preview}
                       alt={file.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">

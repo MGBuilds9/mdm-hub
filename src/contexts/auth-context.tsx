@@ -65,7 +65,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return null;
       }
 
-      return data as UserWithDivisions;
+      return data as unknown as UserWithDivisions;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
       return null;
@@ -145,7 +145,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           email: userData.email || email,
           first_name: userData.first_name || '',
           last_name: userData.last_name || '',
-          phone: userData.phone,
+          phone: userData.phone || null,
           is_internal: userData.is_internal || false,
           supabase_user_id: data.user.id,
         });
