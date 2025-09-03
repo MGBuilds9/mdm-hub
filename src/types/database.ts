@@ -604,3 +604,71 @@ export type PhotoWithDetails = Photo & {
   project: Project
   uploaded_by_user: User
 }
+
+// Project Management Types
+export interface Milestone {
+  id: string
+  project_id: string
+  name: string
+  description?: string
+  due_date: string
+  status: 'pending' | 'in_progress' | 'completed' | 'overdue'
+  completion_percentage: number
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+export interface Task {
+  id: string
+  project_id: string
+  milestone_id?: string
+  title: string
+  description?: string
+  assigned_to?: string
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  due_date?: string
+  estimated_hours?: number
+  actual_hours?: number
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ProjectInvitation {
+  id: string
+  project_id: string
+  email: string
+  role: 'manager' | 'supervisor' | 'worker' | 'observer'
+  invited_by: string
+  status: 'pending' | 'accepted' | 'declined' | 'expired'
+  expires_at: string
+  created_at: string
+  updated_at: string
+}
+
+export interface MilestoneWithDetails extends Milestone {
+  project: Project
+  created_by_user: User
+  tasks: Task[]
+}
+
+export interface TaskWithDetails extends Task {
+  project: Project
+  milestone?: Milestone
+  assigned_to_user?: User
+  created_by_user: User
+}
+
+export interface ProjectInvitationWithDetails extends ProjectInvitation {
+  project: Project
+  invited_by_user: User
+}
+
+// Extended ProjectWithDetails to include new features
+export interface ProjectWithFullDetails extends ProjectWithDetails {
+  milestones: Milestone[]
+  tasks: Task[]
+  invitations: ProjectInvitation[]
+}

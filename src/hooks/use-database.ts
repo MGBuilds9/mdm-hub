@@ -6,6 +6,9 @@ import {
   photoService, 
   changeOrderService, 
   notificationService,
+  milestoneService,
+  taskService,
+  projectInvitationService,
   rlsService,
   DatabaseError
 } from '@/lib/database'
@@ -18,8 +21,12 @@ import {
   Notification,
   UserWithDivisions,
   ProjectWithDetails,
+  ProjectWithFullDetails,
   ChangeOrderWithDetails,
-  PhotoWithDetails
+  PhotoWithDetails,
+  Milestone,
+  Task,
+  ProjectInvitation
 } from '@/types/database'
 import { toast } from '@/hooks/use-toast'
 
@@ -541,6 +548,127 @@ export const useMarkAllNotificationsAsRead = () => {
       toast({
         title: 'Success',
         description: 'All notifications marked as read',
+      })
+    },
+    onError: (error: DatabaseError) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      })
+    },
+  })
+}
+
+// Project management hooks
+export const useProjectWithFullDetails = (id: string) => {
+  return useQuery({
+    queryKey: ['projects', id, 'full-details'],
+    queryFn: () => projectService.getWithFullDetails(id),
+    enabled: !!id,
+  })
+}
+
+export const useMilestonesByProject = (projectId: string) => {
+  return useQuery({
+    queryKey: ['milestones', 'project', projectId],
+    queryFn: () => milestoneService.getByProject(projectId),
+    enabled: !!projectId,
+  })
+}
+
+export const useTasksByProject = (projectId: string) => {
+  return useQuery({
+    queryKey: ['tasks', 'project', projectId],
+    queryFn: () => taskService.getByProject(projectId),
+    enabled: !!projectId,
+  })
+}
+
+export const useCreateMilestone = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (milestone: Omit<Milestone, 'id' | 'created_at' | 'updated_at'>) =>
+      milestoneService.create(milestone),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['milestones', 'project', data.project_id] })
+      queryClient.invalidateQueries({ queryKey: ['projects', data.project_id, 'full-details'] })
+      toast({
+        title: 'Success',
+        description: 'Milestone created successfully',
+      })
+    },
+    onError: (error: DatabaseError) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      })
+    },
+  })
+}
+
+export const useCreateTask = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (task: Omit<Task, 'id' | 'created_at' | 'updated_at'>) =>
+      taskService.create(task),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'project', data.project_id] })
+      queryClient.invalidateQueries({ queryKey: ['projects', data.project_id, 'full-details'] })
+      toast({
+        title: 'Success',
+        description: 'Task created successfully',
+      })
+    },
+    onError: (error: DatabaseError) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      })
+    },
+  })
+}
+
+export const useUpdateTask = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Task> }) =>
+      taskService.update(id, updates),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'project', data.project_id] })
+      queryClient.invalidateQueries({ queryKey: ['projects', data.project_id, 'full-details'] })
+      toast({
+        title: 'Success',
+        description: 'Task updated successfully',
+      })
+    },
+    onError: (error: DatabaseError) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      })
+    },
+  })
+}
+
+export const useCreateProjectInvitation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (invitation: Omit<ProjectInvitation, 'id' | 'created_at' | 'updated_at'>) =>
+      projectInvitationService.create(invitation),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['project-invitations', 'project', data.project_id] })
+      queryClient.invalidateQueries({ queryKey: ['projects', data.project_id, 'full-details'] })
+      toast({
+        title: 'Success',
+        description: 'Invitation sent successfully',
       })
     },
     onError: (error: DatabaseError) => {

@@ -30,7 +30,7 @@ export default function HomePage() {
         <DashboardStats />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = '/projects'}>
             <h3 className="text-lg font-semibold text-charcoal-950 mb-2">
               Recent Projects
             </h3>

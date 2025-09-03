@@ -311,3 +311,140 @@ export type PhotoFormData = z.infer<typeof photoFormSchema>
 export type ProjectSearchData = z.infer<typeof projectSearchSchema>
 export type UserSearchData = z.infer<typeof userSearchSchema>
 export type PhotoSearchData = z.infer<typeof photoSearchSchema>
+
+// Project Management Validation Schemas
+export const milestoneSchema = z.object({
+  id: z.string().uuid(),
+  project_id: z.string().uuid(),
+  name: z.string().min(1, 'Milestone name is required'),
+  description: z.string().optional(),
+  due_date: z.string().datetime('Invalid due date'),
+  status: z.enum(['pending', 'in_progress', 'completed', 'overdue']),
+  completion_percentage: z.number().min(0).max(100),
+  created_by: z.string().uuid(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+})
+
+export const createMilestoneSchema = milestoneSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+})
+
+export const updateMilestoneSchema = createMilestoneSchema.partial()
+
+export const taskSchema = z.object({
+  id: z.string().uuid(),
+  project_id: z.string().uuid(),
+  milestone_id: z.string().uuid().optional(),
+  title: z.string().min(1, 'Task title is required'),
+  description: z.string().optional(),
+  assigned_to: z.string().uuid().optional(),
+  status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
+  priority: z.enum(['low', 'medium', 'high', 'urgent']),
+  due_date: z.string().datetime().optional(),
+  estimated_hours: z.number().positive().optional(),
+  actual_hours: z.number().min(0).optional(),
+  created_by: z.string().uuid(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+})
+
+export const createTaskSchema = taskSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+})
+
+export const updateTaskSchema = createTaskSchema.partial()
+
+export const projectInvitationSchema = z.object({
+  id: z.string().uuid(),
+  project_id: z.string().uuid(),
+  email: z.string().email('Invalid email address'),
+  role: z.enum(['manager', 'supervisor', 'worker', 'observer']),
+  invited_by: z.string().uuid(),
+  status: z.enum(['pending', 'accepted', 'declined', 'expired']),
+  expires_at: z.string().datetime(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+})
+
+export const createProjectInvitationSchema = projectInvitationSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+})
+
+export const updateProjectInvitationSchema = createProjectInvitationSchema.partial()
+
+// Form validation schemas
+export const milestoneFormSchema = z.object({
+  name: z.string().min(1, 'Milestone name is required'),
+  description: z.string().optional(),
+  due_date: z.string().datetime('Invalid due date'),
+  completion_percentage: z.number().min(0).max(100).default(0),
+})
+
+export const taskFormSchema = z.object({
+  title: z.string().min(1, 'Task title is required'),
+  description: z.string().optional(),
+  assigned_to: z.string().uuid().optional(),
+  status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']).default('pending'),
+  priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
+  due_date: z.string().datetime().optional(),
+  estimated_hours: z.number().positive().optional(),
+  actual_hours: z.number().min(0).optional(),
+})
+
+export const projectInvitationFormSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  role: z.enum(['manager', 'supervisor', 'worker', 'observer']),
+})
+
+export const projectStatusUpdateSchema = z.object({
+  status: z.enum(['planning', 'active', 'on-hold', 'completed', 'cancelled']),
+  reason: z.string().optional(),
+})
+
+// Search and filter schemas
+export const milestoneSearchSchema = z.object({
+  query: z.string().optional(),
+  project_id: z.string().uuid().optional(),
+  status: z.enum(['pending', 'in_progress', 'completed', 'overdue']).optional(),
+  due_date_from: z.string().datetime().optional(),
+  due_date_to: z.string().datetime().optional(),
+})
+
+export const taskSearchSchema = z.object({
+  query: z.string().optional(),
+  project_id: z.string().uuid().optional(),
+  milestone_id: z.string().uuid().optional(),
+  assigned_to: z.string().uuid().optional(),
+  status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']).optional(),
+  priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
+  due_date_from: z.string().datetime().optional(),
+  due_date_to: z.string().datetime().optional(),
+})
+
+// Export types
+export type MilestoneFormData = z.infer<typeof milestoneSchema>
+export type CreateMilestoneData = z.infer<typeof createMilestoneSchema>
+export type UpdateMilestoneData = z.infer<typeof updateMilestoneSchema>
+
+export type TaskFormData = z.infer<typeof taskSchema>
+export type CreateTaskData = z.infer<typeof createTaskSchema>
+export type UpdateTaskData = z.infer<typeof updateTaskSchema>
+
+export type ProjectInvitationFormData = z.infer<typeof projectInvitationSchema>
+export type CreateProjectInvitationData = z.infer<typeof createProjectInvitationSchema>
+export type UpdateProjectInvitationData = z.infer<typeof updateProjectInvitationSchema>
+
+export type MilestoneFormData = z.infer<typeof milestoneFormSchema>
+export type TaskFormData = z.infer<typeof taskFormSchema>
+export type ProjectInvitationFormData = z.infer<typeof projectInvitationFormSchema>
+export type ProjectStatusUpdateData = z.infer<typeof projectStatusUpdateSchema>
+
+export type MilestoneSearchData = z.infer<typeof milestoneSearchSchema>
+export type TaskSearchData = z.infer<typeof taskSearchSchema>

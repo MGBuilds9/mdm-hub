@@ -13,6 +13,10 @@ import {
   ProjectWithDetails,
   ChangeOrderWithDetails,
   PhotoWithDetails,
+  ProjectWithFullDetails,
+  Milestone,
+  Task,
+  ProjectInvitation,
   Database
 } from '@/types/database'
 import { PostgrestError } from '@supabase/supabase-js'
@@ -261,6 +265,39 @@ export const projectService = {
       return data as ProjectWithDetails
     } catch (error) {
       handleError(error as Error, 'get project with details')
+    }
+  },
+
+  // Get project with full details including milestones and tasks
+  async getWithFullDetails(id: string): Promise<ProjectWithFullDetails | null> {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          division:divisions (*),
+          project_manager:users!projects_project_manager_id_fkey (*),
+          project_users (
+            *,
+            user:users (*)
+          ),
+          photos (*),
+          change_orders (*),
+          milestones (*),
+          tasks (*),
+          invitations (*)
+        `)
+        .eq('id', id)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') return null
+        handleError(error, 'get project with full details')
+      }
+
+      return data as ProjectWithFullDetails
+    } catch (error) {
+      handleError(error as Error, 'get project with full details')
     }
   },
 
@@ -638,6 +675,171 @@ export const notificationService = {
       if (error) handleError(error, 'mark all notifications as read')
     } catch (error) {
       handleError(error as Error, 'mark all notifications as read')
+    }
+  },
+}
+
+// Milestone operations
+export const milestoneService = {
+  // Get milestones by project
+  async getByProject(projectId: string): Promise<Milestone[]> {
+    try {
+      const { data, error } = await supabase
+        .from('milestones')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('due_date')
+
+      if (error) handleError(error, 'get milestones by project')
+
+      return data || []
+    } catch (error) {
+      handleError(error as Error, 'get milestones by project')
+    }
+  },
+
+  // Create milestone
+  async create(milestone: Omit<Milestone, 'id' | 'created_at' | 'updated_at'>): Promise<Milestone> {
+    try {
+      const { data, error } = await supabase
+        .from('milestones')
+        .insert(milestone)
+        .select()
+        .single()
+
+      if (error) handleError(error, 'create milestone')
+
+      return data
+    } catch (error) {
+      handleError(error as Error, 'create milestone')
+    }
+  },
+
+  // Update milestone
+  async update(id: string, updates: Partial<Milestone>): Promise<Milestone> {
+    try {
+      const { data, error } = await supabase
+        .from('milestones')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) handleError(error, 'update milestone')
+
+      return data
+    } catch (error) {
+      handleError(error as Error, 'update milestone')
+    }
+  },
+}
+
+// Task operations
+export const taskService = {
+  // Get tasks by project
+  async getByProject(projectId: string): Promise<Task[]> {
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false })
+
+      if (error) handleError(error, 'get tasks by project')
+
+      return data || []
+    } catch (error) {
+      handleError(error as Error, 'get tasks by project')
+    }
+  },
+
+  // Create task
+  async create(task: Omit<Task, 'id' | 'created_at' | 'updated_at'>): Promise<Task> {
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert(task)
+        .select()
+        .single()
+
+      if (error) handleError(error, 'create task')
+
+      return data
+    } catch (error) {
+      handleError(error as Error, 'create task')
+    }
+  },
+
+  // Update task
+  async update(id: string, updates: Partial<Task>): Promise<Task> {
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) handleError(error, 'update task')
+
+      return data
+    } catch (error) {
+      handleError(error as Error, 'update task')
+    }
+  },
+}
+
+// Project invitation operations
+export const projectInvitationService = {
+  // Get invitations by project
+  async getByProject(projectId: string): Promise<ProjectInvitation[]> {
+    try {
+      const { data, error } = await supabase
+        .from('project_invitations')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false })
+
+      if (error) handleError(error, 'get invitations by project')
+
+      return data || []
+    } catch (error) {
+      handleError(error as Error, 'get invitations by project')
+    }
+  },
+
+  // Create invitation
+  async create(invitation: Omit<ProjectInvitation, 'id' | 'created_at' | 'updated_at'>): Promise<ProjectInvitation> {
+    try {
+      const { data, error } = await supabase
+        .from('project_invitations')
+        .insert(invitation)
+        .select()
+        .single()
+
+      if (error) handleError(error, 'create invitation')
+
+      return data
+    } catch (error) {
+      handleError(error as Error, 'create invitation')
+    }
+  },
+
+  // Update invitation
+  async update(id: string, updates: Partial<ProjectInvitation>): Promise<ProjectInvitation> {
+    try {
+      const { data, error } = await supabase
+        .from('project_invitations')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) handleError(error, 'update invitation')
+
+      return data
+    } catch (error) {
+      handleError(error as Error, 'update invitation')
     }
   },
 }
