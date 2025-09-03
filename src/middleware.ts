@@ -83,10 +83,12 @@ export async function middleware(request: NextRequest) {
       'NEXT_PUBLIC_AZURE_AUTHORITY',
       'NEXT_PUBLIC_AZURE_REDIRECT_URI',
     ];
-    
-    const missingPublicVars = publicEnvVars.filter(varName => !process.env[varName]);
+
+    const missingPublicVars = publicEnvVars.filter(
+      varName => !process.env[varName]
+    );
     const isPublicEnvValid = missingPublicVars.length === 0;
-    
+
     if (!isPublicEnvValid && shouldRedirectToSetup() && pathname !== '/setup') {
       return NextResponse.redirect(new URL('/setup', request.url));
     }
