@@ -1,32 +1,51 @@
-import { HTMLAttributes, forwardRef } from 'react';
-import { cn } from '@/lib/utils';
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
 
-export interface BadgeProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
+const badgeVariants = cva(
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default: "border-transparent bg-primary-500 text-white hover:bg-primary-600",
+        secondary: "border-transparent bg-charcoal-100 text-charcoal-900 hover:bg-charcoal-200",
+        destructive: "border-transparent bg-error-500 text-white hover:bg-error-600",
+        success: "border-transparent bg-success-500 text-white hover:bg-success-600",
+        warning: "border-transparent bg-warning-500 text-white hover:bg-warning-600",
+        outline: "text-charcoal-950 border-charcoal-300",
+        // Status variants
+        active: "border-transparent bg-success-100 text-success-800",
+        completed: "border-transparent bg-success-100 text-success-800",
+        planning: "border-transparent bg-warning-100 text-warning-800",
+        "on-hold": "border-transparent bg-warning-100 text-warning-800",
+        cancelled: "border-transparent bg-error-100 text-error-800",
+        draft: "border-transparent bg-charcoal-100 text-charcoal-800",
+        "pending_approval": "border-transparent bg-warning-100 text-warning-800",
+        approved: "border-transparent bg-success-100 text-success-800",
+        rejected: "border-transparent bg-error-100 text-error-800",
+        implemented: "border-transparent bg-success-100 text-success-800",
+        // Role variants
+        admin: "border-transparent bg-error-100 text-error-800",
+        manager: "border-transparent bg-primary-100 text-primary-800",
+        supervisor: "border-transparent bg-warning-100 text-warning-800",
+        worker: "border-transparent bg-success-100 text-success-800",
+        viewer: "border-transparent bg-charcoal-100 text-charcoal-800",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  )
 }
 
-const Badge = forwardRef<HTMLDivElement, BadgeProps>(
-  ({ className, variant = 'default', ...props }, ref) => {
-    const variants = {
-      default: 'bg-primary-500 text-white',
-      secondary: 'bg-gray-100 text-gray-800',
-      destructive: 'bg-red-100 text-red-800',
-      outline: 'border border-gray-300 text-gray-700',
-    };
-
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-          variants[variant],
-          className
-        )}
-        {...props}
-      />
-    );
-  }
-);
-Badge.displayName = 'Badge';
-
-export { Badge };
+export { Badge, badgeVariants }
