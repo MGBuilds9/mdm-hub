@@ -5,14 +5,11 @@
  * Server-side operations are handled in supabase-server.ts
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types/database';
 import { checkEnvironmentVariables, shouldRedirectToSetup } from './env-check';
-import { validateEnvironmentOrThrow } from './validate-env';
-
-// Validate environment variables at module load time
-validateEnvironmentOrThrow();
+// Environment validation is handled by the config service
 
 // Environment variable validation
 const envCheck = checkEnvironmentVariables();
@@ -42,13 +39,13 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 // Lazy initialization flag
-let clientInstance: ReturnType<typeof createClient> | null = null;
+let clientInstance: SupabaseClient<Database> | null = null;
 
 /**
  * Creates a Supabase client for browser usage with lazy initialization
  * This client respects RLS policies and should be used for user operations
  */
-export function createBrowserSupabaseClient() {
+export function createBrowserSupabaseClient(): SupabaseClient<Database> {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Supabase configuration is incomplete');
   }

@@ -162,13 +162,28 @@ export function logValidationResults(result: ValidationResult): void {
   console.log('\n==========================================');
 }
 
+// Cache validation result to prevent multiple runs
+let validationCache: { isValid: boolean; result?: ValidationResult } | null =
+  null;
+
 /**
  * Validate environment and throw error if invalid
  */
 export function validateEnvironmentOrThrow(): void {
+  // Return cached result if available
+  if (validationCache) {
+    if (!validationCache.isValid) {
+      throw new Error('Environment validation failed (cached result)');
+    }
+    return;
+  }
+
   const result = validateEnvironment();
 
-  // Log results
+  // Cache the result
+  validationCache = { isValid: result.isValid, result };
+
+  // Log results only once
   logValidationResults(result);
 
   // Throw error if invalid

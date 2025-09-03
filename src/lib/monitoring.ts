@@ -20,14 +20,14 @@ interface PerformanceMetric {
   name: string;
   duration: number;
   timestamp: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any> | undefined;
 }
 
 // Custom metrics
 interface CustomMetric {
   name: string;
   value: number;
-  tags?: Record<string, string>;
+  tags?: Record<string, string> | undefined;
   timestamp: number;
 }
 
@@ -68,7 +68,7 @@ class MonitoringService {
           dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
           environment: process.env.NODE_ENV,
           tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-          beforeSend(event) {
+          beforeSend(event: any) {
             // Filter out non-critical errors in production
             if (process.env.NODE_ENV === 'production') {
               const error = event.exception?.values?.[0];
@@ -271,7 +271,7 @@ class MonitoringService {
       name,
       duration,
       timestamp: Date.now(),
-      metadata,
+      ...(metadata ? { metadata } : {}),
     };
 
     this.performanceMetrics.push(metric);
@@ -287,7 +287,7 @@ class MonitoringService {
       properties: {
         name,
         duration,
-        metadata,
+        ...(metadata ? { metadata } : {}),
       },
     });
 
@@ -306,7 +306,7 @@ class MonitoringService {
     const metric: CustomMetric = {
       name,
       value,
-      tags,
+      ...(tags ? { tags } : {}),
       timestamp: Date.now(),
     };
 
@@ -323,7 +323,7 @@ class MonitoringService {
       properties: {
         name,
         value,
-        tags,
+        ...(tags ? { tags } : {}),
       },
     });
 
@@ -373,6 +373,7 @@ class MonitoringService {
       });
     }
 
+    // Provide a best-effort user identify hook in telemetry
     telemetry.identify(userId, userInfo);
   }
 

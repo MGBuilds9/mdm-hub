@@ -74,14 +74,25 @@ export async function middleware(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    // Check environment variables first
-    const envCheck = checkEnvironmentVariables();
-    if (!envCheck.isValid && shouldRedirectToSetup() && pathname !== '/setup') {
+    // Check only public environment variables in middleware (Edge Runtime limitation)
+    const publicEnvVars = [
+      'NEXT_PUBLIC_SUPABASE_URL',
+      'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+      'NEXT_PUBLIC_AZURE_CLIENT_ID',
+      'NEXT_PUBLIC_AZURE_TENANT_ID',
+      'NEXT_PUBLIC_AZURE_AUTHORITY',
+      'NEXT_PUBLIC_AZURE_REDIRECT_URI',
+    ];
+    
+    const missingPublicVars = publicEnvVars.filter(varName => !process.env[varName]);
+    const isPublicEnvValid = missingPublicVars.length === 0;
+    
+    if (!isPublicEnvValid && shouldRedirectToSetup() && pathname !== '/setup') {
       return NextResponse.redirect(new URL('/setup', request.url));
     }
 
     // Create response with security headers
-    let response = NextResponse.next();
+    const response = NextResponse.next();
 
     // Apply security headers
     Object.entries(securityHeaders).forEach(([key, value]) => {
@@ -142,7 +153,7 @@ export async function middleware(request: NextRequest) {
             status: 429,
             headers: {
               'Content-Type': 'application/json',
-              'Retry-After': rateLimitResult.retryAfter.toString(),
+              'Retry-After': String(rateLimitResult.retryAfter ?? 0),
             },
           }
         );

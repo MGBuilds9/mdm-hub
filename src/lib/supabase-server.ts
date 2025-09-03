@@ -35,7 +35,7 @@ if (!supabaseUrl) {
  * This bypasses RLS and should only be used for administrative operations
  */
 export function createServiceClient() {
-  return createClient(supabaseUrl, serviceRoleKey, {
+  return createClient(supabaseUrl!, serviceRoleKey!, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -51,7 +51,7 @@ export function createServerSupabaseClient() {
   const cookieStore = cookies();
 
   return createServerClient(
-    supabaseUrl,
+    supabaseUrl!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {

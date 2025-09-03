@@ -50,6 +50,7 @@ export interface EnvCheckResult {
   isValid: boolean;
   missingVars: string[];
   errors: string[];
+  warnings: string[];
 }
 
 /**
@@ -58,6 +59,7 @@ export interface EnvCheckResult {
 export function checkEnvironmentVariables(): EnvCheckResult {
   const missingVars: string[] = [];
   const errors: string[] = [];
+  const warnings: string[] = [];
 
   for (const envVar of REQUIRED_ENV_VARS) {
     if (envVar.required && !process.env[envVar.name]) {
@@ -70,6 +72,7 @@ export function checkEnvironmentVariables(): EnvCheckResult {
     isValid: missingVars.length === 0,
     missingVars,
     errors,
+    warnings,
   };
 }
 

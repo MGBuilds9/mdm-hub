@@ -366,7 +366,7 @@ async function checkAzure(config: Configuration): Promise<CheckResult> {
 async function checkDatabase(config: Configuration): Promise<CheckResult> {
   const start = Date.now();
 
-  if (!config.features.database) {
+  if (!config.database.enabled) {
     return {
       status: 'warn',
       message: 'Database not configured',
@@ -431,7 +431,7 @@ async function checkDatabase(config: Configuration): Promise<CheckResult> {
  * Determines overall health status
  */
 function determineOverallStatus(
-  checks: HealthCheckResult['checks']
+  checks: Omit<HealthCheckResult['checks'], 'overall'>
 ): 'healthy' | 'degraded' | 'unhealthy' {
   const statuses = Object.values(checks).map(check => check.status);
 

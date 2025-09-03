@@ -10,7 +10,11 @@ import React, {
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { User, UserWithDivisions } from '@/types/database';
-import { retry, retryAuth, isAuthRetryableError } from '@/lib/retry';
+import {
+  retry,
+  retryAuth as performRetryAuth,
+  isAuthRetryableError,
+} from '@/lib/retry';
 import {
   telemetry,
   trackAuthInit,
@@ -82,7 +86,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         console.log('Fetching user profile for:', supabaseUserId);
 
-        const result = await retryAuth(async () => {
+        const result = await performRetryAuth(async () => {
           const { data, error } = await supabase
             .from('users')
             .select(
@@ -106,7 +110,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (result.success) {
           console.log('User profile fetched successfully:', result.data);
-          return result.data;
+          return (result.data ?? null) as UserWithDivisions | null;
         } else {
           console.error(
             'Error fetching user profile after retries:',
@@ -125,16 +129,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const refreshUser = useCallback(async () => {
     if (authState.supabaseUser) {
       const userProfile = await fetchUserProfile(authState.supabaseUser.id);
-      updateAuthState({ user: userProfile });
+      updateAuthState({ user: userProfile ?? null });
     }
   }, [authState.supabaseUser, fetchUserProfile, updateAuthState]);
 
-  const initializeAuth = useCallback(async () => {
+  const initializeAuth: () => Promise<void> = useCallback(async () => {
     const startTime = Date.now();
     trackAuthInit('session_check');
 
     try {
-      const result = await retryAuth(async () => {
+      const result = await performRetryAuth(async () => {
         const {
           data: { session },
           error,
@@ -150,7 +154,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (result.success) {
         const session = result.data;
         updateAuthState({
-          session,
+          session: session ?? null,
           supabaseUser: session?.user ?? null,
           error: null,
         });
@@ -181,7 +185,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [fetchUserProfile, updateAuthState]);
 
-  const retryAuth = useCallback(async () => {
+  const retryAuthFlow: () => Promise<void> = useCallback(async () => {
     if (authState.isRetrying) return;
 
     updateAuthState({
@@ -406,7 +410,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     updateProfile,
     refreshUser,
     clearError,
-    retryAuth,
+    retryAuth: retryAuthFlow,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

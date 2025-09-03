@@ -35,6 +35,17 @@ class TelemetryService {
     this.sessionId = this.generateSessionId();
   }
 
+  /**
+   * Identify user/session traits (noop-friendly)
+   */
+  identify(userId: string, traits?: Record<string, any>): void {
+    this.track({
+      event: 'identify',
+      properties: { userId, traits },
+      userId,
+    });
+  }
+
   private generateSessionId(): string {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }

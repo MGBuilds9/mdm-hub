@@ -1,4 +1,4 @@
-import { supabase, createServerClient } from './supabase';
+import { supabase } from './supabase';
 import {
   User,
   Project,

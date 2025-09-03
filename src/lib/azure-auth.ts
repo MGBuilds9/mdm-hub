@@ -8,6 +8,7 @@ import {
   RedirectRequest,
   InteractionRequiredAuthError,
   BrowserAuthError,
+  LogLevel,
 } from '@azure/msal-browser';
 import { telemetry } from './telemetry';
 
@@ -66,11 +67,11 @@ export function validateAzureConfig(): {
   }
 
   const config: AzureConfig = {
-    clientId,
-    authority,
-    redirectUri,
-    tenantId,
-  };
+    clientId: clientId!,
+    authority: authority!,
+    redirectUri: redirectUri!,
+    ...(tenantId ? { tenantId } : {}),
+  } as AzureConfig;
 
   return { isValid: true, config, errors: [] };
 }
@@ -114,7 +115,10 @@ function getAzureConfig(): Configuration | null {
           }
         },
         piiLoggingEnabled: false,
-        logLevel: process.env.NODE_ENV === 'development' ? 'Info' : 'Error',
+        logLevel:
+          process.env.NODE_ENV === 'development'
+            ? LogLevel.Info
+            : LogLevel.Error,
       },
     },
   };
@@ -182,7 +186,8 @@ export const getCurrentAzureAccount = (): AccountInfo | null => {
 
   try {
     const accounts = msalInstance.getAllAccounts();
-    return accounts.length > 0 ? accounts[0] : null;
+    // With noUncheckedIndexedAccess, accounts[0] can be undefined
+    return accounts[0] ?? null;
   } catch (error) {
     telemetry.trackError(error as Error, 'azure_get_account');
     return null;
@@ -315,7 +320,7 @@ export const signOutFromAzure = async (): Promise<{
     try {
       // Try popup logout first
       await msalInstance.logoutPopup({
-        account: accounts[0],
+        account: accounts[0]!,
         postLogoutRedirectUri: window.location.origin,
       });
 
@@ -339,7 +344,7 @@ export const signOutFromAzure = async (): Promise<{
 
         // Fallback to redirect logout
         await msalInstance.logoutRedirect({
-          account: accounts[0],
+          account: accounts[0]!,
           postLogoutRedirectUri: window.location.origin,
         });
 
@@ -547,7 +552,10 @@ export const clearAzureCache = async (): Promise<{
 
     const accounts = msalInstance.getAllAccounts();
     for (const account of accounts) {
-      await msalInstance.removeAccount(account);
+      const tokenCache: any = msalInstance.getTokenCache();
+      if (typeof tokenCache.removeAccount === 'function') {
+        await tokenCache.removeAccount(account);
+      }
     }
 
     telemetry.track({

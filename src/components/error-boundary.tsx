@@ -66,12 +66,12 @@ interface ErrorDetails {
   type: ErrorType;
   severity: ErrorSeverity;
   message: string;
-  stack?: string;
-  componentStack?: string;
+  stack?: string | undefined;
+  componentStack?: string | undefined;
   timestamp: string;
   userAgent: string;
   url: string;
-  userId?: string;
+  userId?: string | undefined;
 }
 
 /**
@@ -109,7 +109,7 @@ export class ErrorBoundary extends Component<
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const { onError, errorType } = this.props;
 
     this.setState({
@@ -127,7 +127,7 @@ export class ErrorBoundary extends Component<
     }
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     if (this.retryTimeout) {
       clearTimeout(this.retryTimeout);
     }
@@ -145,8 +145,8 @@ export class ErrorBoundary extends Component<
       type: detectedType,
       severity,
       message: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
+      stack: error.stack ?? undefined,
+      componentStack: errorInfo.componentStack ?? undefined,
       timestamp: new Date().toISOString(),
       userAgent:
         typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown',
@@ -235,11 +235,11 @@ export class ErrorBoundary extends Component<
     if (typeof window !== 'undefined') {
       // Check localStorage
       const stored = localStorage.getItem('user-id');
-      if (stored) return stored;
+      if (stored != null) return stored;
 
       // Check sessionStorage
       const session = sessionStorage.getItem('user-id');
-      if (session) return session;
+      if (session != null) return session;
     }
 
     return undefined;
@@ -390,7 +390,7 @@ User Agent: ${window.navigator.userAgent}
     return actions;
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       const { error, errorInfo, isRetrying } = this.state;
       const errorType = this.detectErrorType(error!, this.props.errorType);

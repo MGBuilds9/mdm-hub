@@ -12,8 +12,8 @@ import {
   handleAzureCallback,
   clearAzureCache,
   type AzureAuthState,
-  type AccountInfo,
 } from '@/lib/azure-auth';
+import type { AccountInfo } from '@azure/msal-browser';
 import { telemetry } from '@/lib/telemetry';
 
 export interface UseAzureAuthReturn {
@@ -44,6 +44,23 @@ export function useAzureAuth(): UseAzureAuthReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [userProfile, setUserProfile] = useState<any | null>(null);
+
+  // Load user profile
+  const loadUserProfile = useCallback(async () => {
+    try {
+      const { profile, error } = await getUserProfile();
+      if (error) {
+        telemetry.trackError(error, 'azure_profile_load');
+        setState(prev => ({ ...prev, error }));
+      } else {
+        setUserProfile(profile);
+      }
+    } catch (error) {
+      const err = error as Error;
+      telemetry.trackError(err, 'azure_profile_load');
+      setState(prev => ({ ...prev, error: err }));
+    }
+  }, []);
 
   // Initialize Azure auth
   const initialize = useCallback(async () => {
@@ -96,24 +113,7 @@ export function useAzureAuth(): UseAzureAuthReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
-
-  // Load user profile
-  const loadUserProfile = useCallback(async () => {
-    try {
-      const { profile, error } = await getUserProfile();
-      if (error) {
-        telemetry.trackError(error, 'azure_profile_load');
-        setState(prev => ({ ...prev, error }));
-      } else {
-        setUserProfile(profile);
-      }
-    } catch (error) {
-      const err = error as Error;
-      telemetry.trackError(err, 'azure_profile_load');
-      setState(prev => ({ ...prev, error: err }));
-    }
-  }, []);
+  }, [loadUserProfile]);
 
   // Sign in
   const signIn = useCallback(async (): Promise<{
