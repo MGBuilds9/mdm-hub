@@ -26,6 +26,23 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+// Service role client for admin operations (bypasses RLS)
+export function createServiceClient() {
+  const serviceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key';
+
+  if (serviceRoleKey === 'placeholder-service-key') {
+    console.warn('Missing SUPABASE_SERVICE_ROLE_KEY - using placeholder');
+  }
+
+  return createClient<Database>(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
 // Debug Supabase connection
 if (typeof window !== 'undefined') {
   console.log('Supabase URL:', supabaseUrl);

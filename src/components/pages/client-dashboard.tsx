@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { ServerDashboard } from './server-dashboard';
 import { LoginForm } from '@/components/auth/login-form';
 import { Loading } from '@/components/ui/loading';
-import { supabase } from '@/lib/supabase';
+import { supabase, createServiceClient } from '@/lib/supabase';
 
 export function ClientDashboard() {
   const { user, supabaseUser, loading } = useAuth();
@@ -94,16 +94,20 @@ export function ClientDashboard() {
                     return;
                   }
 
-                  const { data, error } = await supabase.from('users').insert({
-                    email: supabaseUser.email,
-                    first_name:
-                      supabaseUser.user_metadata?.first_name || 'Michael',
-                    last_name:
-                      supabaseUser.user_metadata?.last_name || 'Guirguis',
-                    supabase_user_id: supabaseUser.id,
-                    is_internal: true,
-                    is_active: true,
-                  });
+                  // Use service role to bypass RLS for profile creation
+                  const serviceClient = createServiceClient();
+                  const { data, error } = await serviceClient
+                    .from('users')
+                    .insert({
+                      email: supabaseUser.email,
+                      first_name:
+                        supabaseUser.user_metadata?.first_name || 'Michael',
+                      last_name:
+                        supabaseUser.user_metadata?.last_name || 'Guirguis',
+                      supabase_user_id: supabaseUser.id,
+                      is_internal: true,
+                      is_active: true,
+                    });
 
                   if (error) {
                     console.error('Error creating profile:', error);
