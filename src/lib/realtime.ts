@@ -1,22 +1,23 @@
 import { supabase } from './supabase';
-import { RealtimeChannel } from '@supabase/supabase-js';
+import type {
+  RealtimeChannel,
+  RealtimePostgresChangesPayload,
+} from '@supabase/supabase-js';
 
 // Realtime subscription types
-export type RealtimeEvent<T = any> = {
-  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
-  new: T;
-  old: T;
-  table: string;
-};
+export type RealtimeEvent<T extends Record<string, any> = any> =
+  RealtimePostgresChangesPayload<T>;
 
-export type RealtimeCallback<T = any> = (payload: RealtimeEvent<T>) => void;
+export type RealtimeCallback<T extends Record<string, any> = any> = (
+  payload: RealtimePostgresChangesPayload<T>
+) => void;
 
 // Realtime service class
 export class RealtimeService {
   private channels: Map<string, RealtimeChannel> = new Map();
 
   // Subscribe to table changes
-  subscribe<T = any>(
+  subscribe<T extends Record<string, any> = Record<string, any>>(
     table: string,
     callback: RealtimeCallback<T>,
     filter?: string
@@ -26,7 +27,7 @@ export class RealtimeService {
     // Remove existing channel if it exists
     this.unsubscribe(channelName);
 
-    const channel = supabase
+    const channel = (supabase as any)
       .channel(channelName)
       .on(
         'postgres_changes',
@@ -36,16 +37,16 @@ export class RealtimeService {
           table,
           filter,
         },
-        callback
+        callback as any
       )
-      .subscribe();
+      .subscribe() as RealtimeChannel;
 
     this.channels.set(channelName, channel);
     return channel;
   }
 
   // Subscribe to specific record changes
-  subscribeToRecord<T = any>(
+  subscribeToRecord<T extends Record<string, any> = Record<string, any>>(
     table: string,
     recordId: string,
     callback: RealtimeCallback<T>
@@ -54,7 +55,7 @@ export class RealtimeService {
   }
 
   // Subscribe to project changes
-  subscribeToProject<T = any>(
+  subscribeToProject<T extends Record<string, any> = Record<string, any>>(
     projectId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
@@ -62,7 +63,7 @@ export class RealtimeService {
   }
 
   // Subscribe to project photos
-  subscribeToProjectPhotos<T = any>(
+  subscribeToProjectPhotos<T extends Record<string, any> = Record<string, any>>(
     projectId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
@@ -70,7 +71,9 @@ export class RealtimeService {
   }
 
   // Subscribe to project change orders
-  subscribeToProjectChangeOrders<T = any>(
+  subscribeToProjectChangeOrders<
+    T extends Record<string, any> = Record<string, any>
+  >(
     projectId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
@@ -82,7 +85,9 @@ export class RealtimeService {
   }
 
   // Subscribe to user notifications
-  subscribeToUserNotifications<T = any>(
+  subscribeToUserNotifications<
+    T extends Record<string, any> = Record<string, any>
+  >(
     userId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
@@ -90,7 +95,7 @@ export class RealtimeService {
   }
 
   // Subscribe to division changes
-  subscribeToDivision<T = any>(
+  subscribeToDivision<T extends Record<string, any> = Record<string, any>>(
     divisionId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
@@ -98,7 +103,7 @@ export class RealtimeService {
   }
 
   // Subscribe to user changes
-  subscribeToUser<T = any>(
+  subscribeToUser<T extends Record<string, any> = Record<string, any>>(
     userId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
@@ -163,7 +168,7 @@ export const useRealtime = () => {
 // Utility functions for common realtime patterns
 export const realtimeUtils = {
   // Create a callback that updates React Query cache
-  createQueryCacheCallback: <T>(
+  createQueryCacheCallback: <T extends Record<string, any>>(
     queryClient: any,
     queryKey: any,
     updateFn?: (oldData: T, newData: T) => T
@@ -221,6 +226,3 @@ export const realtimeUtils = {
     };
   },
 };
-
-// Export types
-export type { RealtimeEvent, RealtimeCallback };

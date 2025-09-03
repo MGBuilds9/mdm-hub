@@ -27,7 +27,7 @@ export type Permission =
 
 export type Role =
   | 'admin'
-  | 'project_manager'
+  | 'manager'
   | 'supervisor'
   | 'estimator'
   | 'client'
@@ -60,7 +60,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     'export_data',
     'system_settings',
   ],
-  project_manager: [
+  manager: [
     'view_projects',
     'create_projects',
     'edit_projects',
@@ -291,10 +291,10 @@ export function canManageUser(
     return true;
   }
 
-  // Project managers can manage users in their divisions
+  // Managers can manage users in their divisions
   const managerDivisions =
     manager.user_divisions
-      ?.filter(ud => ud.role === 'project_manager' || ud.role === 'admin')
+      ?.filter(ud => ud.role === 'manager' || ud.role === 'admin')
       ?.map(ud => ud.division_id) || [];
 
   const targetDivisions =
@@ -312,7 +312,7 @@ export function canManageUser(
 export function getUserHighestRole(user: UserWithDivisions): Role | null {
   const roleHierarchy: Role[] = [
     'admin',
-    'project_manager',
+    'manager',
     'supervisor',
     'estimator',
     'client',
@@ -334,14 +334,14 @@ export function getUserHighestRole(user: UserWithDivisions): Role | null {
  * Check if user is internal staff
  */
 export function isInternalUser(user: User): boolean {
-  return user.internal === true;
+  return user.is_internal === true;
 }
 
 /**
  * Check if user is external (client or subcontractor)
  */
 export function isExternalUser(user: User): boolean {
-  return user.internal === false;
+  return user.is_internal === false;
 }
 
 /**
@@ -372,7 +372,7 @@ export function canApproveChangeOrders(
   // Project managers can approve change orders under $5,000
   if (changeOrderAmount && changeOrderAmount < 5000) {
     return (
-      user.user_divisions?.some(ud => ud.role === 'project_manager') || false
+      user.user_divisions?.some(ud => ud.role === 'manager') || false
     );
   }
 

@@ -198,7 +198,7 @@ export function getNextMilestone(milestones: Milestone[]): Milestone | null {
       (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
     );
 
-  return upcomingMilestones.length > 0 ? upcomingMilestones[0] : null;
+  return upcomingMilestones[0] ?? null;
 }
 
 // Get overdue items
