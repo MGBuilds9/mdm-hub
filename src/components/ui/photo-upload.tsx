@@ -1,22 +1,22 @@
-import * as React from "react"
-import { useCallback, useState } from "react"
-import { Upload, X, Image as ImageIcon, Camera } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "./button"
+import * as React from 'react';
+import { useCallback, useState } from 'react';
+import { Upload, X, Image as ImageIcon, Camera } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from './Button';
 
 interface PhotoUploadProps {
-  onUpload: (files: File[]) => void
-  maxFiles?: number
-  maxSize?: number // in MB
-  acceptedTypes?: string[]
-  className?: string
-  disabled?: boolean
+  onUpload: (files: File[]) => void;
+  maxFiles?: number;
+  maxSize?: number; // in MB
+  acceptedTypes?: string[];
+  className?: string;
+  disabled?: boolean;
 }
 
 interface UploadedFile extends File {
-  id: string
-  preview?: string
-  error?: string
+  id: string;
+  preview?: string;
+  error?: string;
 }
 
 export function PhotoUpload({
@@ -27,104 +27,113 @@ export function PhotoUpload({
   className,
   disabled = false,
 }: PhotoUploadProps) {
-  const [files, setFiles] = useState<UploadedFile[]>([])
-  const [dragActive, setDragActive] = useState(false)
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [dragActive, setDragActive] = useState(false);
 
   const validateFile = (file: File): string | null => {
     if (!acceptedTypes.includes(file.type)) {
-      return 'Invalid file type. Please upload an image.'
+      return 'Invalid file type. Please upload an image.';
     }
     if (file.size > maxSize * 1024 * 1024) {
-      return `File size must be less than ${maxSize}MB.`
+      return `File size must be less than ${maxSize}MB.`;
     }
-    return null
-  }
+    return null;
+  };
 
-  const processFiles = useCallback((newFiles: File[]) => {
-    const validFiles: UploadedFile[] = []
-    const errors: string[] = []
+  const processFiles = useCallback(
+    (newFiles: File[]) => {
+      const validFiles: UploadedFile[] = [];
+      const errors: string[] = [];
 
-    newFiles.forEach((file) => {
-      const error = validateFile(file)
-      if (error) {
-        errors.push(`${file.name}: ${error}`)
-      } else {
-        const uploadedFile = Object.assign(file, {
-          id: Math.random().toString(36).substr(2, 9),
-          preview: URL.createObjectURL(file),
-        })
-        validFiles.push(uploadedFile)
+      newFiles.forEach(file => {
+        const error = validateFile(file);
+        if (error) {
+          errors.push(`${file.name}: ${error}`);
+        } else {
+          const uploadedFile = Object.assign(file, {
+            id: Math.random().toString(36).substr(2, 9),
+            preview: URL.createObjectURL(file),
+          });
+          validFiles.push(uploadedFile);
+        }
+      });
+
+      if (errors.length > 0) {
+        console.error('File validation errors:', errors);
       }
-    })
 
-    if (errors.length > 0) {
-      console.error('File validation errors:', errors)
-    }
+      setFiles(prev => {
+        const updated = [...prev, ...validFiles];
+        if (updated.length > maxFiles) {
+          return updated.slice(0, maxFiles);
+        }
+        return updated;
+      });
 
-    setFiles((prev) => {
-      const updated = [...prev, ...validFiles]
-      if (updated.length > maxFiles) {
-        return updated.slice(0, maxFiles)
-      }
-      return updated
-    })
-
-    onUpload(validFiles)
-  }, [maxFiles, maxSize, acceptedTypes, onUpload])
+      onUpload(validFiles);
+    },
+    [maxFiles, maxSize, acceptedTypes, onUpload]
+  );
 
   const handleDrag = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
     if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true)
+      setDragActive(true);
     } else if (e.type === 'dragleave') {
-      setDragActive(false)
+      setDragActive(false);
     }
-  }, [])
+  }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragActive(false);
 
-    if (disabled) return
+      if (disabled) return;
 
-    const droppedFiles = Array.from(e.dataTransfer.files)
-    processFiles(droppedFiles)
-  }, [disabled, processFiles])
+      const droppedFiles = Array.from(e.dataTransfer.files);
+      processFiles(droppedFiles);
+    },
+    [disabled, processFiles]
+  );
 
-  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (disabled) return
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (disabled) return;
 
-    const selectedFiles = Array.from(e.target.files || [])
-    processFiles(selectedFiles)
-  }, [disabled, processFiles])
+      const selectedFiles = Array.from(e.target.files || []);
+      processFiles(selectedFiles);
+    },
+    [disabled, processFiles]
+  );
 
   const removeFile = useCallback((fileId: string) => {
-    setFiles((prev) => {
-      const file = prev.find(f => f.id === fileId)
+    setFiles(prev => {
+      const file = prev.find(f => f.id === fileId);
       if (file?.preview) {
-        URL.revokeObjectURL(file.preview)
+        URL.revokeObjectURL(file.preview);
       }
-      return prev.filter(f => f.id !== fileId)
-    })
-  }, [])
+      return prev.filter(f => f.id !== fileId);
+    });
+  }, []);
 
   const openFileDialog = () => {
-    if (disabled) return
-    document.getElementById('photo-upload-input')?.click()
-  }
+    if (disabled) return;
+    document.getElementById('photo-upload-input')?.click();
+  };
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn('w-full', className)}>
       {/* Upload Area */}
       <div
         className={cn(
-          "relative border-2 border-dashed rounded-lg p-6 transition-colors",
+          'relative border-2 border-dashed rounded-lg p-6 transition-colors',
           dragActive
-            ? "border-primary-500 bg-primary-50"
-            : "border-charcoal-300 hover:border-charcoal-400",
-          disabled && "opacity-50 cursor-not-allowed"
+            ? 'border-primary-500 bg-primary-50'
+            : 'border-charcoal-300 hover:border-charcoal-400',
+          disabled && 'opacity-50 cursor-not-allowed'
         )}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -177,7 +186,7 @@ export function PhotoUpload({
             Selected Photos ({files.length}/{maxFiles})
           </h4>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {files.map((file) => (
+            {files.map(file => (
               <div key={file.id} className="relative group">
                 <div className="aspect-square rounded-lg overflow-hidden bg-charcoal-100">
                   {file.preview ? (
@@ -213,5 +222,5 @@ export function PhotoUpload({
         </div>
       )}
     </div>
-  )
+  );
 }

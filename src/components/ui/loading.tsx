@@ -1,57 +1,71 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { Loader2 } from "lucide-react"
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 interface LoadingProps {
-  size?: "sm" | "md" | "lg"
-  className?: string
-  text?: string
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+  text?: string;
 }
 
-export function Loading({ size = "md", className, text }: LoadingProps) {
+export function Loading({ size = 'md', className, text }: LoadingProps) {
   const sizeClasses = {
-    sm: "h-4 w-4",
-    md: "h-6 w-6",
-    lg: "h-8 w-8",
-  }
+    sm: 'h-4 w-4',
+    md: 'h-6 w-6',
+    lg: 'h-8 w-8',
+  };
 
   return (
-    <div className={cn("flex items-center justify-center", className)}>
+    <div className={cn('flex items-center justify-center', className)}>
       <div className="flex flex-col items-center gap-2">
-        <Loader2 className={cn("animate-spin text-primary-500", sizeClasses[size])} />
-        {text && (
-          <p className="text-sm text-charcoal-600">{text}</p>
-        )}
+        <Loader2
+          className={cn('animate-spin text-primary-500', sizeClasses[size])}
+        />
+        {text && <p className="text-sm text-charcoal-600">{text}</p>}
       </div>
     </div>
-  )
+  );
 }
 
 interface LoadingSpinnerProps {
-  size?: "sm" | "md" | "lg"
-  className?: string
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
-export function LoadingSpinner({ size = "md", className }: LoadingSpinnerProps) {
+export function LoadingSpinner({
+  size = 'md',
+  className,
+}: LoadingSpinnerProps) {
   const sizeClasses = {
-    sm: "h-4 w-4",
-    md: "h-6 w-6",
-    lg: "h-8 w-8",
-  }
+    sm: 'h-4 w-4',
+    md: 'h-6 w-6',
+    lg: 'h-8 w-8',
+  };
 
   return (
-    <Loader2 className={cn("animate-spin text-primary-500", sizeClasses[size], className)} />
-  )
+    <Loader2
+      className={cn(
+        'animate-spin text-primary-500',
+        sizeClasses[size],
+        className
+      )}
+    />
+  );
 }
 
 interface LoadingPageProps {
-  text?: string
-  className?: string
+  text?: string;
+  className?: string;
 }
 
-export function LoadingPage({ text = "Loading...", className }: LoadingPageProps) {
+export function LoadingPage({
+  text = 'Loading...',
+  className,
+}: LoadingPageProps) {
   return (
-    <div className={cn("min-h-screen flex items-center justify-center", className)}>
+    <div
+      className={cn('min-h-screen flex items-center justify-center', className)}
+    >
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
           <div className="h-12 w-12 border-4 border-charcoal-200 rounded-full"></div>
@@ -60,17 +74,20 @@ export function LoadingPage({ text = "Loading...", className }: LoadingPageProps
         <p className="text-charcoal-600 font-medium">{text}</p>
       </div>
     </div>
-  )
+  );
 }
 
 interface LoadingCardProps {
-  text?: string
-  className?: string
+  text?: string;
+  className?: string;
 }
 
-export function LoadingCard({ text = "Loading...", className }: LoadingCardProps) {
+export function LoadingCard({
+  text = 'Loading...',
+  className,
+}: LoadingCardProps) {
   return (
-    <div className={cn("p-8 flex items-center justify-center", className)}>
+    <div className={cn('p-8 flex items-center justify-center', className)}>
       <div className="flex flex-col items-center gap-3">
         <div className="relative">
           <div className="h-8 w-8 border-3 border-charcoal-200 rounded-full"></div>
@@ -79,22 +96,19 @@ export function LoadingCard({ text = "Loading...", className }: LoadingCardProps
         <p className="text-sm text-charcoal-600">{text}</p>
       </div>
     </div>
-  )
+  );
 }
 
 interface SkeletonProps {
-  className?: string
+  className?: string;
 }
 
 export function Skeleton({ className }: SkeletonProps) {
   return (
     <div
-      className={cn(
-        "animate-pulse rounded-md bg-charcoal-200",
-        className
-      )}
+      className={cn('animate-pulse rounded-md bg-charcoal-200', className)}
     />
-  )
+  );
 }
 
 // Common skeleton patterns
@@ -111,7 +125,7 @@ export function SkeletonCard() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function SkeletonTable() {
@@ -127,11 +141,11 @@ export function SkeletonTable() {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 export function SkeletonAvatar() {
-  return <Skeleton className="h-10 w-10 rounded-full" />
+  return <Skeleton className="h-10 w-10 rounded-full" />;
 }
 
 export function SkeletonText({ lines = 3 }: { lines?: number }) {
@@ -140,12 +154,9 @@ export function SkeletonText({ lines = 3 }: { lines?: number }) {
       {Array.from({ length: lines }).map((_, i) => (
         <Skeleton
           key={i}
-          className={cn(
-            "h-4",
-            i === lines - 1 ? "w-3/4" : "w-full"
-          )}
+          className={cn('h-4', i === lines - 1 ? 'w-3/4' : 'w-full')}
         />
       ))}
     </div>
-  )
+  );
 }

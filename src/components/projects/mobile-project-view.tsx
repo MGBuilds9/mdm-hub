@@ -1,47 +1,62 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
-import { Progress } from '@/components/ui/progress'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ProjectWithFullDetails, Task, Milestone } from '@/types/database'
-import { formatDate, formatRelativeTime, getStatusColor, getInitials } from '@/lib/utils'
-import { getProjectStatistics } from '@/lib/project-utils'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { 
-  Calendar, 
-  MapPin, 
-  Users, 
-  CheckCircle, 
-  Clock, 
-  AlertCircle, 
+import { useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProjectWithFullDetails, Task, Milestone } from '@/types/database';
+import {
+  formatDate,
+  formatRelativeTime,
+  getStatusColor,
+  getInitials,
+} from '@/lib/utils';
+import { getProjectStatistics } from '@/lib/project-utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Calendar,
+  MapPin,
+  Users,
+  CheckCircle,
+  Clock,
+  AlertCircle,
   Camera,
   FileText,
-  Plus
-} from 'lucide-react'
+  Plus,
+} from 'lucide-react';
 
 interface MobileProjectViewProps {
-  project: ProjectWithFullDetails
-  onCreateTask?: () => void
-  onUploadPhoto?: () => void
-  onViewTask?: (task: Task) => void
-  onUpdateTaskStatus?: (task: Task, status: Task['status']) => void
+  project: ProjectWithFullDetails;
+  onCreateTask?: () => void;
+  onUploadPhoto?: () => void;
+  onViewTask?: (task: Task) => void;
+  onUpdateTaskStatus?: (task: Task, status: Task['status']) => void;
 }
 
-export function MobileProjectView({ 
-  project, 
-  onCreateTask, 
-  onUploadPhoto, 
-  onViewTask, 
-  onUpdateTaskStatus 
+export function MobileProjectView({
+  project,
+  onCreateTask,
+  onUploadPhoto,
+  onViewTask,
+  onUpdateTaskStatus,
 }: MobileProjectViewProps) {
-  const [activeTab, setActiveTab] = useState('overview')
-  
-  const stats = getProjectStatistics(project, project.milestones, project.tasks)
-  const myTasks = project.tasks.filter(task => task.assigned_to) // Filter to current user's tasks
-  const recentPhotos = project.photos.slice(0, 3)
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const stats = getProjectStatistics(
+    project,
+    project.milestones,
+    project.tasks
+  );
+  const myTasks = project.tasks.filter(task => task.assigned_to); // Filter to current user's tasks
+  const recentPhotos = project.photos.slice(0, 3);
 
   return (
     <div className="space-y-4 p-4 max-w-md mx-auto">
@@ -50,7 +65,9 @@ export function MobileProjectView({
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg leading-tight">{project.name}</CardTitle>
+              <CardTitle className="text-lg leading-tight">
+                {project.name}
+              </CardTitle>
               <div className="flex items-center gap-2 mt-1">
                 <Badge className={getStatusColor(project.status)}>
                   {project.status.replace('-', ' ')}
@@ -79,15 +96,21 @@ export function MobileProjectView({
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="bg-charcoal-50 rounded-lg p-2">
-                <div className="text-lg font-bold text-green-600">{stats.tasks.completed}</div>
+                <div className="text-lg font-bold text-green-600">
+                  {stats.tasks.completed}
+                </div>
                 <div className="text-xs text-charcoal-600">Done</div>
               </div>
               <div className="bg-charcoal-50 rounded-lg p-2">
-                <div className="text-lg font-bold text-blue-600">{stats.tasks.inProgress}</div>
+                <div className="text-lg font-bold text-blue-600">
+                  {stats.tasks.inProgress}
+                </div>
                 <div className="text-xs text-charcoal-600">Active</div>
               </div>
               <div className="bg-charcoal-50 rounded-lg p-2">
-                <div className="text-lg font-bold text-orange-600">{stats.tasks.overdue}</div>
+                <div className="text-lg font-bold text-orange-600">
+                  {stats.tasks.overdue}
+                </div>
                 <div className="text-xs text-charcoal-600">Overdue</div>
               </div>
             </div>
@@ -97,11 +120,18 @@ export function MobileProjectView({
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-3">
-        <Button onClick={onCreateTask} className="h-12 flex flex-col items-center gap-1">
+        <Button
+          onClick={onCreateTask}
+          className="h-12 flex flex-col items-center gap-1"
+        >
           <Plus className="h-5 w-5" />
           <span className="text-xs">New Task</span>
         </Button>
-        <Button onClick={onUploadPhoto} variant="outline" className="h-12 flex flex-col items-center gap-1">
+        <Button
+          onClick={onUploadPhoto}
+          variant="outline"
+          className="h-12 flex flex-col items-center gap-1"
+        >
           <Camera className="h-5 w-5" />
           <span className="text-xs">Take Photo</span>
         </Button>
@@ -124,14 +154,22 @@ export function MobileProjectView({
             <CardContent className="pt-0">
               {myTasks.length > 0 ? (
                 <div className="space-y-2">
-                  {myTasks.slice(0, 3).map((task) => (
-                    <div key={task.id} className="flex items-center gap-3 p-2 border rounded-lg">
+                  {myTasks.slice(0, 3).map(task => (
+                    <div
+                      key={task.id}
+                      className="flex items-center gap-3 p-2 border rounded-lg"
+                    >
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => onUpdateTaskStatus?.(task, 
-                          task.status === 'completed' ? 'in_progress' : 'completed'
-                        )}
+                        onClick={() =>
+                          onUpdateTaskStatus?.(
+                            task,
+                            task.status === 'completed'
+                              ? 'in_progress'
+                              : 'completed'
+                          )
+                        }
                         className="p-1 h-6 w-6"
                       >
                         {task.status === 'completed' ? (
@@ -141,10 +179,12 @@ export function MobileProjectView({
                         )}
                       </Button>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{task.title}</p>
+                        <p className="text-sm font-medium truncate">
+                          {task.title}
+                        </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className={`text-xs ${getStatusColor(task.priority)}`}
                           >
                             {task.priority}
@@ -180,8 +220,11 @@ export function MobileProjectView({
             <CardContent className="pt-0">
               {recentPhotos.length > 0 ? (
                 <div className="grid grid-cols-3 gap-2">
-                  {recentPhotos.map((photo) => (
-                    <div key={photo.id} className="aspect-square bg-charcoal-100 rounded-lg flex items-center justify-center">
+                  {recentPhotos.map(photo => (
+                    <div
+                      key={photo.id}
+                      className="aspect-square bg-charcoal-100 rounded-lg flex items-center justify-center"
+                    >
                       <Camera className="h-6 w-6 text-charcoal-400" />
                     </div>
                   ))}
@@ -204,9 +247,9 @@ export function MobileProjectView({
             <CardContent className="pt-0">
               {project.tasks.length > 0 ? (
                 <div className="space-y-2">
-                  {project.tasks.map((task) => (
-                    <div 
-                      key={task.id} 
+                  {project.tasks.map(task => (
+                    <div
+                      key={task.id}
                       className="flex items-center gap-3 p-3 border rounded-lg"
                       onClick={() => onViewTask?.(task)}
                     >
@@ -220,16 +263,18 @@ export function MobileProjectView({
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{task.title}</p>
+                        <p className="text-sm font-medium truncate">
+                          {task.title}
+                        </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className={`text-xs ${getStatusColor(task.status)}`}
                           >
                             {task.status}
                           </Badge>
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className={`text-xs ${getStatusColor(task.priority)}`}
                           >
                             {task.priority}
@@ -247,7 +292,9 @@ export function MobileProjectView({
               ) : (
                 <div className="text-center py-8">
                   <FileText className="h-8 w-8 text-charcoal-400 mx-auto mb-2" />
-                  <p className="text-sm text-charcoal-600">No tasks created yet</p>
+                  <p className="text-sm text-charcoal-600">
+                    No tasks created yet
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -262,8 +309,11 @@ export function MobileProjectView({
             <CardContent className="pt-0">
               {project.photos.length > 0 ? (
                 <div className="grid grid-cols-2 gap-2">
-                  {project.photos.map((photo) => (
-                    <div key={photo.id} className="aspect-square bg-charcoal-100 rounded-lg flex items-center justify-center">
+                  {project.photos.map(photo => (
+                    <div
+                      key={photo.id}
+                      className="aspect-square bg-charcoal-100 rounded-lg flex items-center justify-center"
+                    >
                       <Camera className="h-6 w-6 text-charcoal-400" />
                     </div>
                   ))}
@@ -271,7 +321,9 @@ export function MobileProjectView({
               ) : (
                 <div className="text-center py-8">
                   <Camera className="h-8 w-8 text-charcoal-400 mx-auto mb-2" />
-                  <p className="text-sm text-charcoal-600">No photos uploaded yet</p>
+                  <p className="text-sm text-charcoal-600">
+                    No photos uploaded yet
+                  </p>
                   <Button size="sm" className="mt-2" onClick={onUploadPhoto}>
                     Take First Photo
                   </Button>
@@ -282,5 +334,5 @@ export function MobileProjectView({
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

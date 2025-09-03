@@ -5,18 +5,21 @@ A comprehensive multi-tenant construction project management application built w
 ## Features
 
 ### 🏗️ Multi-Tenant Architecture
+
 - 5 divisions: Group, Contracting, Homes, Wood, Telecom
 - Users can belong to multiple divisions with different roles
 - Row Level Security (RLS) for data isolation
 - Division-based project management
 
 ### 🔐 Dual Authentication System
+
 - **Azure AD SSO** for internal staff
 - **Supabase Email/OTP** for external users (clients, subcontractors)
 - Role-based access control
 - Session management and token refresh
 
 ### 📊 Project Management
+
 - Project creation and management
 - User assignment to projects
 - Photo gallery with EXIF data
@@ -24,6 +27,7 @@ A comprehensive multi-tenant construction project management application built w
 - Real-time notifications
 
 ### 🎨 Modern UI/UX
+
 - Tailwind CSS with MDM brand colors
 - Radix UI primitives for accessibility
 - Mobile-first responsive design
@@ -44,7 +48,7 @@ A comprehensive multi-tenant construction project management application built w
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 - Supabase account
 - Azure AD app registration (for internal users)
@@ -52,22 +56,26 @@ A comprehensive multi-tenant construction project management application built w
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd mdm-hub
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env.local
 ```
 
 Fill in your environment variables:
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -80,12 +88,14 @@ NEXT_PUBLIC_AZURE_REDIRECT_URI=http://localhost:3000/auth/callback
 ```
 
 4. Set up the database:
+
 ```bash
 # Run the SQL schema in your Supabase SQL editor
 # File: supabase/schema.sql
 ```
 
 5. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -132,6 +142,7 @@ The application uses a comprehensive PostgreSQL schema with:
 - **Audit Trail**: Complete change tracking
 
 ### Key Features:
+
 - Row Level Security (RLS) policies
 - Foreign key constraints
 - Indexes for performance
@@ -141,11 +152,13 @@ The application uses a comprehensive PostgreSQL schema with:
 ## Authentication
 
 ### Azure AD (Internal Users)
+
 - Single Sign-On (SSO) integration
 - Automatic user provisioning
 - Role-based access control
 
 ### Supabase Auth (External Users)
+
 - Email/password authentication
 - OTP verification
 - Password reset functionality
@@ -153,12 +166,14 @@ The application uses a comprehensive PostgreSQL schema with:
 ## API Integration
 
 ### Supabase Client
+
 - Type-safe database operations
 - Real-time subscriptions
 - File storage for photos
 - Row Level Security enforcement
 
 ### React Query
+
 - Data fetching and caching
 - Optimistic updates
 - Error handling
@@ -167,12 +182,14 @@ The application uses a comprehensive PostgreSQL schema with:
 ## UI Components
 
 ### Design System
+
 - **Colors**: Orange (#FFAA33), Beige (#FFEFDB), Charcoal (#1B1B1A)
 - **Typography**: Inter font family
 - **Spacing**: Consistent 4px grid system
 - **Responsive**: Mobile-first approach
 
 ### Component Library
+
 - Buttons with multiple variants
 - Form inputs with validation
 - Data tables with sorting/filtering
@@ -194,6 +211,7 @@ npm run format       # Format code with Prettier
 ```
 
 ### Code Quality
+
 - ESLint for code linting
 - Prettier for code formatting
 - TypeScript for type safety
@@ -202,6 +220,7 @@ npm run format       # Format code with Prettier
 ## Testing
 
 Visit `/test` to access the implementation test page that verifies:
+
 - Authentication system
 - Database connectivity
 - UI components
@@ -210,12 +229,15 @@ Visit `/test` to access the implementation test page that verifies:
 ## Deployment
 
 ### Vercel (Recommended)
+
 1. Connect your GitHub repository to Vercel
 2. Set environment variables in Vercel dashboard
 3. Deploy automatically on push to main branch
 
 ### Other Platforms
+
 The application can be deployed to any platform that supports Next.js:
+
 - Netlify
 - AWS Amplify
 - Railway

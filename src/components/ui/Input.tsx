@@ -1,19 +1,31 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
-  error?: string
-  label?: string
-  helperText?: string
-  leftIcon?: React.ReactNode
-  rightIcon?: React.ReactNode
+  error?: string;
+  label?: string;
+  helperText?: string;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, error, label, helperText, leftIcon, rightIcon, ...props }, ref) => {
-    const inputId = React.useId()
-    
+  (
+    {
+      className,
+      type,
+      error,
+      label,
+      helperText,
+      leftIcon,
+      rightIcon,
+      ...props
+    },
+    ref
+  ) => {
+    const inputId = React.useId();
+
     return (
       <div className="w-full">
         {label && (
@@ -34,10 +46,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={type}
             id={inputId}
             className={cn(
-              "flex h-10 w-full rounded-md border border-charcoal-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-charcoal-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-              leftIcon && "pl-10",
-              rightIcon && "pr-10",
-              error && "border-error-500 focus-visible:ring-error-500",
+              'flex h-10 w-full rounded-md border border-charcoal-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-charcoal-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+              leftIcon && 'pl-10',
+              rightIcon && 'pr-10',
+              error && 'border-error-500 focus-visible:ring-error-500',
               className
             )}
             ref={ref}
@@ -49,16 +61,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
         </div>
-        {error && (
-          <p className="mt-1 text-sm text-error-600">{error}</p>
-        )}
+        {error && <p className="mt-1 text-sm text-error-600">{error}</p>}
         {helperText && !error && (
           <p className="mt-1 text-sm text-charcoal-500">{helperText}</p>
         )}
       </div>
-    )
+    );
   }
-)
-Input.displayName = "Input"
+);
+Input.displayName = 'Input';
 
-export { Input }
+export { Input };

@@ -1,9 +1,11 @@
-import * as React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+'use client';
+
+import * as React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/Button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +13,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu';
 import {
   Home,
   BarChart3,
@@ -26,98 +28,96 @@ import {
   X,
   LogOut,
   User,
-} from "lucide-react"
+} from 'lucide-react';
 
 interface SidebarProps {
   user?: {
-    id: string
-    name: string
-    email: string
-    avatar?: string
-    role: string
-    divisions: string[]
-  }
-  onLogout?: () => void
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+    role: string;
+    divisions: string[];
+  };
+  onLogout?: () => void;
 }
 
 interface NavItem {
-  title: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  badge?: string
-  roles?: string[]
-  divisions?: string[]
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
+  roles?: string[];
+  divisions?: string[];
 }
 
 const navigation: NavItem[] = [
   {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: Home,
+    title: 'Dashboard',
+    href: '/dashboard',
+    icon: Home as React.ComponentType<{ className?: string }>,
   },
   {
-    title: "Projects",
-    href: "/projects",
-    icon: FolderOpen,
+    title: 'Projects',
+    href: '/projects',
+    icon: FolderOpen as React.ComponentType<{ className?: string }>,
   },
   {
-    title: "Photos",
-    href: "/photos",
-    icon: Camera,
+    title: 'Photos',
+    href: '/photos',
+    icon: Camera as React.ComponentType<{ className?: string }>,
   },
   {
-    title: "Change Orders",
-    href: "/change-orders",
-    icon: FileText,
+    title: 'Change Orders',
+    href: '/change-orders',
+    icon: FileText as React.ComponentType<{ className?: string }>,
   },
   {
-    title: "Analytics",
-    href: "/analytics",
-    icon: BarChart3,
-    roles: ["admin", "manager"],
+    title: 'Analytics',
+    href: '/analytics',
+    icon: BarChart3 as React.ComponentType<{ className?: string }>,
+    roles: ['admin', 'manager'],
   },
   {
-    title: "Team",
-    href: "/team",
-    icon: Users,
-    roles: ["admin", "manager"],
+    title: 'Team',
+    href: '/team',
+    icon: Users as React.ComponentType<{ className?: string }>,
+    roles: ['admin', 'manager'],
   },
   {
-    title: "Divisions",
-    href: "/divisions",
-    icon: Building2,
-    roles: ["admin"],
+    title: 'Divisions',
+    href: '/divisions',
+    icon: Building2 as React.ComponentType<{ className?: string }>,
+    roles: ['admin'],
   },
   {
-    title: "Notifications",
-    href: "/notifications",
-    icon: Bell,
-    badge: "3",
+    title: 'Notifications',
+    href: '/notifications',
+    icon: Bell as React.ComponentType<{ className?: string }>,
+    badge: '3',
   },
-]
+];
 
 export function Sidebar({ user, onLogout }: SidebarProps) {
-  const pathname = usePathname()
-  const [isMobileOpen, setIsMobileOpen] = React.useState(false)
+  const pathname = usePathname();
+  const [isMobileOpen, setIsMobileOpen] = React.useState(false);
 
-  const filteredNavigation = navigation.filter((item) => {
-    if (!user) return false
-    if (!item.roles) return true
-    return item.roles.includes(user.role)
-  })
+  const filteredNavigation = navigation.filter(item => {
+    if (!user) return false;
+    if (!item.roles) return true;
+    return item.roles.includes(user.role);
+  });
 
   const NavItem = ({ item }: { item: NavItem }) => {
-    const isActive = pathname === item.href
-    const Icon = item.icon
+    const isActive = pathname === item.href;
+    const Icon = item.icon;
 
     return (
       <Link
         href={item.href}
         className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-charcoal-100 hover:text-charcoal-900",
-          isActive
-            ? "bg-primary-100 text-primary-700"
-            : "text-charcoal-600"
+          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-charcoal-100 hover:text-charcoal-900',
+          isActive ? 'bg-primary-100 text-primary-700' : 'text-charcoal-600'
         )}
         onClick={() => setIsMobileOpen(false)}
       >
@@ -129,8 +129,8 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
           </span>
         )}
       </Link>
-    )
-  }
+    );
+  };
 
   return (
     <>
@@ -160,8 +160,8 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed left-0 top-0 z-40 h-full w-64 bg-white border-r border-charcoal-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full"
+          'fixed left-0 top-0 z-40 h-full w-64 bg-white border-r border-charcoal-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0',
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex h-full flex-col">
@@ -179,7 +179,7 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 p-4">
-            {filteredNavigation.map((item) => (
+            {filteredNavigation.map(item => (
               <NavItem key={item.href} item={item} />
             ))}
           </nav>
@@ -196,7 +196,10 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user.avatar} alt={user.name} />
                       <AvatarFallback>
-                        {user.name.split(' ').map(n => n[0]).join('')}
+                        {user.name
+                          .split(' ')
+                          .map(n => n[0])
+                          .join('')}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col items-start">
@@ -223,7 +226,10 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={onLogout} className="text-error-600">
+                  <DropdownMenuItem
+                    onClick={onLogout}
+                    className="text-error-600"
+                  >
                     <LogOut className="h-4 w-4 mr-2" />
                     Log out
                   </DropdownMenuItem>
@@ -234,5 +240,5 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
         </div>
       </div>
     </>
-  )
+  );
 }

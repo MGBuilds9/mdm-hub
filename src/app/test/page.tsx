@@ -1,18 +1,28 @@
-'use client'
+'use client';
 
-import { useAuth } from '@/contexts/auth-context'
-import { useDivisions } from '@/hooks/use-database'
-import { Button } from '@/components/ui/Button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Loading } from '@/components/ui/loading'
-import { ErrorBoundary } from '@/components/ui/error-boundary'
+import { useAuth } from '@/contexts/auth-context';
+import { useDivisions } from '@/hooks/use-database';
+import { Button } from '@/components/ui/Button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
+import { Loading } from '@/components/ui/loading';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 export default function TestPage() {
-  const { user, loading: authLoading } = useAuth()
-  const { data: divisions, isLoading: divisionsLoading, error: divisionsError } = useDivisions()
+  const { user, loading: authLoading } = useAuth();
+  const {
+    data: divisions,
+    isLoading: divisionsLoading,
+    error: divisionsError,
+  } = useDivisions();
 
   if (authLoading) {
-    return <Loading />
+    return <Loading />;
   }
 
   if (!user) {
@@ -26,19 +36,21 @@ export default function TestPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => window.location.href = '/'}>
+            <Button onClick={() => (window.location.href = '/')}>
               Go to Login
             </Button>
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-charcoal-950">Implementation Test</h1>
+        <h1 className="text-3xl font-bold text-charcoal-950">
+          Implementation Test
+        </h1>
         <p className="text-charcoal-600 mt-2">
           Testing the complete MDM Hub implementation
         </p>
@@ -51,10 +63,18 @@ export default function TestPage() {
             <CardDescription>Current user information</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <p><strong>Name:</strong> {user.first_name} {user.last_name}</p>
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>Internal:</strong> {user.is_internal ? 'Yes' : 'No'}</p>
-            <p><strong>Active:</strong> {user.is_active ? 'Yes' : 'No'}</p>
+            <p>
+              <strong>Name:</strong> {user.first_name} {user.last_name}
+            </p>
+            <p>
+              <strong>Email:</strong> {user.email}
+            </p>
+            <p>
+              <strong>Internal:</strong> {user.is_internal ? 'Yes' : 'No'}
+            </p>
+            <p>
+              <strong>Active:</strong> {user.is_active ? 'Yes' : 'No'}
+            </p>
           </CardContent>
         </Card>
 
@@ -77,7 +97,9 @@ export default function TestPage() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-green-600 font-medium">✓ Database connection successful</p>
+                  <p className="text-green-600 font-medium">
+                    ✓ Database connection successful
+                  </p>
                   <p className="text-sm text-charcoal-600">
                     Found {divisions?.length || 0} divisions
                   </p>
@@ -85,7 +107,7 @@ export default function TestPage() {
                     <div className="mt-2">
                       <p className="text-sm font-medium">Divisions:</p>
                       <ul className="text-sm text-charcoal-600 mt-1">
-                        {divisions.map((division) => (
+                        {divisions.map(division => (
                           <li key={division.id}>• {division.display_name}</li>
                         ))}
                       </ul>
@@ -111,13 +133,13 @@ export default function TestPage() {
             <Button variant="ghost">Ghost Button</Button>
             <Button variant="destructive">Destructive Button</Button>
           </div>
-          
+
           <div className="flex flex-wrap gap-2">
             <Button size="sm">Small</Button>
             <Button size="default">Default</Button>
             <Button size="lg">Large</Button>
           </div>
-          
+
           <div className="flex flex-wrap gap-2">
             <Button disabled>Disabled</Button>
             <Button loading>Loading</Button>
@@ -145,5 +167,5 @@ export default function TestPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,19 +1,19 @@
-import { supabase } from './supabase'
-import { RealtimeChannel } from '@supabase/supabase-js'
+import { supabase } from './supabase';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 // Realtime subscription types
 export type RealtimeEvent<T = any> = {
-  eventType: 'INSERT' | 'UPDATE' | 'DELETE'
-  new: T
-  old: T
-  table: string
-}
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  new: T;
+  old: T;
+  table: string;
+};
 
-export type RealtimeCallback<T = any> = (payload: RealtimeEvent<T>) => void
+export type RealtimeCallback<T = any> = (payload: RealtimeEvent<T>) => void;
 
 // Realtime service class
 export class RealtimeService {
-  private channels: Map<string, RealtimeChannel> = new Map()
+  private channels: Map<string, RealtimeChannel> = new Map();
 
   // Subscribe to table changes
   subscribe<T = any>(
@@ -21,10 +21,10 @@ export class RealtimeService {
     callback: RealtimeCallback<T>,
     filter?: string
   ): RealtimeChannel {
-    const channelName = filter ? `${table}:${filter}` : table
-    
+    const channelName = filter ? `${table}:${filter}` : table;
+
     // Remove existing channel if it exists
-    this.unsubscribe(channelName)
+    this.unsubscribe(channelName);
 
     const channel = supabase
       .channel(channelName)
@@ -38,10 +38,10 @@ export class RealtimeService {
         },
         callback
       )
-      .subscribe()
+      .subscribe();
 
-    this.channels.set(channelName, channel)
-    return channel
+    this.channels.set(channelName, channel);
+    return channel;
   }
 
   // Subscribe to specific record changes
@@ -50,7 +50,7 @@ export class RealtimeService {
     recordId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
-    return this.subscribe<T>(table, callback, `id=eq.${recordId}`)
+    return this.subscribe<T>(table, callback, `id=eq.${recordId}`);
   }
 
   // Subscribe to project changes
@@ -58,7 +58,7 @@ export class RealtimeService {
     projectId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
-    return this.subscribe<T>('projects', callback, `id=eq.${projectId}`)
+    return this.subscribe<T>('projects', callback, `id=eq.${projectId}`);
   }
 
   // Subscribe to project photos
@@ -66,7 +66,7 @@ export class RealtimeService {
     projectId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
-    return this.subscribe<T>('photos', callback, `project_id=eq.${projectId}`)
+    return this.subscribe<T>('photos', callback, `project_id=eq.${projectId}`);
   }
 
   // Subscribe to project change orders
@@ -74,7 +74,11 @@ export class RealtimeService {
     projectId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
-    return this.subscribe<T>('change_orders', callback, `project_id=eq.${projectId}`)
+    return this.subscribe<T>(
+      'change_orders',
+      callback,
+      `project_id=eq.${projectId}`
+    );
   }
 
   // Subscribe to user notifications
@@ -82,7 +86,7 @@ export class RealtimeService {
     userId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
-    return this.subscribe<T>('notifications', callback, `user_id=eq.${userId}`)
+    return this.subscribe<T>('notifications', callback, `user_id=eq.${userId}`);
   }
 
   // Subscribe to division changes
@@ -90,7 +94,7 @@ export class RealtimeService {
     divisionId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
-    return this.subscribe<T>('divisions', callback, `id=eq.${divisionId}`)
+    return this.subscribe<T>('divisions', callback, `id=eq.${divisionId}`);
   }
 
   // Subscribe to user changes
@@ -98,58 +102,63 @@ export class RealtimeService {
     userId: string,
     callback: RealtimeCallback<T>
   ): RealtimeChannel {
-    return this.subscribe<T>('users', callback, `id=eq.${userId}`)
+    return this.subscribe<T>('users', callback, `id=eq.${userId}`);
   }
 
   // Unsubscribe from a channel
   unsubscribe(channelName: string): void {
-    const channel = this.channels.get(channelName)
+    const channel = this.channels.get(channelName);
     if (channel) {
-      supabase.removeChannel(channel)
-      this.channels.delete(channelName)
+      supabase.removeChannel(channel);
+      this.channels.delete(channelName);
     }
   }
 
   // Unsubscribe from all channels
   unsubscribeAll(): void {
     this.channels.forEach((channel, channelName) => {
-      supabase.removeChannel(channel)
-    })
-    this.channels.clear()
+      supabase.removeChannel(channel);
+    });
+    this.channels.clear();
   }
 
   // Get channel status
   getChannelStatus(channelName: string): string | null {
-    const channel = this.channels.get(channelName)
-    return channel ? channel.state : null
+    const channel = this.channels.get(channelName);
+    return channel ? channel.state : null;
   }
 
   // Get all active channels
   getActiveChannels(): string[] {
-    return Array.from(this.channels.keys())
+    return Array.from(this.channels.keys());
   }
 }
 
 // Create singleton instance
-export const realtimeService = new RealtimeService()
+export const realtimeService = new RealtimeService();
 
 // React hook for realtime subscriptions
 export const useRealtime = () => {
   return {
     subscribe: realtimeService.subscribe.bind(realtimeService),
     subscribeToRecord: realtimeService.subscribeToRecord.bind(realtimeService),
-    subscribeToProject: realtimeService.subscribeToProject.bind(realtimeService),
-    subscribeToProjectPhotos: realtimeService.subscribeToProjectPhotos.bind(realtimeService),
-    subscribeToProjectChangeOrders: realtimeService.subscribeToProjectChangeOrders.bind(realtimeService),
-    subscribeToUserNotifications: realtimeService.subscribeToUserNotifications.bind(realtimeService),
-    subscribeToDivision: realtimeService.subscribeToDivision.bind(realtimeService),
+    subscribeToProject:
+      realtimeService.subscribeToProject.bind(realtimeService),
+    subscribeToProjectPhotos:
+      realtimeService.subscribeToProjectPhotos.bind(realtimeService),
+    subscribeToProjectChangeOrders:
+      realtimeService.subscribeToProjectChangeOrders.bind(realtimeService),
+    subscribeToUserNotifications:
+      realtimeService.subscribeToUserNotifications.bind(realtimeService),
+    subscribeToDivision:
+      realtimeService.subscribeToDivision.bind(realtimeService),
     subscribeToUser: realtimeService.subscribeToUser.bind(realtimeService),
     unsubscribe: realtimeService.unsubscribe.bind(realtimeService),
     unsubscribeAll: realtimeService.unsubscribeAll.bind(realtimeService),
     getChannelStatus: realtimeService.getChannelStatus.bind(realtimeService),
     getActiveChannels: realtimeService.getActiveChannels.bind(realtimeService),
-  }
-}
+  };
+};
 
 // Utility functions for common realtime patterns
 export const realtimeUtils = {
@@ -161,55 +170,57 @@ export const realtimeUtils = {
   ) => {
     return (payload: RealtimeEvent<T>) => {
       queryClient.setQueryData(queryKey, (oldData: T) => {
-        if (!oldData) return oldData
+        if (!oldData) return oldData;
 
         switch (payload.eventType) {
           case 'INSERT':
-            return updateFn ? updateFn(oldData, payload.new) : payload.new
+            return updateFn ? updateFn(oldData, payload.new) : payload.new;
           case 'UPDATE':
-            return updateFn ? updateFn(oldData, payload.new) : payload.new
+            return updateFn ? updateFn(oldData, payload.new) : payload.new;
           case 'DELETE':
-            return null
+            return null;
           default:
-            return oldData
+            return oldData;
         }
-      })
-    }
+      });
+    };
   },
 
   // Create a callback that invalidates React Query cache
   createInvalidationCallback: (queryClient: any, queryKey: any) => {
     return () => {
-      queryClient.invalidateQueries({ queryKey })
-    }
+      queryClient.invalidateQueries({ queryKey });
+    };
   },
 
   // Create a callback that shows toast notifications
   createToastCallback: (toast: any) => {
     return (payload: RealtimeEvent) => {
-      const { eventType, table } = payload
-      const tableName = table.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-      
-      let message = ''
+      const { eventType, table } = payload;
+      const tableName = table
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, l => l.toUpperCase());
+
+      let message = '';
       switch (eventType) {
         case 'INSERT':
-          message = `New ${tableName} created`
-          break
+          message = `New ${tableName} created`;
+          break;
         case 'UPDATE':
-          message = `${tableName} updated`
-          break
+          message = `${tableName} updated`;
+          break;
         case 'DELETE':
-          message = `${tableName} deleted`
-          break
+          message = `${tableName} deleted`;
+          break;
       }
 
       toast({
         title: 'Real-time Update',
         description: message,
-      })
-    }
+      });
+    };
   },
-}
+};
 
 // Export types
-export type { RealtimeEvent, RealtimeCallback }
+export type { RealtimeEvent, RealtimeCallback };

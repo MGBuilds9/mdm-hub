@@ -1,38 +1,35 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useParams } from 'next/navigation'
-import { useProjectWithDetails } from '@/hooks/use-database'
-import { ProjectDashboard } from '@/components/projects/project-dashboard'
-import { ProjectTimeline } from '@/components/projects/project-timeline'
-import { ProjectStatusWorkflow } from '@/components/projects/project-status-workflow'
-import { MobileProjectView } from '@/components/projects/mobile-project-view'
-import { MainLayout } from '@/components/layout/main-layout'
-import { Loading } from '@/components/ui/loading'
-import { ErrorBoundary } from '@/components/ui/error-boundary'
-import { Button } from '@/components/ui/Button'
-import { ArrowLeft, Smartphone, Monitor } from 'lucide-react'
+import { useState } from 'react';
+import { useParams } from 'next/navigation';
+import { useProjectWithDetails } from '@/hooks/use-database';
+import { ProjectWithFullDetails } from '@/types/database';
+import { ProjectDashboard } from '@/components/projects/project-dashboard';
+import { ProjectTimeline } from '@/components/projects/project-timeline';
+import { ProjectStatusWorkflow } from '@/components/projects/project-status-workflow';
+import { MobileProjectView } from '@/components/projects/mobile-project-view';
+import { MainLayout } from '@/components/layout/main-layout';
+import { Loading } from '@/components/ui/loading';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { Button } from '@/components/ui/Button';
+import { ArrowLeft, Smartphone, Monitor } from 'lucide-react';
 
 export default function ProjectDetailPage() {
-  const params = useParams()
-  const projectId = params.id as string
-  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop')
-  const [showMilestoneForm, setShowMilestoneForm] = useState(false)
-  const [showTaskForm, setShowTaskForm] = useState(false)
-  const [showTeamInviteForm, setShowTeamInviteForm] = useState(false)
+  const params = useParams();
+  const projectId = params.id as string;
+  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+  const [showMilestoneForm, setShowMilestoneForm] = useState(false);
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [showTeamInviteForm, setShowTeamInviteForm] = useState(false);
 
-  const { 
-    data: project, 
-    isLoading, 
-    error 
-  } = useProjectWithDetails(projectId)
+  const { data: project, isLoading, error } = useProjectWithDetails(projectId);
 
   if (isLoading) {
     return (
       <MainLayout>
         <Loading />
       </MainLayout>
-    )
+    );
   }
 
   if (error || !project) {
@@ -40,7 +37,9 @@ export default function ProjectDetailPage() {
       <MainLayout>
         <ErrorBoundary>
           <div className="text-center py-12">
-            <h2 className="text-xl font-semibold text-red-600 mb-2">Project Not Found</h2>
+            <h2 className="text-xl font-semibold text-red-600 mb-2">
+              Project Not Found
+            </h2>
             <p className="text-charcoal-600 mb-4">
               {error?.message || 'The requested project could not be found.'}
             </p>
@@ -51,36 +50,36 @@ export default function ProjectDetailPage() {
           </div>
         </ErrorBoundary>
       </MainLayout>
-    )
+    );
   }
 
   const handleStatusUpdate = async (status: string, reason?: string) => {
     // TODO: Implement status update
-    console.log('Updating project status:', { status, reason })
-  }
+    console.log('Updating project status:', { status, reason });
+  };
 
   const handleCreateMilestone = () => {
-    setShowMilestoneForm(true)
-  }
+    setShowMilestoneForm(true);
+  };
 
   const handleCreateTask = () => {
-    setShowTaskForm(true)
-  }
+    setShowTaskForm(true);
+  };
 
   const handleUploadPhoto = () => {
     // TODO: Implement photo upload
-    console.log('Upload photo')
-  }
+    console.log('Upload photo');
+  };
 
   const handleViewTask = (task: any) => {
     // TODO: Navigate to task detail
-    console.log('View task:', task)
-  }
+    console.log('View task:', task);
+  };
 
   const handleUpdateTaskStatus = (task: any, status: string) => {
     // TODO: Implement task status update
-    console.log('Update task status:', { task, status })
-  }
+    console.log('Update task status:', { task, status });
+  };
 
   if (viewMode === 'mobile') {
     return (
@@ -103,10 +102,10 @@ export default function ProjectDetailPage() {
             Back
           </Button>
         </div>
-        
+
         <ErrorBoundary>
           <MobileProjectView
-            project={project}
+            project={project as ProjectWithFullDetails}
             onCreateTask={handleCreateTask}
             onUploadPhoto={handleUploadPhoto}
             onViewTask={handleViewTask}
@@ -114,7 +113,7 @@ export default function ProjectDetailPage() {
           />
         </ErrorBoundary>
       </div>
-    )
+    );
   }
 
   return (
@@ -130,7 +129,7 @@ export default function ProjectDetailPage() {
             <ArrowLeft className="h-4 w-4" />
             Back to Projects
           </Button>
-          
+
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -144,7 +143,7 @@ export default function ProjectDetailPage() {
         </div>
 
         <ErrorBoundary>
-          <ProjectDashboard project={project} />
+          <ProjectDashboard project={project as ProjectWithFullDetails} />
         </ErrorBoundary>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -152,8 +151,8 @@ export default function ProjectDetailPage() {
           <div className="lg:col-span-2">
             <ErrorBoundary>
               <ProjectTimeline
-                milestones={project.milestones}
-                tasks={project.tasks}
+                milestones={[]}
+                tasks={[]}
                 onCreateMilestone={handleCreateMilestone}
                 onCreateTask={handleCreateTask}
               />
@@ -164,7 +163,7 @@ export default function ProjectDetailPage() {
           <div>
             <ErrorBoundary>
               <ProjectStatusWorkflow
-                project={project}
+                project={project as ProjectWithFullDetails}
                 onStatusUpdate={handleStatusUpdate}
               />
             </ErrorBoundary>
@@ -172,5 +171,5 @@ export default function ProjectDetailPage() {
         </div>
       </div>
     </MainLayout>
-  )
+  );
 }

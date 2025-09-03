@@ -1,13 +1,13 @@
-import { supabase, createServerClient } from './supabase'
-import { 
-  User, 
-  Project, 
-  Division, 
-  UserDivision, 
-  ProjectUser, 
-  Photo, 
-  ChangeOrder, 
-  ChangeOrderAttachment, 
+import { supabase, createServerClient } from './supabase';
+import {
+  User,
+  Project,
+  Division,
+  UserDivision,
+  ProjectUser,
+  Photo,
+  ChangeOrder,
+  ChangeOrderAttachment,
   Notification,
   UserWithDivisions,
   ProjectWithDetails,
@@ -17,9 +17,9 @@ import {
   Milestone,
   Task,
   ProjectInvitation,
-  Database
-} from '@/types/database'
-import { PostgrestError } from '@supabase/supabase-js'
+  Database,
+} from '@/types/database';
+import { PostgrestError } from '@supabase/supabase-js';
 
 // Generic error handling
 export class DatabaseError extends Error {
@@ -27,16 +27,19 @@ export class DatabaseError extends Error {
     message: string,
     public originalError?: PostgrestError | Error
   ) {
-    super(message)
-    this.name = 'DatabaseError'
+    super(message);
+    this.name = 'DatabaseError';
   }
 }
 
 // Helper function to handle Supabase errors
-const handleError = (error: PostgrestError | Error, operation: string): never => {
-  console.error(`Database ${operation} error:`, error)
-  throw new DatabaseError(`Failed to ${operation}`, error)
-}
+const handleError = (
+  error: PostgrestError | Error,
+  operation: string
+): never => {
+  console.error(`Database ${operation} error:`, error);
+  throw new DatabaseError(`Failed to ${operation}`, error);
+};
 
 // User operations
 export const userService = {
@@ -47,16 +50,16 @@ export const userService = {
         .from('users')
         .select('*')
         .eq('id', id)
-        .single()
+        .single();
 
       if (error) {
-        if (error.code === 'PGRST116') return null // No rows returned
-        handleError(error, 'get user by ID')
+        if (error.code === 'PGRST116') return null; // No rows returned
+        handleError(error, 'get user by ID');
       }
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'get user by ID')
+      handleError(error as Error, 'get user by ID');
     }
   },
 
@@ -65,24 +68,26 @@ export const userService = {
     try {
       const { data, error } = await supabase
         .from('users')
-        .select(`
+        .select(
+          `
           *,
           user_divisions (
             *,
             division:divisions (*)
           )
-        `)
+        `
+        )
         .eq('id', id)
-        .single()
+        .single();
 
       if (error) {
-        if (error.code === 'PGRST116') return null
-        handleError(error, 'get user with divisions')
+        if (error.code === 'PGRST116') return null;
+        handleError(error, 'get user with divisions');
       }
 
-      return data as UserWithDivisions
+      return data as UserWithDivisions;
     } catch (error) {
-      handleError(error as Error, 'get user with divisions')
+      handleError(error as Error, 'get user with divisions');
     }
   },
 
@@ -94,13 +99,13 @@ export const userService = {
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'update user')
+      if (error) handleError(error, 'update user');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'update user')
+      handleError(error as Error, 'update user');
     }
   },
 
@@ -109,22 +114,24 @@ export const userService = {
     try {
       const { data, error } = await supabase
         .from('users')
-        .select(`
+        .select(
+          `
           *,
           user_divisions!inner (
             division_id
           )
-        `)
-        .eq('user_divisions.division_id', divisionId)
+        `
+        )
+        .eq('user_divisions.division_id', divisionId);
 
-      if (error) handleError(error, 'get users by division')
+      if (error) handleError(error, 'get users by division');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get users by division')
+      handleError(error as Error, 'get users by division');
     }
   },
-}
+};
 
 // Division operations
 export const divisionService = {
@@ -134,13 +141,13 @@ export const divisionService = {
       const { data, error } = await supabase
         .from('divisions')
         .select('*')
-        .order('display_name')
+        .order('display_name');
 
-      if (error) handleError(error, 'get all divisions')
+      if (error) handleError(error, 'get all divisions');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get all divisions')
+      handleError(error as Error, 'get all divisions');
     }
   },
 
@@ -151,33 +158,35 @@ export const divisionService = {
         .from('divisions')
         .select('*')
         .eq('id', id)
-        .single()
+        .single();
 
       if (error) {
-        if (error.code === 'PGRST116') return null
-        handleError(error, 'get division by ID')
+        if (error.code === 'PGRST116') return null;
+        handleError(error, 'get division by ID');
       }
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'get division by ID')
+      handleError(error as Error, 'get division by ID');
     }
   },
 
   // Create division
-  async create(division: Omit<Division, 'id' | 'created_at' | 'updated_at'>): Promise<Division> {
+  async create(
+    division: Omit<Division, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<Division> {
     try {
       const { data, error } = await supabase
         .from('divisions')
         .insert(division)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'create division')
+      if (error) handleError(error, 'create division');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'create division')
+      handleError(error as Error, 'create division');
     }
   },
 
@@ -189,16 +198,16 @@ export const divisionService = {
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'update division')
+      if (error) handleError(error, 'update division');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'update division')
+      handleError(error as Error, 'update division');
     }
   },
-}
+};
 
 // Project operations
 export const projectService = {
@@ -208,13 +217,13 @@ export const projectService = {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false });
 
-      if (error) handleError(error, 'get all projects')
+      if (error) handleError(error, 'get all projects');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get all projects')
+      handleError(error as Error, 'get all projects');
     }
   },
 
@@ -225,16 +234,16 @@ export const projectService = {
         .from('projects')
         .select('*')
         .eq('id', id)
-        .single()
+        .single();
 
       if (error) {
-        if (error.code === 'PGRST116') return null
-        handleError(error, 'get project by ID')
+        if (error.code === 'PGRST116') return null;
+        handleError(error, 'get project by ID');
       }
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'get project by ID')
+      handleError(error as Error, 'get project by ID');
     }
   },
 
@@ -243,7 +252,8 @@ export const projectService = {
     try {
       const { data, error } = await supabase
         .from('projects')
-        .select(`
+        .select(
+          `
           *,
           division:divisions (*),
           project_manager:users!projects_project_manager_id_fkey (*),
@@ -253,18 +263,19 @@ export const projectService = {
           ),
           photos (*),
           change_orders (*)
-        `)
+        `
+        )
         .eq('id', id)
-        .single()
+        .single();
 
       if (error) {
-        if (error.code === 'PGRST116') return null
-        handleError(error, 'get project with details')
+        if (error.code === 'PGRST116') return null;
+        handleError(error, 'get project with details');
       }
 
-      return data as ProjectWithDetails
+      return data as ProjectWithDetails;
     } catch (error) {
-      handleError(error as Error, 'get project with details')
+      handleError(error as Error, 'get project with details');
     }
   },
 
@@ -273,7 +284,8 @@ export const projectService = {
     try {
       const { data, error } = await supabase
         .from('projects')
-        .select(`
+        .select(
+          `
           *,
           division:divisions (*),
           project_manager:users!projects_project_manager_id_fkey (*),
@@ -286,18 +298,19 @@ export const projectService = {
           milestones (*),
           tasks (*),
           invitations (*)
-        `)
+        `
+        )
         .eq('id', id)
-        .single()
+        .single();
 
       if (error) {
-        if (error.code === 'PGRST116') return null
-        handleError(error, 'get project with full details')
+        if (error.code === 'PGRST116') return null;
+        handleError(error, 'get project with full details');
       }
 
-      return data as ProjectWithFullDetails
+      return data as ProjectWithFullDetails;
     } catch (error) {
-      handleError(error as Error, 'get project with full details')
+      handleError(error as Error, 'get project with full details');
     }
   },
 
@@ -308,30 +321,32 @@ export const projectService = {
         .from('projects')
         .select('*')
         .eq('division_id', divisionId)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false });
 
-      if (error) handleError(error, 'get projects by division')
+      if (error) handleError(error, 'get projects by division');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get projects by division')
+      handleError(error as Error, 'get projects by division');
     }
   },
 
   // Create project
-  async create(project: Omit<Project, 'id' | 'created_at' | 'updated_at'>): Promise<Project> {
+  async create(
+    project: Omit<Project, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<Project> {
     try {
       const { data, error } = await supabase
         .from('projects')
         .insert(project)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'create project')
+      if (error) handleError(error, 'create project');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'create project')
+      handleError(error as Error, 'create project');
     }
   },
 
@@ -343,30 +358,27 @@ export const projectService = {
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'update project')
+      if (error) handleError(error, 'update project');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'update project')
+      handleError(error as Error, 'update project');
     }
   },
 
   // Delete project
   async delete(id: string): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', id)
+      const { error } = await supabase.from('projects').delete().eq('id', id);
 
-      if (error) handleError(error, 'delete project')
+      if (error) handleError(error, 'delete project');
     } catch (error) {
-      handleError(error as Error, 'delete project')
+      handleError(error as Error, 'delete project');
     }
   },
-}
+};
 
 // Photo operations
 export const photoService = {
@@ -377,13 +389,13 @@ export const photoService = {
         .from('photos')
         .select('*')
         .eq('project_id', projectId)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false });
 
-      if (error) handleError(error, 'get photos by project')
+      if (error) handleError(error, 'get photos by project');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get photos by project')
+      handleError(error as Error, 'get photos by project');
     }
   },
 
@@ -392,22 +404,24 @@ export const photoService = {
     try {
       const { data, error } = await supabase
         .from('photos')
-        .select(`
+        .select(
+          `
           *,
           project:projects (*),
           uploaded_by_user:users!photos_uploaded_by_fkey (*)
-        `)
+        `
+        )
         .eq('id', id)
-        .single()
+        .single();
 
       if (error) {
-        if (error.code === 'PGRST116') return null
-        handleError(error, 'get photo with details')
+        if (error.code === 'PGRST116') return null;
+        handleError(error, 'get photo with details');
       }
 
-      return data as PhotoWithDetails
+      return data as PhotoWithDetails;
     } catch (error) {
-      handleError(error as Error, 'get photo with details')
+      handleError(error as Error, 'get photo with details');
     }
   },
 
@@ -418,13 +432,13 @@ export const photoService = {
         .from('photos')
         .insert(photo)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'create photo')
+      if (error) handleError(error, 'create photo');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'create photo')
+      handleError(error as Error, 'create photo');
     }
   },
 
@@ -436,30 +450,27 @@ export const photoService = {
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'update photo')
+      if (error) handleError(error, 'update photo');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'update photo')
+      handleError(error as Error, 'update photo');
     }
   },
 
   // Delete photo
   async delete(id: string): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('photos')
-        .delete()
-        .eq('id', id)
+      const { error } = await supabase.from('photos').delete().eq('id', id);
 
-      if (error) handleError(error, 'delete photo')
+      if (error) handleError(error, 'delete photo');
     } catch (error) {
-      handleError(error as Error, 'delete photo')
+      handleError(error as Error, 'delete photo');
     }
   },
-}
+};
 
 // Change order operations
 export const changeOrderService = {
@@ -470,13 +481,13 @@ export const changeOrderService = {
         .from('change_orders')
         .select('*')
         .eq('project_id', projectId)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false });
 
-      if (error) handleError(error, 'get change orders by project')
+      if (error) handleError(error, 'get change orders by project');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get change orders by project')
+      handleError(error as Error, 'get change orders by project');
     }
   },
 
@@ -485,59 +496,66 @@ export const changeOrderService = {
     try {
       const { data, error } = await supabase
         .from('change_orders')
-        .select(`
+        .select(
+          `
           *,
           project:projects (*),
           created_by_user:users!change_orders_created_by_fkey (*),
           approved_by_user:users!change_orders_approved_by_fkey (*),
           attachments:change_order_attachments (*)
-        `)
+        `
+        )
         .eq('id', id)
-        .single()
+        .single();
 
       if (error) {
-        if (error.code === 'PGRST116') return null
-        handleError(error, 'get change order with details')
+        if (error.code === 'PGRST116') return null;
+        handleError(error, 'get change order with details');
       }
 
-      return data as ChangeOrderWithDetails
+      return data as ChangeOrderWithDetails;
     } catch (error) {
-      handleError(error as Error, 'get change order with details')
+      handleError(error as Error, 'get change order with details');
     }
   },
 
   // Create change order
-  async create(changeOrder: Omit<ChangeOrder, 'id' | 'created_at' | 'updated_at'>): Promise<ChangeOrder> {
+  async create(
+    changeOrder: Omit<ChangeOrder, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<ChangeOrder> {
     try {
       const { data, error } = await supabase
         .from('change_orders')
         .insert(changeOrder)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'create change order')
+      if (error) handleError(error, 'create change order');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'create change order')
+      handleError(error as Error, 'create change order');
     }
   },
 
   // Update change order
-  async update(id: string, updates: Partial<ChangeOrder>): Promise<ChangeOrder> {
+  async update(
+    id: string,
+    updates: Partial<ChangeOrder>
+  ): Promise<ChangeOrder> {
     try {
       const { data, error } = await supabase
         .from('change_orders')
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'update change order')
+      if (error) handleError(error, 'update change order');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'update change order')
+      handleError(error as Error, 'update change order');
     }
   },
 
@@ -553,13 +571,13 @@ export const changeOrderService = {
         })
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'approve change order')
+      if (error) handleError(error, 'approve change order');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'approve change order')
+      handleError(error as Error, 'approve change order');
     }
   },
 
@@ -574,16 +592,16 @@ export const changeOrderService = {
         })
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'reject change order')
+      if (error) handleError(error, 'reject change order');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'reject change order')
+      handleError(error as Error, 'reject change order');
     }
   },
-}
+};
 
 // Notification operations
 export const notificationService = {
@@ -594,13 +612,13 @@ export const notificationService = {
         .from('notifications')
         .select('*')
         .eq('user_id', userId)
-        .order('sent_at', { ascending: false })
+        .order('sent_at', { ascending: false });
 
-      if (error) handleError(error, 'get notifications by user')
+      if (error) handleError(error, 'get notifications by user');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get notifications by user')
+      handleError(error as Error, 'get notifications by user');
     }
   },
 
@@ -612,30 +630,32 @@ export const notificationService = {
         .select('*')
         .eq('user_id', userId)
         .eq('is_read', false)
-        .order('sent_at', { ascending: false })
+        .order('sent_at', { ascending: false });
 
-      if (error) handleError(error, 'get unread notifications')
+      if (error) handleError(error, 'get unread notifications');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get unread notifications')
+      handleError(error as Error, 'get unread notifications');
     }
   },
 
   // Create notification
-  async create(notification: Omit<Notification, 'id' | 'sent_at' | 'read_at'>): Promise<Notification> {
+  async create(
+    notification: Omit<Notification, 'id' | 'sent_at' | 'read_at'>
+  ): Promise<Notification> {
     try {
       const { data, error } = await supabase
         .from('notifications')
         .insert(notification)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'create notification')
+      if (error) handleError(error, 'create notification');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'create notification')
+      handleError(error as Error, 'create notification');
     }
   },
 
@@ -650,13 +670,13 @@ export const notificationService = {
         })
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'mark notification as read')
+      if (error) handleError(error, 'mark notification as read');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'mark notification as read')
+      handleError(error as Error, 'mark notification as read');
     }
   },
 
@@ -670,14 +690,14 @@ export const notificationService = {
           read_at: new Date().toISOString(),
         })
         .eq('user_id', userId)
-        .eq('is_read', false)
+        .eq('is_read', false);
 
-      if (error) handleError(error, 'mark all notifications as read')
+      if (error) handleError(error, 'mark all notifications as read');
     } catch (error) {
-      handleError(error as Error, 'mark all notifications as read')
+      handleError(error as Error, 'mark all notifications as read');
     }
   },
-}
+};
 
 // Milestone operations
 export const milestoneService = {
@@ -688,30 +708,32 @@ export const milestoneService = {
         .from('milestones')
         .select('*')
         .eq('project_id', projectId)
-        .order('due_date')
+        .order('due_date');
 
-      if (error) handleError(error, 'get milestones by project')
+      if (error) handleError(error, 'get milestones by project');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get milestones by project')
+      handleError(error as Error, 'get milestones by project');
     }
   },
 
   // Create milestone
-  async create(milestone: Omit<Milestone, 'id' | 'created_at' | 'updated_at'>): Promise<Milestone> {
+  async create(
+    milestone: Omit<Milestone, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<Milestone> {
     try {
       const { data, error } = await supabase
         .from('milestones')
         .insert(milestone)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'create milestone')
+      if (error) handleError(error, 'create milestone');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'create milestone')
+      handleError(error as Error, 'create milestone');
     }
   },
 
@@ -723,16 +745,16 @@ export const milestoneService = {
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'update milestone')
+      if (error) handleError(error, 'update milestone');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'update milestone')
+      handleError(error as Error, 'update milestone');
     }
   },
-}
+};
 
 // Task operations
 export const taskService = {
@@ -743,30 +765,32 @@ export const taskService = {
         .from('tasks')
         .select('*')
         .eq('project_id', projectId)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false });
 
-      if (error) handleError(error, 'get tasks by project')
+      if (error) handleError(error, 'get tasks by project');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get tasks by project')
+      handleError(error as Error, 'get tasks by project');
     }
   },
 
   // Create task
-  async create(task: Omit<Task, 'id' | 'created_at' | 'updated_at'>): Promise<Task> {
+  async create(
+    task: Omit<Task, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<Task> {
     try {
       const { data, error } = await supabase
         .from('tasks')
         .insert(task)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'create task')
+      if (error) handleError(error, 'create task');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'create task')
+      handleError(error as Error, 'create task');
     }
   },
 
@@ -778,16 +802,16 @@ export const taskService = {
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'update task')
+      if (error) handleError(error, 'update task');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'update task')
+      handleError(error as Error, 'update task');
     }
   },
-}
+};
 
 // Project invitation operations
 export const projectInvitationService = {
@@ -798,51 +822,56 @@ export const projectInvitationService = {
         .from('project_invitations')
         .select('*')
         .eq('project_id', projectId)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false });
 
-      if (error) handleError(error, 'get invitations by project')
+      if (error) handleError(error, 'get invitations by project');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get invitations by project')
+      handleError(error as Error, 'get invitations by project');
     }
   },
 
   // Create invitation
-  async create(invitation: Omit<ProjectInvitation, 'id' | 'created_at' | 'updated_at'>): Promise<ProjectInvitation> {
+  async create(
+    invitation: Omit<ProjectInvitation, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<ProjectInvitation> {
     try {
       const { data, error } = await supabase
         .from('project_invitations')
         .insert(invitation)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'create invitation')
+      if (error) handleError(error, 'create invitation');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'create invitation')
+      handleError(error as Error, 'create invitation');
     }
   },
 
   // Update invitation
-  async update(id: string, updates: Partial<ProjectInvitation>): Promise<ProjectInvitation> {
+  async update(
+    id: string,
+    updates: Partial<ProjectInvitation>
+  ): Promise<ProjectInvitation> {
     try {
       const { data, error } = await supabase
         .from('project_invitations')
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .single();
 
-      if (error) handleError(error, 'update invitation')
+      if (error) handleError(error, 'update invitation');
 
-      return data
+      return data;
     } catch (error) {
-      handleError(error as Error, 'update invitation')
+      handleError(error as Error, 'update invitation');
     }
   },
-}
+};
 
 // RLS testing functions
 export const rlsService = {
@@ -852,13 +881,13 @@ export const rlsService = {
       const { data, error } = await supabase.rpc('user_has_project_access', {
         user_id: userId,
         project_id: projectId,
-      })
+      });
 
-      if (error) handleError(error, 'test project access')
+      if (error) handleError(error, 'test project access');
 
-      return data || false
+      return data || false;
     } catch (error) {
-      handleError(error as Error, 'test project access')
+      handleError(error as Error, 'test project access');
     }
   },
 
@@ -867,13 +896,13 @@ export const rlsService = {
     try {
       const { data, error } = await supabase.rpc('get_user_divisions', {
         user_id: userId,
-      })
+      });
 
-      if (error) handleError(error, 'get user divisions')
+      if (error) handleError(error, 'get user divisions');
 
-      return data || []
+      return data || [];
     } catch (error) {
-      handleError(error as Error, 'get user divisions')
+      handleError(error as Error, 'get user divisions');
     }
   },
 
@@ -882,11 +911,11 @@ export const rlsService = {
     try {
       const { error } = await supabase.rpc('set_current_user', {
         user_id: userId,
-      })
+      });
 
-      if (error) handleError(error, 'set current user')
+      if (error) handleError(error, 'set current user');
     } catch (error) {
-      handleError(error as Error, 'set current user')
+      handleError(error as Error, 'set current user');
     }
   },
-}
+};

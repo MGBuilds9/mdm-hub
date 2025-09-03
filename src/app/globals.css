@@ -51,10 +51,10 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(214.3 31.8% 91.4%);
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-white text-charcoal-950;
   }
 }
 
@@ -84,7 +84,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -93,7 +94,8 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(-25%);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
@@ -126,7 +128,7 @@
   .no-print {
     display: none !important;
   }
-  
+
   .print-only {
     display: block !important;
   }
@@ -137,7 +139,7 @@
   .mobile-hidden {
     display: none !important;
   }
-  
+
   .mobile-full {
     width: 100% !important;
   }

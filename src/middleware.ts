@@ -1,38 +1,38 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
+  const res = NextResponse.next();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get(name: string) {
-          return req.cookies.get(name)?.value
+          return req.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: any) {
           res.cookies.set({
             name,
             value,
             ...options,
-          })
+          });
         },
         remove(name: string, options: any) {
           res.cookies.set({
             name,
             value: '',
             ...options,
-          })
+          });
         },
       },
     }
-  )
+  );
 
   const {
     data: { session },
-  } = await supabase.auth.getSession()
+  } = await supabase.auth.getSession();
 
   // Protected routes that require authentication
   const protectedRoutes = [
@@ -46,41 +46,38 @@ export async function middleware(req: NextRequest) {
     '/notifications',
     '/profile',
     '/settings',
-  ]
+  ];
 
   // Admin-only routes
-  const adminRoutes = [
-    '/analytics',
-    '/team',
-    '/divisions',
-  ]
+  const adminRoutes = ['/analytics', '/team', '/divisions'];
 
   // Public routes that don't require authentication
-  const publicRoutes = [
-    '/',
-    '/auth',
-    '/auth/callback',
-    '/login',
-    '/signup',
-  ]
+  const publicRoutes = ['/', '/auth', '/auth/callback', '/login', '/signup'];
 
-  const { pathname } = req.nextUrl
+  const { pathname } = req.nextUrl;
 
   // Check if the current path is protected
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
-  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
-  const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith(route))
+  const isProtectedRoute = protectedRoutes.some(route =>
+    pathname.startsWith(route)
+  );
+  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
+  const isPublicRoute = publicRoutes.some(
+    route => pathname === route || pathname.startsWith(route)
+  );
 
   // If user is not authenticated and trying to access protected route
   if (!session && isProtectedRoute) {
-    const redirectUrl = new URL('/login', req.url)
-    redirectUrl.searchParams.set('redirectTo', pathname)
-    return NextResponse.redirect(redirectUrl)
+    const redirectUrl = new URL('/login', req.url);
+    redirectUrl.searchParams.set('redirectTo', pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
   // If user is authenticated and trying to access auth pages
-  if (session && (pathname === '/login' || pathname === '/signup' || pathname === '/auth')) {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
+  if (
+    session &&
+    (pathname === '/login' || pathname === '/signup' || pathname === '/auth')
+  ) {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
   // If user is authenticated, check admin routes
@@ -89,32 +86,34 @@ export async function middleware(req: NextRequest) {
       // Get user profile to check role
       const { data: userProfile } = await supabase
         .from('users')
-        .select(`
+        .select(
+          `
           *,
           user_divisions (
             role,
             division:divisions (*)
           )
-        `)
+        `
+        )
         .eq('supabase_user_id', session.user.id)
-        .single()
+        .single();
 
       if (userProfile) {
         const hasAdminRole = userProfile.user_divisions?.some(
           (ud: any) => ud.role === 'admin'
-        )
+        );
 
         if (!hasAdminRole) {
-          return NextResponse.redirect(new URL('/dashboard', req.url))
+          return NextResponse.redirect(new URL('/dashboard', req.url));
         }
       }
     } catch (error) {
-      console.error('Error checking user role:', error)
-      return NextResponse.redirect(new URL('/dashboard', req.url))
+      console.error('Error checking user role:', error);
+      return NextResponse.redirect(new URL('/dashboard', req.url));
     }
   }
 
-  return res
+  return res;
 }
 
 export const config = {
@@ -128,4 +127,4 @@ export const config = {
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
-}
+};

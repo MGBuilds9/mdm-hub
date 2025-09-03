@@ -1,31 +1,49 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useProjects, useDivisions } from '@/hooks/use-database'
-import { MainLayout } from '@/components/layout/main-layout'
-import { Loading } from '@/components/ui/loading'
-import { ErrorBoundary } from '@/components/ui/error-boundary'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { formatDate, getStatusColor } from '@/lib/utils'
-import { Calendar, Clock, MapPin, Users, Filter, Plus } from 'lucide-react'
+import { useState } from 'react';
+import { useProjects, useDivisions } from '@/hooks/use-database';
+import { MainLayout } from '@/components/layout/main-layout';
+import { Loading } from '@/components/ui/loading';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { formatDate, getStatusColor } from '@/lib/utils';
+import { Calendar, Clock, MapPin, Users, Filter, Plus } from 'lucide-react';
 
 export default function SchedulePage() {
-  const [viewMode, setViewMode] = useState<'calendar' | 'timeline' | 'list'>('calendar')
-  const [divisionFilter, setDivisionFilter] = useState<string>('all')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [viewMode, setViewMode] = useState<'calendar' | 'timeline' | 'list'>(
+    'calendar'
+  );
+  const [divisionFilter, setDivisionFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const { data: projects, isLoading: projectsLoading, error: projectsError } = useProjects()
-  const { data: divisions, isLoading: divisionsLoading } = useDivisions()
+  const {
+    data: projects,
+    isLoading: projectsLoading,
+    error: projectsError,
+  } = useProjects();
+  const { data: divisions, isLoading: divisionsLoading } = useDivisions();
 
   if (projectsLoading || divisionsLoading) {
     return (
       <MainLayout>
         <Loading />
       </MainLayout>
-    )
+    );
   }
 
   if (projectsError) {
@@ -33,25 +51,30 @@ export default function SchedulePage() {
       <MainLayout>
         <ErrorBoundary>
           <div className="text-center py-12">
-            <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Schedule</h2>
+            <h2 className="text-xl font-semibold text-red-600 mb-2">
+              Error Loading Schedule
+            </h2>
             <p className="text-charcoal-600">{projectsError.message}</p>
           </div>
         </ErrorBoundary>
       </MainLayout>
-    )
+    );
   }
 
   // Filter projects
-  const filteredProjects = projects?.filter(project => {
-    const matchesDivision = divisionFilter === 'all' || project.division_id === divisionFilter
-    const matchesStatus = statusFilter === 'all' || project.status === statusFilter
-    return matchesDivision && matchesStatus
-  }) || []
+  const filteredProjects =
+    projects?.filter(project => {
+      const matchesDivision =
+        divisionFilter === 'all' || project.division_id === divisionFilter;
+      const matchesStatus =
+        statusFilter === 'all' || project.status === statusFilter;
+      return matchesDivision && matchesStatus;
+    }) || [];
 
   const getDivisionName = (divisionId: string) => {
-    const division = divisions?.find(d => d.id === divisionId)
-    return division?.display_name || 'Unknown Division'
-  }
+    const division = divisions?.find(d => d.id === divisionId);
+    return division?.display_name || 'Unknown Division';
+  };
 
   // Get upcoming milestones and tasks (mock data for now)
   const upcomingItems = [
@@ -61,7 +84,7 @@ export default function SchedulePage() {
       title: 'Foundation Complete',
       project: 'Downtown Office Building',
       dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: '2',
@@ -69,7 +92,7 @@ export default function SchedulePage() {
       title: 'Install Electrical Wiring',
       project: 'Residential Complex',
       dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-      status: 'in_progress'
+      status: 'in_progress',
     },
     {
       id: '3',
@@ -77,9 +100,9 @@ export default function SchedulePage() {
       title: 'Roof Installation',
       project: 'Shopping Center',
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-      status: 'pending'
-    }
-  ]
+      status: 'pending',
+    },
+  ];
 
   return (
     <MainLayout>
@@ -151,7 +174,7 @@ export default function SchedulePage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Divisions</SelectItem>
-                  {divisions?.map((division) => (
+                  {divisions?.map(division => (
                     <SelectItem key={division.id} value={division.id}>
                       {division.display_name}
                     </SelectItem>
@@ -188,13 +211,18 @@ export default function SchedulePage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {upcomingItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
+              {upcomingItems.map(item => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
                   <div className="flex items-center gap-4">
                     <div className="w-3 h-3 bg-primary-500 rounded-full" />
                     <div>
                       <h4 className="font-medium">{item.title}</h4>
-                      <p className="text-sm text-charcoal-600">{item.project}</p>
+                      <p className="text-sm text-charcoal-600">
+                        {item.project}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -222,7 +250,7 @@ export default function SchedulePage() {
           <CardContent>
             {filteredProjects.length > 0 ? (
               <div className="space-y-4">
-                {filteredProjects.map((project) => (
+                {filteredProjects.map(project => (
                   <div key={project.id} className="border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
@@ -241,16 +269,26 @@ export default function SchedulePage() {
                         {project.status.replace('-', ' ')}
                       </Badge>
                     </div>
-                    
+
                     {/* Timeline Bar */}
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm text-charcoal-600">
-                        <span>Start: {project.start_date ? formatDate(project.start_date) : 'Not set'}</span>
-                        <span>End: {project.end_date ? formatDate(project.end_date) : 'Not set'}</span>
+                        <span>
+                          Start:{' '}
+                          {project.start_date
+                            ? formatDate(project.start_date)
+                            : 'Not set'}
+                        </span>
+                        <span>
+                          End:{' '}
+                          {project.end_date
+                            ? formatDate(project.end_date)
+                            : 'Not set'}
+                        </span>
                       </div>
                       <div className="w-full bg-charcoal-200 rounded-full h-2">
-                        <div 
-                          className="bg-primary-500 h-2 rounded-full" 
+                        <div
+                          className="bg-primary-500 h-2 rounded-full"
                           style={{ width: '45%' }} // Mock progress
                         />
                       </div>
@@ -267,8 +305,7 @@ export default function SchedulePage() {
                 <p className="text-charcoal-600">
                   {divisionFilter !== 'all' || statusFilter !== 'all'
                     ? 'Try adjusting your filters'
-                    : 'No projects have been created yet'
-                  }
+                    : 'No projects have been created yet'}
                 </p>
               </div>
             )}
@@ -276,5 +313,5 @@ export default function SchedulePage() {
         </Card>
       </div>
     </MainLayout>
-  )
+  );
 }

@@ -1,34 +1,65 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useUsers, useDivisions } from '@/hooks/use-database'
-import { MainLayout } from '@/components/layout/main-layout'
-import { Loading } from '@/components/ui/loading'
-import { ErrorBoundary } from '@/components/ui/error-boundary'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Input } from '@/components/ui/Input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { formatDate, getInitials, getRoleColor } from '@/lib/utils'
-import { Search, Filter, Plus, Mail, Phone, MapPin, Building2 } from 'lucide-react'
+import { useState } from 'react';
+import { useUsers, useDivisions } from '@/hooks/use-database';
+import { MainLayout } from '@/components/layout/main-layout';
+import { Loading } from '@/components/ui/loading';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/Input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { formatDate, getInitials, getRoleColor } from '@/lib/utils';
+import {
+  Search,
+  Filter,
+  Plus,
+  Mail,
+  Phone,
+  MapPin,
+  Building2,
+} from 'lucide-react';
 
 export default function TeamPage() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [divisionFilter, setDivisionFilter] = useState<string>('all')
-  const [roleFilter, setRoleFilter] = useState<string>('all')
+  const [searchQuery, setSearchQuery] = useState('');
+  const [divisionFilter, setDivisionFilter] = useState<string>('all');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
 
-  const { data: users, isLoading: usersLoading, error: usersError } = useUsers()
-  const { data: divisions, isLoading: divisionsLoading } = useDivisions()
+  const {
+    data: users,
+    isLoading: usersLoading,
+    error: usersError,
+  } = useUsers();
+  const { data: divisions, isLoading: divisionsLoading } = useDivisions();
 
   if (usersLoading || divisionsLoading) {
     return (
       <MainLayout>
         <Loading />
       </MainLayout>
-    )
+    );
   }
 
   if (usersError) {
@@ -36,34 +67,41 @@ export default function TeamPage() {
       <MainLayout>
         <ErrorBoundary>
           <div className="text-center py-12">
-            <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Team</h2>
+            <h2 className="text-xl font-semibold text-red-600 mb-2">
+              Error Loading Team
+            </h2>
             <p className="text-charcoal-600">{usersError.message}</p>
           </div>
         </ErrorBoundary>
       </MainLayout>
-    )
+    );
   }
 
   // Filter users
-  const filteredUsers = users?.filter(user => {
-    const matchesSearch = 
-      user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesDivision = divisionFilter === 'all' || 
-      user.user_divisions?.some(ud => ud.division_id === divisionFilter)
-    
-    const matchesRole = roleFilter === 'all' || 
-      user.user_divisions?.some(ud => ud.role === roleFilter)
+  const filteredUsers =
+    (Array.isArray(users) ? users : [])?.filter(user => {
+      const matchesSearch =
+        user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesSearch && matchesDivision && matchesRole
-  }) || []
+      const matchesDivision =
+        divisionFilter === 'all' ||
+        user.user_divisions?.some(
+          (ud: any) => ud.division_id === divisionFilter
+        );
+
+      const matchesRole =
+        roleFilter === 'all' ||
+        user.user_divisions?.some((ud: any) => ud.role === roleFilter);
+
+      return matchesSearch && matchesDivision && matchesRole;
+    }) || [];
 
   const getDivisionName = (divisionId: string) => {
-    const division = divisions?.find(d => d.id === divisionId)
-    return division?.display_name || 'Unknown Division'
-  }
+    const division = divisions?.find(d => d.id === divisionId);
+    return division?.display_name || 'Unknown Division';
+  };
 
   return (
     <MainLayout>
@@ -97,7 +135,7 @@ export default function TeamPage() {
                 <Input
                   placeholder="Search team members..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -108,7 +146,7 @@ export default function TeamPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Divisions</SelectItem>
-                  {divisions?.map((division) => (
+                  {divisions?.map(division => (
                     <SelectItem key={division.id} value={division.id}>
                       {division.display_name}
                     </SelectItem>
@@ -123,7 +161,9 @@ export default function TeamPage() {
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="project_manager">Project Manager</SelectItem>
+                  <SelectItem value="project_manager">
+                    Project Manager
+                  </SelectItem>
                   <SelectItem value="supervisor">Supervisor</SelectItem>
                   <SelectItem value="estimator">Estimator</SelectItem>
                   <SelectItem value="client">Client</SelectItem>
@@ -139,7 +179,8 @@ export default function TeamPage() {
           <CardHeader>
             <CardTitle>Team Members ({filteredUsers.length})</CardTitle>
             <CardDescription>
-              Showing {filteredUsers.length} of {users?.length || 0} team members
+              Showing {filteredUsers.length} of{' '}
+              {Array.isArray(users) ? users.length : 0} team members
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -157,7 +198,7 @@ export default function TeamPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.map((user) => (
+                    {filteredUsers.map(user => (
                       <TableRow key={user.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
@@ -172,7 +213,9 @@ export default function TeamPage() {
                                 {user.first_name} {user.last_name}
                               </div>
                               <div className="text-sm text-charcoal-600">
-                                {user.internal ? 'Internal Staff' : 'External User'}
+                                {user.internal
+                                  ? 'Internal Staff'
+                                  : 'External User'}
                               </div>
                             </div>
                           </div>
@@ -193,12 +236,17 @@ export default function TeamPage() {
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1">
-                            {user.user_divisions?.map((userDivision) => (
-                              <div key={userDivision.id} className="flex items-center gap-2">
+                            {user.user_divisions?.map((userDivision: any) => (
+                              <div
+                                key={userDivision.id}
+                                className="flex items-center gap-2"
+                              >
                                 <Badge variant="outline" className="text-xs">
                                   {getDivisionName(userDivision.division_id)}
                                 </Badge>
-                                <Badge className={`text-xs ${getRoleColor(userDivision.role)}`}>
+                                <Badge
+                                  className={`text-xs ${getRoleColor(userDivision.role)}`}
+                                >
                                   {userDivision.role.replace('_', ' ')}
                                 </Badge>
                               </div>
@@ -206,13 +254,17 @@ export default function TeamPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge className={user.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                          <Badge
+                            className={
+                              user.active
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }
+                          >
                             {user.active ? 'Active' : 'Inactive'}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          {formatDate(user.created_at)}
-                        </TableCell>
+                        <TableCell>{formatDate(user.created_at)}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Button variant="ghost" size="sm">
@@ -237,22 +289,25 @@ export default function TeamPage() {
                   No team members found
                 </h3>
                 <p className="text-charcoal-600 mb-4">
-                  {searchQuery || divisionFilter !== 'all' || roleFilter !== 'all'
+                  {searchQuery ||
+                  divisionFilter !== 'all' ||
+                  roleFilter !== 'all'
                     ? 'Try adjusting your filters or search terms'
-                    : 'Get started by adding your first team member'
-                  }
+                    : 'Get started by adding your first team member'}
                 </p>
-                {(!searchQuery && divisionFilter === 'all' && roleFilter === 'all') && (
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Team Member
-                  </Button>
-                )}
+                {!searchQuery &&
+                  divisionFilter === 'all' &&
+                  roleFilter === 'all' && (
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Team Member
+                    </Button>
+                  )}
               </div>
             )}
           </CardContent>
         </Card>
       </div>
     </MainLayout>
-  )
+  );
 }

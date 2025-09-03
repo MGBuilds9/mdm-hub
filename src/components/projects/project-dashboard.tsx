@@ -1,47 +1,79 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
-import { Progress } from '@/components/ui/progress'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ProjectWithFullDetails, Milestone, Task } from '@/types/database'
-import { formatDate, formatCurrency, getStatusColor, getInitials } from '@/lib/utils'
-import { Calendar, MapPin, Users, DollarSign, Clock, CheckCircle, AlertCircle } from 'lucide-react'
+import { useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ProjectWithFullDetails, Milestone, Task } from '@/types/database';
+import {
+  formatDate,
+  formatCurrency,
+  getStatusColor,
+  getInitials,
+} from '@/lib/utils';
+import {
+  Calendar,
+  MapPin,
+  Users,
+  DollarSign,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react';
 
 interface ProjectDashboardProps {
-  project: ProjectWithFullDetails
+  project: ProjectWithFullDetails;
 }
 
 export function ProjectDashboard({ project }: ProjectDashboardProps) {
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Calculate project metrics
-  const totalTasks = project.tasks.length
-  const completedTasks = project.tasks.filter(task => task.status === 'completed').length
-  const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+  const totalTasks = project.tasks.length;
+  const completedTasks = project.tasks.filter(
+    task => task.status === 'completed'
+  ).length;
+  const progressPercentage =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const overdueTasks = project.tasks.filter(task => 
-    task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed'
-  ).length
+  const overdueTasks = project.tasks.filter(
+    task =>
+      task.due_date &&
+      new Date(task.due_date) < new Date() &&
+      task.status !== 'completed'
+  ).length;
 
   const upcomingMilestones = project.milestones
     .filter(milestone => new Date(milestone.due_date) > new Date())
-    .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
-    .slice(0, 3)
+    .sort(
+      (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+    )
+    .slice(0, 3);
 
   const recentTasks = project.tasks
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 5)
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+    .slice(0, 5);
 
   return (
     <div className="space-y-6">
       {/* Project Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-charcoal-950">{project.name}</h1>
+          <h1 className="text-3xl font-bold text-charcoal-950">
+            {project.name}
+          </h1>
           <div className="flex items-center gap-4 mt-2 text-sm text-charcoal-600">
             <div className="flex items-center gap-1">
               <MapPin className="h-4 w-4" />
@@ -49,7 +81,9 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
             </div>
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              {project.start_date ? formatDate(project.start_date) : 'No start date'}
+              {project.start_date
+                ? formatDate(project.start_date)
+                : 'No start date'}
             </div>
             <Badge className={getStatusColor(project.status)}>
               {project.status.replace('-', ' ').toUpperCase()}
@@ -87,9 +121,7 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
             <div className="text-2xl font-bold">
               {project.budget ? formatCurrency(project.budget) : 'Not set'}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Project budget
-            </p>
+            <p className="text-xs text-muted-foreground">Project budget</p>
           </CardContent>
         </Card>
 
@@ -99,10 +131,10 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{project.project_users.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Active team members
-            </p>
+            <div className="text-2xl font-bold">
+              {project.project_users.length}
+            </div>
+            <p className="text-xs text-muted-foreground">Active team members</p>
           </CardContent>
         </Card>
 
@@ -112,10 +144,10 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{overdueTasks}</div>
-            <p className="text-xs text-muted-foreground">
-              Tasks past due date
-            </p>
+            <div className="text-2xl font-bold text-red-600">
+              {overdueTasks}
+            </div>
+            <p className="text-xs text-muted-foreground">Tasks past due date</p>
           </CardContent>
         </Card>
       </div>
@@ -151,8 +183,11 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
               </CardHeader>
               <CardContent className="space-y-3">
                 {upcomingMilestones.length > 0 ? (
-                  upcomingMilestones.map((milestone) => (
-                    <div key={milestone.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  upcomingMilestones.map(milestone => (
+                    <div
+                      key={milestone.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
                       <div>
                         <p className="font-medium">{milestone.name}</p>
                         <p className="text-sm text-charcoal-600">
@@ -165,7 +200,9 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
                     </div>
                   ))
                 ) : (
-                  <p className="text-charcoal-600 text-center py-4">No upcoming milestones</p>
+                  <p className="text-charcoal-600 text-center py-4">
+                    No upcoming milestones
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -176,13 +213,18 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
           <Card>
             <CardHeader>
               <CardTitle>Project Milestones</CardTitle>
-              <CardDescription>Track project progress through key milestones</CardDescription>
+              <CardDescription>
+                Track project progress through key milestones
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {project.milestones.length > 0 ? (
                 <div className="space-y-4">
-                  {project.milestones.map((milestone) => (
-                    <div key={milestone.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  {project.milestones.map(milestone => (
+                    <div
+                      key={milestone.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
                           <h4 className="font-medium">{milestone.name}</h4>
@@ -191,20 +233,29 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
                           </Badge>
                         </div>
                         {milestone.description && (
-                          <p className="text-sm text-charcoal-600 mt-1">{milestone.description}</p>
+                          <p className="text-sm text-charcoal-600 mt-1">
+                            {milestone.description}
+                          </p>
                         )}
                         <div className="flex items-center gap-4 mt-2 text-sm text-charcoal-600">
                           <span>Due: {formatDate(milestone.due_date)}</span>
-                          <span>Progress: {milestone.completion_percentage}%</span>
+                          <span>
+                            Progress: {milestone.completion_percentage}%
+                          </span>
                         </div>
-                        <Progress value={milestone.completion_percentage} className="mt-2" />
+                        <Progress
+                          value={milestone.completion_percentage}
+                          className="mt-2"
+                        />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-charcoal-600 mb-4">No milestones created yet</p>
+                  <p className="text-charcoal-600 mb-4">
+                    No milestones created yet
+                  </p>
                   <Button>Create First Milestone</Button>
                 </div>
               )}
@@ -221,20 +272,28 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
             <CardContent>
               {recentTasks.length > 0 ? (
                 <div className="space-y-3">
-                  {recentTasks.map((task) => (
-                    <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  {recentTasks.map(task => (
+                    <div
+                      key={task.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
                           <h4 className="font-medium">{task.title}</h4>
                           <Badge className={getStatusColor(task.status)}>
                             {task.status}
                           </Badge>
-                          <Badge variant="outline" className={getStatusColor(task.priority)}>
+                          <Badge
+                            variant="outline"
+                            className={getStatusColor(task.priority)}
+                          >
                             {task.priority}
                           </Badge>
                         </div>
                         {task.description && (
-                          <p className="text-sm text-charcoal-600 mt-1">{task.description}</p>
+                          <p className="text-sm text-charcoal-600 mt-1">
+                            {task.description}
+                          </p>
                         )}
                         {task.due_date && (
                           <p className="text-sm text-charcoal-600 mt-1">
@@ -264,19 +323,30 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
             <CardContent>
               {project.project_users.length > 0 ? (
                 <div className="space-y-3">
-                  {project.project_users.map((projectUser) => (
-                    <div key={projectUser.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                  {project.project_users.map(projectUser => (
+                    <div
+                      key={projectUser.id}
+                      className="flex items-center gap-3 p-3 border rounded-lg"
+                    >
                       <Avatar>
-                        <AvatarImage src={projectUser.user.avatar_url || undefined} />
+                        <AvatarImage
+                          src={projectUser.user.avatar_url || undefined}
+                        />
                         <AvatarFallback>
-                          {getInitials(projectUser.user.first_name, projectUser.user.last_name)}
+                          {getInitials(
+                            projectUser.user.first_name,
+                            projectUser.user.last_name
+                          )}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <p className="font-medium">
-                          {projectUser.user.first_name} {projectUser.user.last_name}
+                          {projectUser.user.first_name}{' '}
+                          {projectUser.user.last_name}
                         </p>
-                        <p className="text-sm text-charcoal-600">{projectUser.user.email}</p>
+                        <p className="text-sm text-charcoal-600">
+                          {projectUser.user.email}
+                        </p>
                       </div>
                       <Badge className={getStatusColor(projectUser.role)}>
                         {projectUser.role}
@@ -286,7 +356,9 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-charcoal-600 mb-4">No team members assigned yet</p>
+                  <p className="text-charcoal-600 mb-4">
+                    No team members assigned yet
+                  </p>
                   <Button>Add Team Member</Button>
                 </div>
               )}
@@ -295,5 +367,5 @@ export function ProjectDashboard({ project }: ProjectDashboardProps) {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

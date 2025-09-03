@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from 'react';
 import {
   ColumnDef,
   flexRender,
@@ -9,11 +9,11 @@ import {
   useReactTable,
   SortingState,
   ColumnFiltersState,
-} from "@tanstack/react-table"
-import { ChevronDown, ChevronUp, Search, Filter } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "./button"
-import { Input } from "./input"
+} from '@tanstack/react-table';
+import { ChevronDown, ChevronUp, Search, Filter } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from './Button';
+import { Input } from './Input';
 import {
   Table,
   TableBody,
@@ -21,7 +21,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./table"
+} from './table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,34 +29,36 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./dropdown-menu"
+} from './dropdown-menu';
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  searchKey?: string
-  searchPlaceholder?: string
-  className?: string
-  showPagination?: boolean
-  showSearch?: boolean
-  showFilters?: boolean
-  pageSize?: number
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  searchKey?: string;
+  searchPlaceholder?: string;
+  className?: string;
+  showPagination?: boolean;
+  showSearch?: boolean;
+  showFilters?: boolean;
+  pageSize?: number;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
-  searchPlaceholder = "Search...",
+  searchPlaceholder = 'Search...',
   className,
   showPagination = true,
   showSearch = true,
   showFilters = false,
   pageSize = 10,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
     data,
@@ -78,10 +80,10 @@ export function DataTable<TData, TValue>({
         pageSize,
       },
     },
-  })
+  });
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn('space-y-4', className)}>
       {/* Toolbar */}
       {(showSearch || showFilters) && (
         <div className="flex items-center justify-between">
@@ -91,9 +93,14 @@ export function DataTable<TData, TValue>({
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-charcoal-400" />
                 <Input
                   placeholder={searchPlaceholder}
-                  value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-                  onChange={(event) =>
-                    table.getColumn(searchKey)?.setFilterValue(event.target.value)
+                  value={
+                    (table.getColumn(searchKey)?.getFilterValue() as string) ??
+                    ''
+                  }
+                  onChange={event =>
+                    table
+                      .getColumn(searchKey)
+                      ?.setFilterValue(event.target.value)
                   }
                   className="pl-8 max-w-sm"
                 />
@@ -112,13 +119,13 @@ export function DataTable<TData, TValue>({
                   <DropdownMenuSeparator />
                   {table
                     .getAllColumns()
-                    .filter((column) => column.getCanFilter())
-                    .map((column) => {
+                    .filter(column => column.getCanFilter())
+                    .map(column => {
                       return (
                         <DropdownMenuItem key={column.id}>
                           {column.id}
                         </DropdownMenuItem>
-                      )
+                      );
                     })}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -134,9 +141,9 @@ export function DataTable<TData, TValue>({
       <div className="rounded-md border border-charcoal-200">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map(header => {
                   return (
                     <TableHead key={header.id}>
                       {header.isPlaceholder
@@ -146,19 +153,19 @@ export function DataTable<TData, TValue>({
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map(row => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  data-state={row.getIsSelected() && 'selected'}
                 >
-                  {row.getVisibleCells().map((cell) => (
+                  {row.getVisibleCells().map(cell => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -186,7 +193,7 @@ export function DataTable<TData, TValue>({
       {showPagination && (
         <div className="flex items-center justify-between space-x-2 py-4">
           <div className="flex-1 text-sm text-charcoal-500">
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            Page {table.getState().pagination.pageIndex + 1} of{' '}
             {table.getPageCount()}
           </div>
           <div className="flex items-center space-x-2">
@@ -210,28 +217,31 @@ export function DataTable<TData, TValue>({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // Utility function to create sortable column header
-export function SortableHeader({ column, children }: { 
-  column: any
-  children: React.ReactNode 
+export function SortableHeader({
+  column,
+  children,
+}: {
+  column: any;
+  children: React.ReactNode;
 }) {
   return (
     <Button
       variant="ghost"
-      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
       className="h-auto p-0 font-medium hover:bg-transparent"
     >
       {children}
-      {column.getIsSorted() === "asc" ? (
+      {column.getIsSorted() === 'asc' ? (
         <ChevronUp className="ml-2 h-4 w-4" />
-      ) : column.getIsSorted() === "desc" ? (
+      ) : column.getIsSorted() === 'desc' ? (
         <ChevronDown className="ml-2 h-4 w-4" />
       ) : (
         <div className="ml-2 h-4 w-4" />
       )}
     </Button>
-  )
+  );
 }

@@ -1,111 +1,83 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cn } from "@/lib/utils"
-import { Label } from "./label"
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cn } from '@/lib/utils';
+import { Label } from './label';
+import {
+  useForm as useReactHookForm,
+  UseFormReturn,
+  FieldValues,
+  Path,
+} from 'react-hook-form';
 
 interface FormFieldProps {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }
 
 export function FormField({ children, className }: FormFieldProps) {
-  return (
-    <div className={cn("space-y-2", className)}>
-      {children}
-    </div>
-  )
+  return <div className={cn('space-y-2', className)}>{children}</div>;
 }
 
-interface FormLabelProps extends React.ComponentPropsWithoutRef<typeof Label> {
-  required?: boolean
-}
-
-export function FormLabel({ children, required, className, ...props }: FormLabelProps) {
-  return (
-    <Label className={cn(className)} {...props}>
-      {children}
-      {required && <span className="text-error-500 ml-1">*</span>}
-    </Label>
-  )
-}
-
-interface FormDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
+interface FormDescriptionProps
+  extends React.HTMLAttributes<HTMLParagraphElement> {}
 
 export function FormDescription({ className, ...props }: FormDescriptionProps) {
   return (
-    <p
-      className={cn("text-sm text-charcoal-500", className)}
-      {...props}
-    />
-  )
-}
-
-interface FormMessageProps extends React.HTMLAttributes<HTMLParagraphElement> {
-  type?: "error" | "warning" | "success" | "info"
-}
-
-export function FormMessage({ className, type = "error", children, ...props }: FormMessageProps) {
-  if (!children) return null
-
-  const typeClasses = {
-    error: "text-error-600",
-    warning: "text-warning-600",
-    success: "text-success-600",
-    info: "text-charcoal-600",
-  }
-
-  return (
-    <p
-      className={cn("text-sm font-medium", typeClasses[type], className)}
-      {...props}
-    >
-      {children}
-    </p>
-  )
+    <p className={cn('text-sm text-charcoal-500', className)} {...props} />
+  );
 }
 
 interface FormGroupProps {
-  children: React.ReactNode
-  className?: string
-  asChild?: boolean
+  children: React.ReactNode;
+  className?: string;
+  asChild?: boolean;
 }
 
-export function FormGroup({ children, className, asChild = false }: FormGroupProps) {
-  const Comp = asChild ? Slot : "div"
-  
-  return (
-    <Comp className={cn("space-y-4", className)}>
-      {children}
-    </Comp>
-  )
+export function FormGroup({
+  children,
+  className,
+  asChild = false,
+}: FormGroupProps) {
+  const Comp = asChild ? Slot : 'div';
+
+  return <Comp className={cn('space-y-4', className)}>{children}</Comp>;
 }
 
 interface FormRowProps {
-  children: React.ReactNode
-  className?: string
-  asChild?: boolean
+  children: React.ReactNode;
+  className?: string;
+  asChild?: boolean;
 }
 
-export function FormRow({ children, className, asChild = false }: FormRowProps) {
-  const Comp = asChild ? Slot : "div"
-  
+export function FormRow({
+  children,
+  className,
+  asChild = false,
+}: FormRowProps) {
+  const Comp = asChild ? Slot : 'div';
+
   return (
-    <Comp className={cn("grid grid-cols-1 md:grid-cols-2 gap-4", className)}>
+    <Comp className={cn('grid grid-cols-1 md:grid-cols-2 gap-4', className)}>
       {children}
     </Comp>
-  )
+  );
 }
 
 interface FormSectionProps {
-  title?: string
-  description?: string
-  children: React.ReactNode
-  className?: string
+  title?: string;
+  description?: string;
+  children: React.ReactNode;
+  className?: string;
 }
 
-export function FormSection({ title, description, children, className }: FormSectionProps) {
+export function FormSection({
+  title,
+  description,
+  children,
+  className,
+}: FormSectionProps) {
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn('space-y-4', className)}>
       {(title || description) && (
         <div className="space-y-1">
           {title && (
@@ -116,30 +88,121 @@ export function FormSection({ title, description, children, className }: FormSec
           )}
         </div>
       )}
-      <div className="space-y-4">
-        {children}
-      </div>
+      <div className="space-y-4">{children}</div>
     </div>
-  )
+  );
 }
 
 interface FormActionsProps {
-  children: React.ReactNode
-  className?: string
-  align?: "left" | "right" | "center" | "between"
+  children: React.ReactNode;
+  className?: string;
+  align?: 'left' | 'right' | 'center' | 'between';
 }
 
-export function FormActions({ children, className, align = "right" }: FormActionsProps) {
+export function FormActions({
+  children,
+  className,
+  align = 'right',
+}: FormActionsProps) {
   const alignClasses = {
-    left: "justify-start",
-    right: "justify-end",
-    center: "justify-center",
-    between: "justify-between",
-  }
+    left: 'justify-start',
+    right: 'justify-end',
+    center: 'justify-center',
+    between: 'justify-between',
+  };
 
   return (
-    <div className={cn("flex gap-3", alignClasses[align], className)}>
+    <div className={cn('flex gap-3', alignClasses[align], className)}>
       {children}
     </div>
-  )
+  );
 }
+
+// React Hook Form components
+interface FormProps<T extends FieldValues> {
+  form: UseFormReturn<T>;
+  children: React.ReactNode;
+  onSubmit: (data: T) => void | Promise<void>;
+  className?: string;
+}
+
+export function Form<T extends FieldValues>({
+  form,
+  children,
+  onSubmit,
+  className,
+}: FormProps<T>) {
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)} className={className}>
+      {children}
+    </form>
+  );
+}
+
+interface FormItemProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function FormItem({ children, className }: FormItemProps) {
+  return <div className={cn('space-y-2', className)}>{children}</div>;
+}
+
+interface FormControlProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function FormControl({ children, className }: FormControlProps) {
+  return <div className={className}>{children}</div>;
+}
+
+interface FormLabelProps extends React.ComponentPropsWithoutRef<typeof Label> {
+  required?: boolean;
+}
+
+export function FormLabel({
+  children,
+  required,
+  className,
+  ...props
+}: FormLabelProps) {
+  return (
+    <Label className={cn(className)} {...props}>
+      {children}
+      {required && <span className="text-error-500 ml-1">*</span>}
+    </Label>
+  );
+}
+
+interface FormMessageProps extends React.HTMLAttributes<HTMLParagraphElement> {
+  type?: 'error' | 'warning' | 'success' | 'info';
+}
+
+export function FormMessage({
+  className,
+  type = 'error',
+  children,
+  ...props
+}: FormMessageProps) {
+  if (!children) return null;
+
+  const typeClasses = {
+    error: 'text-error-600',
+    warning: 'text-warning-600',
+    success: 'text-success-600',
+    info: 'text-charcoal-600',
+  };
+
+  return (
+    <p
+      className={cn('text-sm font-medium', typeClasses[type], className)}
+      {...props}
+    >
+      {children}
+    </p>
+  );
+}
+
+// Re-export useForm from react-hook-form
+export { useReactHookForm as useForm };

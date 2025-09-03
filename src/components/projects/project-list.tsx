@@ -1,76 +1,110 @@
-'use client'
+'use client';
 
-import { useState, useMemo } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Project, Division } from '@/types/database'
-import { formatDate, formatCurrency, getStatusColor, getInitials } from '@/lib/utils'
-import { Search, Filter, Plus, Eye, Edit, MoreHorizontal } from 'lucide-react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { useState, useMemo } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Project, Division } from '@/types/database';
+import {
+  formatDate,
+  formatCurrency,
+  getStatusColor,
+  getInitials,
+} from '@/lib/utils';
+import { Search, Filter, Plus, Eye, Edit, MoreHorizontal } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ProjectListProps {
-  projects: Project[]
-  divisions: Division[]
-  onCreateProject?: () => void
-  onViewProject?: (project: Project) => void
-  onEditProject?: (project: Project) => void
+  projects: Project[];
+  divisions: Division[];
+  onCreateProject?: () => void;
+  onViewProject?: (project: Project) => void;
+  onEditProject?: (project: Project) => void;
 }
 
-export function ProjectList({ 
-  projects, 
-  divisions, 
-  onCreateProject, 
-  onViewProject, 
-  onEditProject 
+export function ProjectList({
+  projects,
+  divisions,
+  onCreateProject,
+  onViewProject,
+  onEditProject,
 }: ProjectListProps) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [divisionFilter, setDivisionFilter] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<string>('created_at')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [divisionFilter, setDivisionFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Filter and sort projects
   const filteredProjects = useMemo(() => {
-    let filtered = projects.filter(project => {
-      const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           project.location?.toLowerCase().includes(searchQuery.toLowerCase())
-      
-      const matchesStatus = statusFilter === 'all' || project.status === statusFilter
-      const matchesDivision = divisionFilter === 'all' || project.division_id === divisionFilter
-      
-      return matchesSearch && matchesStatus && matchesDivision
-    })
+    const filtered = projects.filter(project => {
+      const matchesSearch =
+        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        project.location?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === 'all' || project.status === statusFilter;
+      const matchesDivision =
+        divisionFilter === 'all' || project.division_id === divisionFilter;
+
+      return matchesSearch && matchesStatus && matchesDivision;
+    });
 
     // Sort projects
     filtered.sort((a, b) => {
-      let aValue: any = a[sortBy as keyof Project]
-      let bValue: any = b[sortBy as keyof Project]
+      let aValue: any = a[sortBy as keyof Project];
+      let bValue: any = b[sortBy as keyof Project];
 
       if (sortBy === 'created_at' || sortBy === 'updated_at') {
-        aValue = new Date(aValue).getTime()
-        bValue = new Date(bValue).getTime()
+        aValue = new Date(aValue).getTime();
+        bValue = new Date(bValue).getTime();
       }
 
       if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1
+        return aValue > bValue ? 1 : -1;
       } else {
-        return aValue < bValue ? 1 : -1
+        return aValue < bValue ? 1 : -1;
       }
-    })
+    });
 
-    return filtered
-  }, [projects, searchQuery, statusFilter, divisionFilter, sortBy, sortOrder])
+    return filtered;
+  }, [projects, searchQuery, statusFilter, divisionFilter, sortBy, sortOrder]);
 
   const getDivisionName = (divisionId: string) => {
-    const division = divisions.find(d => d.id === divisionId)
-    return division?.display_name || 'Unknown Division'
-  }
+    const division = divisions.find(d => d.id === divisionId);
+    return division?.display_name || 'Unknown Division';
+  };
 
   return (
     <div className="space-y-6">
@@ -103,7 +137,7 @@ export function ProjectList({
               <Input
                 placeholder="Search projects..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
@@ -128,7 +162,7 @@ export function ProjectList({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Divisions</SelectItem>
-                {divisions.map((division) => (
+                {divisions.map(division => (
                   <SelectItem key={division.id} value={division.id}>
                     {division.display_name}
                   </SelectItem>
@@ -136,11 +170,14 @@ export function ProjectList({
               </SelectContent>
             </Select>
 
-            <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
-              const [field, order] = value.split('-')
-              setSortBy(field)
-              setSortOrder(order as 'asc' | 'desc')
-            }}>
+            <Select
+              value={`${sortBy}-${sortOrder}`}
+              onValueChange={value => {
+                const [field, order] = value.split('-');
+                setSortBy(field || 'name');
+                setSortOrder((order as 'asc' | 'desc') || 'asc');
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -183,7 +220,7 @@ export function ProjectList({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredProjects.map((project) => (
+                  {filteredProjects.map(project => (
                     <TableRow key={project.id}>
                       <TableCell>
                         <div>
@@ -211,13 +248,19 @@ export function ProjectList({
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {project.budget ? formatCurrency(project.budget) : 'Not set'}
+                        {project.budget
+                          ? formatCurrency(project.budget)
+                          : 'Not set'}
                       </TableCell>
                       <TableCell>
-                        {project.start_date ? formatDate(project.start_date) : 'Not set'}
+                        {project.start_date
+                          ? formatDate(project.start_date)
+                          : 'Not set'}
                       </TableCell>
                       <TableCell>
-                        {project.end_date ? formatDate(project.end_date) : 'Not set'}
+                        {project.end_date
+                          ? formatDate(project.end_date)
+                          : 'Not set'}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -265,21 +308,24 @@ export function ProjectList({
                 No projects found
               </h3>
               <p className="text-charcoal-600 mb-4">
-                {searchQuery || statusFilter !== 'all' || divisionFilter !== 'all'
+                {searchQuery ||
+                statusFilter !== 'all' ||
+                divisionFilter !== 'all'
                   ? 'Try adjusting your filters or search terms'
-                  : 'Get started by creating your first project'
-                }
+                  : 'Get started by creating your first project'}
               </p>
-              {(!searchQuery && statusFilter === 'all' && divisionFilter === 'all') && (
-                <Button onClick={onCreateProject}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Project
-                </Button>
-              )}
+              {!searchQuery &&
+                statusFilter === 'all' &&
+                divisionFilter === 'all' && (
+                  <Button onClick={onCreateProject}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Project
+                  </Button>
+                )}
             </div>
           )}
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

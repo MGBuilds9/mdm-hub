@@ -1,59 +1,65 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency: string = 'USD'): string {
+export function formatCurrency(
+  amount: number,
+  currency: string = 'USD'
+): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
-  }).format(amount)
+  }).format(amount);
 }
 
-export function formatDate(date: Date | string, format: 'short' | 'long' | 'time' = 'short'): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date
-  
+export function formatDate(
+  date: Date | string,
+  format: 'short' | 'long' | 'time' = 'short'
+): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+
   if (format === 'short') {
     return dateObj.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-    })
+    });
   }
-  
+
   if (format === 'long') {
     return dateObj.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    })
+    });
   }
-  
+
   if (format === 'time') {
     return dateObj.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
-    })
+    });
   }
-  
-  return dateObj.toLocaleDateString()
+
+  return dateObj.toLocaleDateString();
 }
 
 export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes'
-  
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 export function getInitials(firstName: string, lastName: string): string {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 }
 
 export function slugify(text: string): string {
@@ -61,53 +67,53 @@ export function slugify(text: string): string {
     .toLowerCase()
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .replace(/^-+|-+$/g, '');
 }
 
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null
-  
+  let timeout: NodeJS.Timeout | null = null;
+
   return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout)
-    timeout = setTimeout(() => func(...args), wait)
-  }
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
 }
 
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
-  let inThrottle: boolean
-  
+  let inThrottle: boolean;
+
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
-      func(...args)
-      inThrottle = true
-      setTimeout(() => (inThrottle = false), limit)
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
     }
-  }
+  };
 }
 
 export function generateId(): string {
-  return Math.random().toString(36).substr(2, 9)
+  return Math.random().toString(36).substr(2, 9);
 }
 
 export function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 }
 
 export function isValidPhone(phone: string): boolean {
-  const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
-  return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))
+  const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+  return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
 }
 
 export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
-  return text.substr(0, maxLength) + '...'
+  if (text.length <= maxLength) return text;
+  return text.substr(0, maxLength) + '...';
 }
 
 export function getStatusColor(status: string): string {
@@ -118,13 +124,13 @@ export function getStatusColor(status: string): string {
     'on-hold': 'text-warning-600 bg-warning-50',
     cancelled: 'text-error-600 bg-error-50',
     draft: 'text-charcoal-600 bg-charcoal-50',
-    'pending_approval': 'text-warning-600 bg-warning-50',
+    pending_approval: 'text-warning-600 bg-warning-50',
     approved: 'text-success-600 bg-success-50',
     rejected: 'text-error-600 bg-error-50',
     implemented: 'text-success-600 bg-success-50',
-  }
-  
-  return statusColors[status] || 'text-charcoal-600 bg-charcoal-50'
+  };
+
+  return statusColors[status] || 'text-charcoal-600 bg-charcoal-50';
 }
 
 export function getRoleColor(role: string): string {
@@ -134,28 +140,30 @@ export function getRoleColor(role: string): string {
     supervisor: 'text-warning-600 bg-warning-50',
     worker: 'text-success-600 bg-success-50',
     viewer: 'text-charcoal-600 bg-charcoal-50',
-  }
-  
-  return roleColors[role] || 'text-charcoal-600 bg-charcoal-50'
+  };
+
+  return roleColors[role] || 'text-charcoal-600 bg-charcoal-50';
 }
 
 export function formatRelativeTime(date: string | Date): string {
-  const now = new Date()
-  const targetDate = new Date(date)
-  const diffInSeconds = Math.floor((now.getTime() - targetDate.getTime()) / 1000)
+  const now = new Date();
+  const targetDate = new Date(date);
+  const diffInSeconds = Math.floor(
+    (now.getTime() - targetDate.getTime()) / 1000
+  );
 
   if (diffInSeconds < 60) {
-    return 'just now'
+    return 'just now';
   } else if (diffInSeconds < 3600) {
-    const minutes = Math.floor(diffInSeconds / 60)
-    return `${minutes} minute${minutes > 1 ? 's' : ''} ago`
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
   } else if (diffInSeconds < 86400) {
-    const hours = Math.floor(diffInSeconds / 3600)
-    return `${hours} hour${hours > 1 ? 's' : ''} ago`
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours} hour${hours > 1 ? 's' : ''} ago`;
   } else if (diffInSeconds < 2592000) {
-    const days = Math.floor(diffInSeconds / 86400)
-    return `${days} day${days > 1 ? 's' : ''} ago`
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days} day${days > 1 ? 's' : ''} ago`;
   } else {
-    return formatDate(targetDate)
+    return formatDate(targetDate);
   }
 }

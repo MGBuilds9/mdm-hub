@@ -1,34 +1,40 @@
-import * as React from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
+import * as React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Progress } from '@/components/ui/progress';
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
   Calendar,
   Users,
   FolderOpen,
   AlertTriangle,
-  CheckCircle
-} from "lucide-react"
-import { cn } from "@/lib/utils"
+  CheckCircle,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface StatCardProps {
-  title: string
-  value: string | number
+  title: string;
+  value: string | number;
   change?: {
-    value: number
-    type: 'increase' | 'decrease'
-    period: string
-  }
-  icon: React.ComponentType<{ className?: string }>
-  className?: string
+    value: number;
+    type: 'increase' | 'decrease';
+    period: string;
+  };
+  icon: React.ComponentType<{ className?: string }>;
+  className?: string;
 }
 
-function StatCard({ title, value, change, icon: Icon, className }: StatCardProps) {
+function StatCard({
+  title,
+  value,
+  change,
+  icon: Icon,
+  className,
+}: StatCardProps) {
   return (
-    <Card className={cn("", className)}>
+    <Card className={cn('', className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-charcoal-600">
           {title}
@@ -44,9 +50,13 @@ function StatCard({ title, value, change, icon: Icon, className }: StatCardProps
             ) : (
               <TrendingDown className="h-3 w-3 text-error-500 mr-1" />
             )}
-            <span className={cn(
-              change.type === 'increase' ? 'text-success-600' : 'text-error-600'
-            )}>
+            <span
+              className={cn(
+                change.type === 'increase'
+                  ? 'text-success-600'
+                  : 'text-error-600'
+              )}
+            >
               {Math.abs(change.value)}%
             </span>
             <span className="ml-1">from last {change.period}</span>
@@ -54,24 +64,24 @@ function StatCard({ title, value, change, icon: Icon, className }: StatCardProps
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
 interface ProjectProgressProps {
   project: {
-    id: string
-    name: string
-    progress: number
-    status: string
-    budget: number
-    spent: number
-    endDate: string
-  }
+    id: string;
+    name: string;
+    progress: number;
+    status: string;
+    budget: number;
+    spent: number;
+    endDate: string;
+  };
 }
 
 function ProjectProgress({ project }: ProjectProgressProps) {
-  const budgetUtilization = (project.spent / project.budget) * 100
-  const isOverBudget = budgetUtilization > 100
+  const budgetUtilization = (project.spent / project.budget) * 100;
+  const isOverBudget = budgetUtilization > 100;
 
   return (
     <Card>
@@ -95,21 +105,25 @@ function ProjectProgress({ project }: ProjectProgressProps) {
         <div>
           <div className="flex justify-between text-sm mb-2">
             <span className="text-charcoal-600">Budget</span>
-            <span className={cn(
-              "font-medium",
-              isOverBudget ? "text-error-600" : "text-charcoal-900"
-            )}>
-              ${project.spent.toLocaleString()} / ${project.budget.toLocaleString()}
+            <span
+              className={cn(
+                'font-medium',
+                isOverBudget ? 'text-error-600' : 'text-charcoal-900'
+              )}
+            >
+              ${project.spent.toLocaleString()} / $
+              {project.budget.toLocaleString()}
             </span>
           </div>
-          <Progress 
-            value={Math.min(budgetUtilization, 100)} 
-            className={cn("h-2", isOverBudget && "bg-error-100")}
+          <Progress
+            value={Math.min(budgetUtilization, 100)}
+            className={cn('h-2', isOverBudget && 'bg-error-100')}
           />
           {isOverBudget && (
             <div className="flex items-center text-xs text-error-600 mt-1">
               <AlertTriangle className="h-3 w-3 mr-1" />
-              Over budget by ${(project.spent - project.budget).toLocaleString()}
+              Over budget by $
+              {(project.spent - project.budget).toLocaleString()}
             </div>
           )}
         </div>
@@ -121,38 +135,42 @@ function ProjectProgress({ project }: ProjectProgressProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 interface DashboardStatsProps {
   stats: {
-    totalProjects: number
-    activeProjects: number
-    totalBudget: number
-    spentBudget: number
-    teamMembers: number
-    changeOrders: number
-    pendingApprovals: number
-    completedProjects: number
-  }
+    totalProjects: number;
+    activeProjects: number;
+    totalBudget: number;
+    spentBudget: number;
+    teamMembers: number;
+    changeOrders: number;
+    pendingApprovals: number;
+    completedProjects: number;
+  };
   projects: Array<{
-    id: string
-    name: string
-    progress: number
-    status: string
-    budget: number
-    spent: number
-    endDate: string
-  }>
-  className?: string
+    id: string;
+    name: string;
+    progress: number;
+    status: string;
+    budget: number;
+    spent: number;
+    endDate: string;
+  }>;
+  className?: string;
 }
 
-export function DashboardStats({ stats, projects, className }: DashboardStatsProps) {
-  const budgetUtilization = (stats.spentBudget / stats.totalBudget) * 100
-  const isOverBudget = budgetUtilization > 100
+export function DashboardStats({
+  stats,
+  projects,
+  className,
+}: DashboardStatsProps) {
+  const budgetUtilization = (stats.spentBudget / stats.totalBudget) * 100;
+  const isOverBudget = budgetUtilization > 100;
 
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn('space-y-6', className)}>
       {/* Overview Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
@@ -161,9 +179,9 @@ export function DashboardStats({ stats, projects, className }: DashboardStatsPro
           change={{
             value: 12,
             type: 'increase',
-            period: 'month'
+            period: 'month',
           }}
-          icon={FolderOpen}
+          icon={FolderOpen as React.ComponentType<{ className?: string }>}
         />
         <StatCard
           title="Active Projects"
@@ -171,9 +189,9 @@ export function DashboardStats({ stats, projects, className }: DashboardStatsPro
           change={{
             value: 5,
             type: 'increase',
-            period: 'month'
+            period: 'month',
           }}
-          icon={CheckCircle}
+          icon={CheckCircle as React.ComponentType<{ className?: string }>}
         />
         <StatCard
           title="Total Budget"
@@ -181,9 +199,9 @@ export function DashboardStats({ stats, projects, className }: DashboardStatsPro
           change={{
             value: 8,
             type: 'increase',
-            period: 'month'
+            period: 'month',
           }}
-          icon={DollarSign}
+          icon={DollarSign as React.ComponentType<{ className?: string }>}
         />
         <StatCard
           title="Team Members"
@@ -191,9 +209,9 @@ export function DashboardStats({ stats, projects, className }: DashboardStatsPro
           change={{
             value: 2,
             type: 'increase',
-            period: 'month'
+            period: 'month',
           }}
-          icon={Users}
+          icon={Users as React.ComponentType<{ className?: string }>}
         />
       </div>
 
@@ -210,29 +228,35 @@ export function DashboardStats({ stats, projects, className }: DashboardStatsPro
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-charcoal-600">Budget Utilization</span>
-                <span className={cn(
-                  "font-medium",
-                  isOverBudget ? "text-error-600" : "text-charcoal-900"
-                )}>
+                <span
+                  className={cn(
+                    'font-medium',
+                    isOverBudget ? 'text-error-600' : 'text-charcoal-900'
+                  )}
+                >
                   {budgetUtilization.toFixed(1)}%
                 </span>
               </div>
-              <Progress 
-                value={Math.min(budgetUtilization, 100)} 
-                className={cn("h-3", isOverBudget && "bg-error-100")}
+              <Progress
+                value={Math.min(budgetUtilization, 100)}
+                className={cn('h-3', isOverBudget && 'bg-error-100')}
               />
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-charcoal-600">Total Budget</p>
-                <p className="font-semibold">${stats.totalBudget.toLocaleString()}</p>
+                <p className="font-semibold">
+                  ${stats.totalBudget.toLocaleString()}
+                </p>
               </div>
               <div>
                 <p className="text-charcoal-600">Spent</p>
-                <p className={cn(
-                  "font-semibold",
-                  isOverBudget ? "text-error-600" : "text-charcoal-900"
-                )}>
+                <p
+                  className={cn(
+                    'font-semibold',
+                    isOverBudget ? 'text-error-600' : 'text-charcoal-900'
+                  )}
+                >
                   ${stats.spentBudget.toLocaleString()}
                 </p>
               </div>
@@ -240,7 +264,8 @@ export function DashboardStats({ stats, projects, className }: DashboardStatsPro
             {isOverBudget && (
               <div className="flex items-center text-sm text-error-600 bg-error-50 p-3 rounded-lg">
                 <AlertTriangle className="h-4 w-4 mr-2" />
-                Over budget by ${(stats.spentBudget - stats.totalBudget).toLocaleString()}
+                Over budget by $
+                {(stats.spentBudget - stats.totalBudget).toLocaleString()}
               </div>
             )}
           </CardContent>
@@ -276,11 +301,11 @@ export function DashboardStats({ stats, projects, className }: DashboardStatsPro
           Project Progress
         </h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
+          {projects.map(project => (
             <ProjectProgress key={project.id} project={project} />
           ))}
         </div>
       </div>
     </div>
-  )
+  );
 }

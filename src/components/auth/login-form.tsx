@@ -1,31 +1,37 @@
-import React, { useState } from 'react'
-import { useAuth } from '@/contexts/auth-context'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
-import { Building2, Mail, Lock, User, Phone, AlertCircle } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import React, { useState } from 'react';
+import { useAuth } from '@/contexts/auth-context';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { Building2, Mail, Lock, User, Phone, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface LoginFormProps {
-  onSuccess?: () => void
-  className?: string
+  onSuccess?: () => void;
+  className?: string;
 }
 
 export function LoginForm({ onSuccess, className }: LoginFormProps) {
-  const { signInWithEmail, signInWithAzure, signUp } = useAuth()
-  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const { signInWithEmail, signInWithAzure, signUp } = useAuth();
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   // Sign in form state
   const [signInData, setSignInData] = useState({
     email: '',
     password: '',
-  })
+  });
 
   // Sign up form state
   const [signUpData, setSignUpData] = useState({
@@ -36,33 +42,36 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
     lastName: '',
     phone: '',
     isInternal: false,
-  })
+  });
 
   const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-    const { error } = await signInWithEmail(signInData.email, signInData.password)
-    
+    const { error } = await signInWithEmail(
+      signInData.email,
+      signInData.password
+    );
+
     if (error) {
-      setError(error.message || 'Failed to sign in')
+      setError(error.message || 'Failed to sign in');
     } else {
-      onSuccess?.()
+      onSuccess?.();
     }
-    
-    setLoading(false)
-  }
+
+    setLoading(false);
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     if (signUpData.password !== signUpData.confirmPassword) {
-      setError('Passwords do not match')
-      setLoading(false)
-      return
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
     }
 
     const { error } = await signUp(signUpData.email, signUpData.password, {
@@ -70,12 +79,14 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
       last_name: signUpData.lastName,
       phone: signUpData.phone,
       is_internal: signUpData.isInternal,
-    })
-    
+    });
+
     if (error) {
-      setError(error.message || 'Failed to create account')
+      setError(error.message || 'Failed to create account');
     } else {
-      setSuccess('Account created successfully! Please check your email to verify your account.')
+      setSuccess(
+        'Account created successfully! Please check your email to verify your account.'
+      );
       setSignUpData({
         email: '',
         password: '',
@@ -84,27 +95,27 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
         lastName: '',
         phone: '',
         isInternal: false,
-      })
+      });
     }
-    
-    setLoading(false)
-  }
+
+    setLoading(false);
+  };
 
   const handleAzureSignIn = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
-    const { error } = await signInWithAzure()
-    
+    const { error } = await signInWithAzure();
+
     if (error) {
-      setError(error.message || 'Failed to sign in with Azure AD')
+      setError(error.message || 'Failed to sign in with Azure AD');
     }
-    
-    setLoading(false)
-  }
+
+    setLoading(false);
+  };
 
   return (
-    <div className={cn("w-full max-w-md mx-auto", className)}>
+    <div className={cn('w-full max-w-md mx-auto', className)}>
       <Card>
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary-500">
@@ -116,7 +127,10 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'signin' | 'signup')}>
+          <Tabs
+            value={activeTab}
+            onValueChange={value => setActiveTab(value as 'signin' | 'signup')}
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -142,7 +156,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     type="email"
                     placeholder="Email"
                     value={signInData.email}
-                    onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
+                    onChange={e =>
+                      setSignInData({ ...signInData, email: e.target.value })
+                    }
                     leftIcon={<Mail className="h-4 w-4" />}
                     required
                   />
@@ -152,7 +168,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     type="password"
                     placeholder="Password"
                     value={signInData.password}
-                    onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
+                    onChange={e =>
+                      setSignInData({ ...signInData, password: e.target.value })
+                    }
                     leftIcon={<Lock className="h-4 w-4" />}
                     required
                   />
@@ -167,7 +185,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                   <Separator className="w-full" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-charcoal-500">Or continue with</span>
+                  <span className="bg-white px-2 text-charcoal-500">
+                    Or continue with
+                  </span>
                 </div>
               </div>
 
@@ -189,7 +209,12 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     type="text"
                     placeholder="First Name"
                     value={signUpData.firstName}
-                    onChange={(e) => setSignUpData({ ...signUpData, firstName: e.target.value })}
+                    onChange={e =>
+                      setSignUpData({
+                        ...signUpData,
+                        firstName: e.target.value,
+                      })
+                    }
                     leftIcon={<User className="h-4 w-4" />}
                     required
                   />
@@ -197,7 +222,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     type="text"
                     placeholder="Last Name"
                     value={signUpData.lastName}
-                    onChange={(e) => setSignUpData({ ...signUpData, lastName: e.target.value })}
+                    onChange={e =>
+                      setSignUpData({ ...signUpData, lastName: e.target.value })
+                    }
                     leftIcon={<User className="h-4 w-4" />}
                     required
                   />
@@ -207,7 +234,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     type="email"
                     placeholder="Email"
                     value={signUpData.email}
-                    onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
+                    onChange={e =>
+                      setSignUpData({ ...signUpData, email: e.target.value })
+                    }
                     leftIcon={<Mail className="h-4 w-4" />}
                     required
                   />
@@ -217,7 +246,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     type="tel"
                     placeholder="Phone (optional)"
                     value={signUpData.phone}
-                    onChange={(e) => setSignUpData({ ...signUpData, phone: e.target.value })}
+                    onChange={e =>
+                      setSignUpData({ ...signUpData, phone: e.target.value })
+                    }
                     leftIcon={<Phone className="h-4 w-4" />}
                   />
                 </div>
@@ -226,7 +257,9 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     type="password"
                     placeholder="Password"
                     value={signUpData.password}
-                    onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
+                    onChange={e =>
+                      setSignUpData({ ...signUpData, password: e.target.value })
+                    }
                     leftIcon={<Lock className="h-4 w-4" />}
                     required
                   />
@@ -236,7 +269,12 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     type="password"
                     placeholder="Confirm Password"
                     value={signUpData.confirmPassword}
-                    onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })}
+                    onChange={e =>
+                      setSignUpData({
+                        ...signUpData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
                     leftIcon={<Lock className="h-4 w-4" />}
                     required
                   />
@@ -250,5 +288,5 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

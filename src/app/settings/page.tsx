@@ -1,40 +1,52 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useAuth } from '@/contexts/auth-context'
-import { MainLayout } from '@/components/layout/main-layout'
-import { Loading } from '@/components/ui/loading'
-import { ErrorBoundary } from '@/components/ui/error-boundary'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/Badge'
-import { Separator } from '@/components/ui/separator'
-import { getInitials } from '@/lib/utils'
-import { 
-  User, 
-  Bell, 
-  Shield, 
-  Building2, 
-  Mail, 
-  Phone, 
-  MapPin, 
+import { useState } from 'react';
+import { useAuth } from '@/contexts/auth-context';
+import { MainLayout } from '@/components/layout/main-layout';
+import { Loading } from '@/components/ui/loading';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/Badge';
+import { Separator } from '@/components/ui/separator';
+import { getInitials } from '@/lib/utils';
+import {
+  User,
+  Bell,
+  Shield,
+  Building2,
+  Mail,
+  Phone,
+  MapPin,
   Save,
   Upload,
   Trash2,
   Key,
-  Globe
-} from 'lucide-react'
+  Globe,
+} from 'lucide-react';
 
 export default function SettingsPage() {
-  const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState('profile')
-  const [isLoading, setIsLoading] = useState(false)
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('profile');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Mock user data - in real app this would come from the auth context
   const userData = {
@@ -46,14 +58,14 @@ export default function SettingsPage() {
     avatar_url: null,
     internal: true,
     active: true,
-    created_at: '2024-01-15T00:00:00Z'
-  }
+    created_at: '2024-01-15T00:00:00Z',
+  };
 
   const handleSave = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     // TODO: Implement save functionality
-    setTimeout(() => setIsLoading(false), 1000)
-  }
+    setTimeout(() => setIsLoading(false), 1000);
+  };
 
   return (
     <MainLayout>
@@ -123,7 +135,11 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" type="email" defaultValue={userData.email} />
+                    <Input
+                      id="email"
+                      type="email"
+                      defaultValue={userData.email}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
@@ -148,7 +164,13 @@ export default function SettingsPage() {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Badge className={userData.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                    <Badge
+                      className={
+                        userData.active
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }
+                    >
                       {userData.active ? 'Active' : 'Inactive'}
                     </Badge>
                     <Badge variant="outline">
@@ -156,7 +178,8 @@ export default function SettingsPage() {
                     </Badge>
                   </div>
                   <span className="text-sm text-charcoal-600">
-                    Member since {new Date(userData.created_at).toLocaleDateString()}
+                    Member since{' '}
+                    {new Date(userData.created_at).toLocaleDateString()}
                   </span>
                 </div>
               </CardContent>
@@ -180,7 +203,10 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium">Project Updates</h4>
-                      <p className="text-sm text-charcoal-600">Get notified when projects you're involved in are updated</p>
+                      <p className="text-sm text-charcoal-600">
+                        Get notified when projects you're involved in are
+                        updated
+                      </p>
                     </div>
                     <Select defaultValue="email">
                       <SelectTrigger className="w-32">
@@ -198,7 +224,9 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium">Task Assignments</h4>
-                      <p className="text-sm text-charcoal-600">Get notified when new tasks are assigned to you</p>
+                      <p className="text-sm text-charcoal-600">
+                        Get notified when new tasks are assigned to you
+                      </p>
                     </div>
                     <Select defaultValue="both">
                       <SelectTrigger className="w-32">
@@ -216,7 +244,9 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium">Deadline Reminders</h4>
-                      <p className="text-sm text-charcoal-600">Get reminded about upcoming deadlines</p>
+                      <p className="text-sm text-charcoal-600">
+                        Get reminded about upcoming deadlines
+                      </p>
                     </div>
                     <Select defaultValue="both">
                       <SelectTrigger className="w-32">
@@ -265,7 +295,9 @@ export default function SettingsPage() {
                     <Input id="newPassword" type="password" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Label htmlFor="confirmPassword">
+                      Confirm New Password
+                    </Label>
                     <Input id="confirmPassword" type="password" />
                   </div>
                 </div>
@@ -290,7 +322,9 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium">SMS Authentication</h4>
-                    <p className="text-sm text-charcoal-600">Receive verification codes via SMS</p>
+                    <p className="text-sm text-charcoal-600">
+                      Receive verification codes via SMS
+                    </p>
                   </div>
                   <Button variant="outline">Enable</Button>
                 </div>
@@ -314,15 +348,24 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="companyName">Company Name</Label>
-                    <Input id="companyName" defaultValue="MDM Construction Group" />
+                    <Input
+                      id="companyName"
+                      defaultValue="MDM Construction Group"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="website">Website</Label>
-                    <Input id="website" defaultValue="https://mdmconstruction.com" />
+                    <Input
+                      id="website"
+                      defaultValue="https://mdmconstruction.com"
+                    />
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="address">Address</Label>
-                    <Textarea id="address" defaultValue="123 Construction Way, Building City, BC 12345" />
+                    <Textarea
+                      id="address"
+                      defaultValue="123 Construction Way, Building City, BC 12345"
+                    />
                   </div>
                 </div>
 
@@ -338,5 +381,5 @@ export default function SettingsPage() {
         </Tabs>
       </div>
     </MainLayout>
-  )
+  );
 }

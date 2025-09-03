@@ -1,23 +1,39 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/components/ui/Button'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/Badge'
-import { projectStatusUpdateSchema, type ProjectStatusUpdateData } from '@/lib/validation'
-import { Project, ProjectStatus } from '@/types/database'
-import { getStatusColor } from '@/lib/utils'
-import { toast } from '@/hooks/use-toast'
-import { ArrowRight, CheckCircle, Pause, Play, Archive, X } from 'lucide-react'
+import { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/Button';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/Badge';
+import {
+  projectStatusUpdateSchema,
+  type ProjectStatusUpdateData,
+} from '@/lib/validation';
+import { Project, ProjectStatus } from '@/types/database';
+import { getStatusColor } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
+import { ArrowRight, CheckCircle, Pause, Play, Archive, X } from 'lucide-react';
 
 interface ProjectStatusWorkflowProps {
-  project: Project
-  onStatusUpdate?: (status: ProjectStatus, reason?: string) => void
+  project: Project;
+  onStatusUpdate?: (status: ProjectStatus, reason?: string) => void;
 }
 
 const statusTransitions: Record<ProjectStatus, ProjectStatus[]> = {
@@ -26,7 +42,7 @@ const statusTransitions: Record<ProjectStatus, ProjectStatus[]> = {
   'on-hold': ['active', 'cancelled'],
   completed: ['active'], // Allow reopening if needed
   cancelled: [], // Terminal state
-}
+};
 
 const statusIcons: Record<ProjectStatus, React.ReactNode> = {
   planning: <CheckCircle className="h-4 w-4" />,
@@ -34,7 +50,7 @@ const statusIcons: Record<ProjectStatus, React.ReactNode> = {
   'on-hold': <Pause className="h-4 w-4" />,
   completed: <CheckCircle className="h-4 w-4" />,
   cancelled: <X className="h-4 w-4" />,
-}
+};
 
 const statusLabels: Record<ProjectStatus, string> = {
   planning: 'Planning',
@@ -42,12 +58,17 @@ const statusLabels: Record<ProjectStatus, string> = {
   'on-hold': 'On Hold',
   completed: 'Completed',
   cancelled: 'Cancelled',
-}
+};
 
-export function ProjectStatusWorkflow({ project, onStatusUpdate }: ProjectStatusWorkflowProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [selectedStatus, setSelectedStatus] = useState<ProjectStatus | null>(null)
-  const [isUpdating, setIsUpdating] = useState(false)
+export function ProjectStatusWorkflow({
+  project,
+  onStatusUpdate,
+}: ProjectStatusWorkflowProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<ProjectStatus | null>(
+    null
+  );
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const form = useForm<ProjectStatusUpdateData>({
     resolver: zodResolver(projectStatusUpdateSchema),
@@ -55,37 +76,37 @@ export function ProjectStatusWorkflow({ project, onStatusUpdate }: ProjectStatus
       status: project.status,
       reason: '',
     },
-  })
+  });
 
-  const availableTransitions = statusTransitions[project.status] || []
+  const availableTransitions = statusTransitions[project.status] || [];
 
   const handleStatusSelect = (status: ProjectStatus) => {
-    setSelectedStatus(status)
-    form.setValue('status', status)
-    setIsDialogOpen(true)
-  }
+    setSelectedStatus(status);
+    form.setValue('status', status);
+    setIsDialogOpen(true);
+  };
 
   const onSubmit = async (data: ProjectStatusUpdateData) => {
-    setIsUpdating(true)
+    setIsUpdating(true);
     try {
-      await onStatusUpdate?.(data.status, data.reason)
+      await onStatusUpdate?.(data.status, data.reason);
       toast({
         title: 'Success',
         description: `Project status updated to ${statusLabels[data.status]}`,
-      })
-      setIsDialogOpen(false)
-      setSelectedStatus(null)
-      form.reset()
+      });
+      setIsDialogOpen(false);
+      setSelectedStatus(null);
+      form.reset();
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to update project status',
         variant: 'destructive',
-      })
+      });
     } finally {
-      setIsUpdating(false)
+      setIsUpdating(false);
     }
-  }
+  };
 
   return (
     <Card>
@@ -108,7 +129,7 @@ export function ProjectStatusWorkflow({ project, onStatusUpdate }: ProjectStatus
           <div className="space-y-3">
             <span className="text-sm font-medium">Available Actions:</span>
             <div className="flex flex-wrap gap-2">
-              {availableTransitions.map((status) => (
+              {availableTransitions.map(status => (
                 <Button
                   key={status}
                   variant="outline"
@@ -135,44 +156,40 @@ export function ProjectStatusWorkflow({ project, onStatusUpdate }: ProjectStatus
             <DialogHeader>
               <DialogTitle>Update Project Status</DialogTitle>
               <DialogDescription>
-                Change project status from {statusLabels[project.status]} to {selectedStatus && statusLabels[selectedStatus]}
+                Change project status from {statusLabels[project.status]} to{' '}
+                {selectedStatus && statusLabels[selectedStatus]}
               </DialogDescription>
             </DialogHeader>
-            
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="reason"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Reason for Change (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Explain why you're changing the project status..."
-                          className="min-h-[100px]"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" loading={isUpdating}>
-                    Update Status
-                  </Button>
-                </div>
-              </form>
-            </Form>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <Controller
+                control={form.control}
+                name="reason"
+                render={({ field }) => (
+                  <div className="space-y-2">
+                    <Label>Reason for Change (Optional)</Label>
+                    <Textarea
+                      placeholder="Explain why you're changing the project status..."
+                      className="min-h-[100px]"
+                      {...field}
+                    />
+                  </div>
+                )}
+              />
+
+              <div className="flex justify-end space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" loading={isUpdating}>
+                  Update Status
+                </Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
 
@@ -192,5 +209,5 @@ export function ProjectStatusWorkflow({ project, onStatusUpdate }: ProjectStatus
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
