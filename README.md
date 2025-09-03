@@ -37,6 +37,7 @@ A comprehensive multi-tenant construction project management application built w
 ## Tech Stack
 
 - **Frontend**: Next.js 14, React 18, TypeScript
+- **Architecture**: Hybrid Server/Client Components (App Router)
 - **Styling**: Tailwind CSS, Radix UI
 - **Backend**: Supabase (PostgreSQL, Auth, Real-time)
 - **Authentication**: Azure AD, Supabase Auth
@@ -106,19 +107,26 @@ npm run dev
 
 ```
 src/
-├── app/                    # Next.js App Router
+├── app/                    # Next.js App Router (Server Components)
 │   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Home page
-│   └── test/              # Test page
+│   ├── layout.tsx         # Root layout (Server)
+│   ├── page.tsx           # Home page (Server)
+│   ├── dashboard/         # Dashboard pages (Server)
+│   ├── projects/          # Project pages (Server)
+│   ├── team/              # Team pages (Server)
+│   ├── settings/          # Settings pages (Server)
+│   └── test/              # Test page (Server)
 ├── components/            # React components
-│   ├── auth/              # Authentication components
-│   ├── dashboard/         # Dashboard components
-│   ├── layout/            # Layout components
-│   ├── providers/         # Context providers
-│   └── ui/                # Reusable UI components
-├── contexts/              # React contexts
-├── hooks/                 # Custom hooks
+│   ├── auth/              # Authentication components (Client)
+│   ├── dashboard/         # Dashboard components (Mixed)
+│   ├── layout/            # Layout components (Mixed)
+│   ├── pages/             # Page wrappers (Client/Server)
+│   │   ├── client-*.tsx   # Client component wrappers
+│   │   └── server-*.tsx   # Server component wrappers
+│   ├── providers/         # Context providers (Client)
+│   └── ui/                # Reusable UI components (Mixed)
+├── contexts/              # React contexts (Client)
+├── hooks/                 # Custom hooks (Client)
 ├── lib/                   # Utility libraries
 │   ├── database.ts        # Database operations
 │   ├── realtime.ts        # Real-time subscriptions
@@ -128,6 +136,14 @@ src/
 ├── types/                 # TypeScript types
 └── middleware.ts          # Next.js middleware
 ```
+
+### Architecture Overview
+
+The application uses a **hybrid server/client architecture** to optimize performance and resolve SSR issues:
+
+- **Server Components**: Handle static content, SEO, and initial page loads
+- **Client Components**: Handle interactive features, state management, and user interactions
+- **Hybrid Pages**: Server pages that render client components for interactivity
 
 ## Database Schema
 
@@ -197,6 +213,25 @@ The application uses a comprehensive PostgreSQL schema with:
 - Toast notifications
 - Photo upload components
 - Loading states and error boundaries
+
+## Recent Updates
+
+### 🚀 Hybrid Architecture Implementation (Latest)
+
+**Problem Solved**: React hooks SSR errors during build process
+**Solution**: Implemented hybrid server/client component architecture
+
+#### Key Changes:
+- **Server Components**: Static content, SEO optimization, initial page loads
+- **Client Components**: Interactive features, state management, user interactions
+- **Clean Separation**: No more SSR conflicts with React hooks
+- **Build Success**: ✅ All pages build successfully without errors
+
+#### Benefits:
+- **Performance**: Server components are pre-rendered, client components hydrate
+- **SEO**: Static content is server-rendered for better search engine optimization
+- **Maintainability**: Clear separation of concerns between server and client code
+- **Deployability**: Ready for production deployment without SSR issues
 
 ## Development
 
