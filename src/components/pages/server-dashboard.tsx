@@ -46,15 +46,30 @@ const mockProjects = [
 export function ServerDashboard() {
   return (
     <MainLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-charcoal-950">Dashboard</h1>
-          <p className="text-charcoal-600 mt-2">
-            Welcome to your project management dashboard
-          </p>
+      <div className="min-h-screen bg-gradient-to-br from-background-50 via-white to-primary-50">
+        {/* Hero Section */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 to-primary-600/5"></div>
+          <div className="relative px-6 py-12">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-charcoal-900 via-primary-600 to-primary-800 bg-clip-text text-transparent mb-4">
+                  Welcome to MDM Hub
+                </h1>
+                <p className="text-xl text-charcoal-600 max-w-2xl mx-auto">
+                  Your comprehensive construction project management platform
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <DashboardStats stats={mockStats} projects={mockProjects} />
+        {/* Main Content */}
+        <div className="px-6 pb-12">
+          <div className="max-w-7xl mx-auto">
+            <DashboardStats stats={mockStats} projects={mockProjects} />
+          </div>
+        </div>
       </div>
     </MainLayout>
   );

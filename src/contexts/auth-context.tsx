@@ -46,6 +46,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     supabaseUserId: string
   ): Promise<UserWithDivisions | null> => {
     try {
+      console.log('Fetching user profile for:', supabaseUserId);
       const { data, error } = await supabase
         .from('users')
         .select(
@@ -62,9 +63,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (error) {
         console.error('Error fetching user profile:', error);
+        console.log('This might be normal if the user profile does not exist yet');
         return null;
       }
 
+      console.log('User profile fetched successfully:', data);
       return data as unknown as UserWithDivisions;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
@@ -197,10 +200,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   useEffect(() => {
+    console.log('Auth context initializing...');
+    
+    // Set a timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      console.warn('Auth initialization timeout - forcing loading to false');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+    
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      console.log('Initial session check:', { session: !!session, error });
+      clearTimeout(timeout);
       setSession(session);
       setSupabaseUser(session?.user ?? null);
+      
+      if (session?.user) {
+        console.log('User found in session, fetching profile...');
+        fetchUserProfile(session.user.id).then((userProfile) => {
+          console.log('User profile fetched:', userProfile);
+          setUser(userProfile);
+          setLoading(false);
+        }).catch((error) => {
+          console.error('Error fetching initial user profile:', error);
+          setUser(null);
+          setLoading(false);
+        });
+      } else {
+        console.log('No user in session');
+        setLoading(false);
+      }
+    }).catch((error) => {
+      console.error('Error getting initial session:', error);
+      clearTimeout(timeout);
       setLoading(false);
     });
 
@@ -208,12 +240,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.email);
       setSession(session);
       setSupabaseUser(session?.user ?? null);
 
       if (session?.user) {
-        const userProfile = await fetchUserProfile(session.user.id);
-        setUser(userProfile);
+        try {
+          const userProfile = await fetchUserProfile(session.user.id);
+          setUser(userProfile);
+        } catch (error) {
+          console.error('Error fetching user profile on auth change:', error);
+          setUser(null);
+        }
       } else {
         setUser(null);
       }
@@ -221,7 +259,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const value: AuthContextType = {

@@ -23,7 +23,7 @@ export function MainLayout({
   className,
 }: MainLayoutProps) {
   return (
-    <div className="min-h-screen bg-background-50">
+    <div className="min-h-screen bg-gradient-to-br from-background-50 via-white to-primary-50">
       {user && onLogout && <Sidebar user={user} onLogout={onLogout} />}
 
       {/* Main content */}

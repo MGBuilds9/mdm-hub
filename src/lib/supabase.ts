@@ -26,6 +26,21 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+// Debug Supabase connection
+if (typeof window !== 'undefined') {
+  console.log('Supabase URL:', supabaseUrl);
+  console.log('Supabase Key (first 10 chars):', supabaseAnonKey.substring(0, 10) + '...');
+  
+  // Test connection
+  supabase.from('users').select('count').then(({ data, error }) => {
+    if (error) {
+      console.error('Supabase connection test failed:', error);
+    } else {
+      console.log('Supabase connection test successful');
+    }
+  });
+}
+
 // Server-side Supabase client with service role key
 export const createServerClient = () => {
   const serviceRoleKey =

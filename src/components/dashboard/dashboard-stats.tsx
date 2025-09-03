@@ -34,32 +34,31 @@ function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <Card className={cn('', className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-charcoal-600">
+    <Card className={cn('group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:bg-white', className)}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+        <CardTitle className="text-sm font-medium text-charcoal-600 group-hover:text-charcoal-800 transition-colors">
           {title}
         </CardTitle>
-        <Icon className="h-4 w-4 text-charcoal-400" />
+        <div className="p-2 rounded-xl bg-gradient-to-br from-primary-100 to-primary-200 group-hover:from-primary-200 group-hover:to-primary-300 transition-all duration-300">
+          <Icon className="h-5 w-5 text-primary-600" />
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-charcoal-900">{value}</div>
+        <div className="text-3xl font-bold text-charcoal-900 mb-2">{value}</div>
         {change && (
-          <div className="flex items-center text-xs text-charcoal-500 mt-1">
+          <div className="flex items-center text-sm">
             {change.type === 'increase' ? (
-              <TrendingUp className="h-3 w-3 text-success-500 mr-1" />
+              <div className="flex items-center text-success-600 bg-success-50 px-2 py-1 rounded-full">
+                <TrendingUp className="h-3 w-3 mr-1" />
+                <span className="font-medium">+{Math.abs(change.value)}%</span>
+              </div>
             ) : (
-              <TrendingDown className="h-3 w-3 text-error-500 mr-1" />
+              <div className="flex items-center text-error-600 bg-error-50 px-2 py-1 rounded-full">
+                <TrendingDown className="h-3 w-3 mr-1" />
+                <span className="font-medium">-{Math.abs(change.value)}%</span>
+              </div>
             )}
-            <span
-              className={cn(
-                change.type === 'increase'
-                  ? 'text-success-600'
-                  : 'text-error-600'
-              )}
-            >
-              {Math.abs(change.value)}%
-            </span>
-            <span className="ml-1">from last {change.period}</span>
+            <span className="text-charcoal-500 ml-2 text-xs">from last {change.period}</span>
           </div>
         )}
       </CardContent>

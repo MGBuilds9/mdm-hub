@@ -115,25 +115,40 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
   };
 
   return (
-    <div className={cn('w-full max-w-md mx-auto', className)}>
-      <Card>
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary-500">
-            <Building2 className="h-6 w-6 text-white" />
+    <div className={cn('min-h-screen flex items-center justify-center bg-gradient-to-br from-background-50 via-white to-primary-50 p-4', className)}>
+      <div className="w-full max-w-md">
+        {/* Welcome Card */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-primary-100 p-8">
+          {/* Logo/Icon */}
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+              <Building2 className="h-8 w-8 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-charcoal-900 to-primary-600 bg-clip-text text-transparent mb-2">
+              Welcome to MDM Hub
+            </h1>
+            <p className="text-charcoal-600 text-sm">
+              Sign in to your account or create a new one
+            </p>
           </div>
-          <CardTitle className="text-2xl">Welcome to MDM Hub</CardTitle>
-          <CardDescription>
-            Sign in to your account or create a new one
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+
           <Tabs
             value={activeTab}
             onValueChange={value => setActiveTab(value as 'signin' | 'signup')}
           >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-primary-50 p-1 rounded-xl mb-6">
+              <TabsTrigger 
+                value="signin" 
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-700"
+              >
+                Sign In
+              </TabsTrigger>
+              <TabsTrigger 
+                value="signup"
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-700"
+              >
+                Sign Up
+              </TabsTrigger>
             </TabsList>
 
             {error && (
@@ -149,7 +164,7 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
               </Alert>
             )}
 
-            <TabsContent value="signin" className="space-y-4">
+            <TabsContent value="signin" className="space-y-6">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Input
@@ -159,7 +174,8 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     onChange={e =>
                       setSignInData({ ...signInData, email: e.target.value })
                     }
-                    leftIcon={<Mail className="h-4 w-4" />}
+                    leftIcon={<Mail className="h-4 w-4 text-primary-500" />}
+                    className="h-12 rounded-xl border-primary-200 focus:border-primary-500 focus:ring-primary-500"
                     required
                   />
                 </div>
@@ -171,21 +187,26 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     onChange={e =>
                       setSignInData({ ...signInData, password: e.target.value })
                     }
-                    leftIcon={<Lock className="h-4 w-4" />}
+                    leftIcon={<Lock className="h-4 w-4 text-primary-500" />}
+                    className="h-12 rounded-xl border-primary-200 focus:border-primary-500 focus:ring-primary-500"
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" loading={loading}>
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg" 
+                  loading={loading}
+                >
                   Sign In
                 </Button>
               </form>
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
+                  <Separator className="w-full bg-primary-200" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-charcoal-500">
+                  <span className="bg-white px-3 text-charcoal-500 font-medium">
                     Or continue with
                   </span>
                 </div>
@@ -193,16 +214,16 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
 
               <Button
                 variant="outline"
-                className="w-full"
+                className="w-full h-12 border-primary-200 hover:bg-primary-50 hover:border-primary-300 rounded-xl transition-all duration-200"
                 onClick={handleAzureSignIn}
                 disabled={loading}
               >
-                <Building2 className="mr-2 h-4 w-4" />
-                Sign in with Azure AD
+                <Building2 className="mr-2 h-4 w-4 text-primary-600" />
+                Sign in with Microsoft
               </Button>
             </TabsContent>
 
-            <TabsContent value="signup" className="space-y-4">
+            <TabsContent value="signup" className="space-y-6">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <Input
@@ -215,7 +236,8 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                         firstName: e.target.value,
                       })
                     }
-                    leftIcon={<User className="h-4 w-4" />}
+                    leftIcon={<User className="h-4 w-4 text-primary-500" />}
+                    className="h-12 rounded-xl border-primary-200 focus:border-primary-500 focus:ring-primary-500"
                     required
                   />
                   <Input
@@ -225,7 +247,8 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     onChange={e =>
                       setSignUpData({ ...signUpData, lastName: e.target.value })
                     }
-                    leftIcon={<User className="h-4 w-4" />}
+                    leftIcon={<User className="h-4 w-4 text-primary-500" />}
+                    className="h-12 rounded-xl border-primary-200 focus:border-primary-500 focus:ring-primary-500"
                     required
                   />
                 </div>
@@ -237,7 +260,8 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     onChange={e =>
                       setSignUpData({ ...signUpData, email: e.target.value })
                     }
-                    leftIcon={<Mail className="h-4 w-4" />}
+                    leftIcon={<Mail className="h-4 w-4 text-primary-500" />}
+                    className="h-12 rounded-xl border-primary-200 focus:border-primary-500 focus:ring-primary-500"
                     required
                   />
                 </div>
@@ -249,7 +273,8 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     onChange={e =>
                       setSignUpData({ ...signUpData, phone: e.target.value })
                     }
-                    leftIcon={<Phone className="h-4 w-4" />}
+                    leftIcon={<Phone className="h-4 w-4 text-primary-500" />}
+                    className="h-12 rounded-xl border-primary-200 focus:border-primary-500 focus:ring-primary-500"
                   />
                 </div>
                 <div className="space-y-2">
@@ -260,7 +285,8 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                     onChange={e =>
                       setSignUpData({ ...signUpData, password: e.target.value })
                     }
-                    leftIcon={<Lock className="h-4 w-4" />}
+                    leftIcon={<Lock className="h-4 w-4 text-primary-500" />}
+                    className="h-12 rounded-xl border-primary-200 focus:border-primary-500 focus:ring-primary-500"
                     required
                   />
                 </div>
@@ -275,18 +301,23 @@ export function LoginForm({ onSuccess, className }: LoginFormProps) {
                         confirmPassword: e.target.value,
                       })
                     }
-                    leftIcon={<Lock className="h-4 w-4" />}
+                    leftIcon={<Lock className="h-4 w-4 text-primary-500" />}
+                    className="h-12 rounded-xl border-primary-200 focus:border-primary-500 focus:ring-primary-500"
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" loading={loading}>
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg" 
+                  loading={loading}
+                >
                   Create Account
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
