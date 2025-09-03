@@ -1,58 +1,91 @@
-# MDM Construction Hub
+# MDM Hub - Construction Project Management
 
-A professional construction project management platform built with Next.js 14, TypeScript, and Tailwind CSS.
+A comprehensive multi-tenant construction project management application built with Next.js 14, Supabase, and TypeScript.
 
 ## Features
 
-- 🏗️ **Project Management**: Track and manage construction projects from start to finish
-- 👥 **Team Collaboration**: Manage team members and assign tasks
-- 📊 **Dashboard Analytics**: Real-time project insights and progress tracking
-- 📱 **Responsive Design**: Mobile-first design that works on all devices
-- 🎨 **Modern UI**: Clean, professional interface with MDM brand colors
-- 🔒 **Type Safety**: Full TypeScript support with strict configuration
-- ⚡ **Performance**: Optimized for speed and SEO
+### 🏗️ Multi-Tenant Architecture
+- 5 divisions: Group, Contracting, Homes, Wood, Telecom
+- Users can belong to multiple divisions with different roles
+- Row Level Security (RLS) for data isolation
+- Division-based project management
+
+### 🔐 Dual Authentication System
+- **Azure AD SSO** for internal staff
+- **Supabase Email/OTP** for external users (clients, subcontractors)
+- Role-based access control
+- Session management and token refresh
+
+### 📊 Project Management
+- Project creation and management
+- User assignment to projects
+- Photo gallery with EXIF data
+- Change orders with approval workflow
+- Real-time notifications
+
+### 🎨 Modern UI/UX
+- Tailwind CSS with MDM brand colors
+- Radix UI primitives for accessibility
+- Mobile-first responsive design
+- Loading states and error boundaries
+- Toast notifications
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Icons**: Lucide React
-- **Code Quality**: ESLint + Prettier
-- **Utilities**: clsx, tailwind-merge, date-fns
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Tailwind CSS, Radix UI
+- **Backend**: Supabase (PostgreSQL, Auth, Real-time)
+- **Authentication**: Azure AD, Supabase Auth
+- **State Management**: React Query, React Context
+- **Validation**: Zod
+- **Forms**: React Hook Form
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 18+ 
 - npm or yarn
+- Supabase account
+- Azure AD app registration (for internal users)
 
 ### Installation
 
 1. Clone the repository:
-
 ```bash
 git clone <repository-url>
-cd mdm-construction-hub
+cd mdm-hub
 ```
 
 2. Install dependencies:
-
 ```bash
 npm install
 ```
 
-3. Copy environment variables:
-
+3. Set up environment variables:
 ```bash
-cp env.example .env.local
+cp .env.example .env.local
 ```
 
-4. Update the environment variables in `.env.local` with your actual values.
+Fill in your environment variables:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
-5. Run the development server:
+# Azure AD Configuration
+NEXT_PUBLIC_AZURE_CLIENT_ID=your_azure_client_id
+NEXT_PUBLIC_AZURE_TENANT_ID=your_azure_tenant_id
+NEXT_PUBLIC_AZURE_REDIRECT_URI=http://localhost:3000/auth/callback
+```
 
+4. Set up the database:
+```bash
+# Run the SQL schema in your Supabase SQL editor
+# File: supabase/schema.sql
+```
+
+5. Start the development server:
 ```bash
 npm run dev
 ```
@@ -63,58 +96,137 @@ npm run dev
 
 ```
 src/
-├── app/                    # Next.js 14 App Router
-│   ├── dashboard/         # Dashboard pages
+├── app/                    # Next.js App Router
 │   ├── globals.css        # Global styles
 │   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Home page
+│   ├── page.tsx           # Home page
+│   └── test/              # Test page
 ├── components/            # React components
-│   ├── dashboard/         # Dashboard-specific components
-│   ├── home/              # Home page components
-│   ├── layout/            # Layout components (Navigation, Footer)
+│   ├── auth/              # Authentication components
+│   ├── dashboard/         # Dashboard components
+│   ├── layout/            # Layout components
+│   ├── providers/         # Context providers
 │   └── ui/                # Reusable UI components
-├── lib/                   # Utility functions
-│   └── utils.ts           # Common utilities
-└── types/                 # TypeScript type definitions
-    └── index.ts           # Global types
+├── contexts/              # React contexts
+├── hooks/                 # Custom hooks
+├── lib/                   # Utility libraries
+│   ├── database.ts        # Database operations
+│   ├── realtime.ts        # Real-time subscriptions
+│   ├── supabase.ts        # Supabase client
+│   ├── validation.ts      # Zod schemas
+│   └── utils.ts           # Utility functions
+├── types/                 # TypeScript types
+└── middleware.ts          # Next.js middleware
 ```
 
-## Available Scripts
+## Database Schema
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint errors
-- `npm run format` - Format code with Prettier
-- `npm run format:check` - Check code formatting
-- `npm run type-check` - Run TypeScript type checking
+The application uses a comprehensive PostgreSQL schema with:
 
-## Brand Colors
+- **Users**: User profiles and authentication
+- **Divisions**: Multi-tenant organization structure
+- **Projects**: Project management and tracking
+- **Photos**: Photo gallery with EXIF data
+- **Change Orders**: Approval workflow system
+- **Notifications**: Real-time notification system
+- **Audit Trail**: Complete change tracking
 
-The application uses the following MDM brand colors:
+### Key Features:
+- Row Level Security (RLS) policies
+- Foreign key constraints
+- Indexes for performance
+- Triggers for audit trails
+- Sample data for testing
 
-- **Primary Orange**: `#FFAA33`
-- **Background Beige**: `#FFEFDB`
-- **Text Charcoal**: `#1B1B1A`
-- **White**: `#FFFFFF`
+## Authentication
 
-## Environment Variables
+### Azure AD (Internal Users)
+- Single Sign-On (SSO) integration
+- Automatic user provisioning
+- Role-based access control
 
-Copy `env.example` to `.env.local` and configure the following variables:
+### Supabase Auth (External Users)
+- Email/password authentication
+- OTP verification
+- Password reset functionality
 
-- Database connection
-- Authentication secrets
-- API keys for external services
-- File storage configuration
-- App configuration
+## API Integration
+
+### Supabase Client
+- Type-safe database operations
+- Real-time subscriptions
+- File storage for photos
+- Row Level Security enforcement
+
+### React Query
+- Data fetching and caching
+- Optimistic updates
+- Error handling
+- Loading states
+
+## UI Components
+
+### Design System
+- **Colors**: Orange (#FFAA33), Beige (#FFEFDB), Charcoal (#1B1B1A)
+- **Typography**: Inter font family
+- **Spacing**: Consistent 4px grid system
+- **Responsive**: Mobile-first approach
+
+### Component Library
+- Buttons with multiple variants
+- Form inputs with validation
+- Data tables with sorting/filtering
+- Modal dialogs and dropdowns
+- Toast notifications
+- Photo upload components
+- Loading states and error boundaries
+
+## Development
+
+### Available Scripts
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run format       # Format code with Prettier
+```
+
+### Code Quality
+- ESLint for code linting
+- Prettier for code formatting
+- TypeScript for type safety
+- Husky for git hooks (optional)
+
+## Testing
+
+Visit `/test` to access the implementation test page that verifies:
+- Authentication system
+- Database connectivity
+- UI components
+- Responsive design
+
+## Deployment
+
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Other Platforms
+The application can be deployed to any platform that supports Next.js:
+- Netlify
+- AWS Amplify
+- Railway
+- DigitalOcean App Platform
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/new-feature`
-3. Commit your changes: `git commit -am 'Add new feature'`
-4. Push to the branch: `git push origin feature/new-feature`
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
 5. Submit a pull request
 
 ## License
@@ -123,4 +235,4 @@ This project is licensed under the MIT License.
 
 ## Support
 
-For support, email info@mdmconstruction.com or create an issue in the repository.
+For support and questions, please contact the development team or create an issue in the repository.
