@@ -838,3 +838,51 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof PublicSchema['Enums']
     ? PublicSchema['Enums'][PublicEnumNameOrOptions]
     : never;
+
+// Custom types for complex queries
+export type User = Tables<'users'>;
+export type Division = Tables<'divisions'>;
+export type Project = Tables<'projects'>;
+export type Task = Tables<'tasks'>;
+export type ChangeOrder = Tables<'change_orders'>;
+export type Photo = Tables<'photos'>;
+export type Document = Tables<'documents'>;
+export type Notification = Tables<'notifications'>;
+export type UserDivision = Tables<'user_divisions'>;
+export type ProjectMember = Tables<'project_members'>;
+export type Milestone = Tables<'tasks'>; // Using tasks table for milestones
+export type ProjectInvitation = Tables<'project_members'>; // Using project_members for invitations
+
+// Complex types with relationships
+export type UserWithDivisions = User & {
+  user_divisions?: (UserDivision & {
+    division?: Division;
+  })[];
+};
+
+export type ProjectWithDetails = Project & {
+  division?: Division;
+  manager?: User;
+  project_members?: (ProjectMember & {
+    user?: User;
+  })[];
+  tasks?: Task[];
+};
+
+export type ProjectWithFullDetails = ProjectWithDetails & {
+  change_orders?: ChangeOrder[];
+  photos?: Photo[];
+  documents?: Document[];
+};
+
+export type ChangeOrderWithDetails = ChangeOrder & {
+  project?: Project;
+  requested_by_user?: User;
+  approved_by_user?: User;
+};
+
+export type PhotoWithDetails = Photo & {
+  project?: Project;
+  task?: Task;
+  uploaded_by_user?: User;
+};

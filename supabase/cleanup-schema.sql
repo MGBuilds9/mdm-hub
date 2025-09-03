@@ -15,23 +15,47 @@ BEGIN
     END LOOP;
 END $$;
 
--- Drop all triggers
+-- Drop all triggers (more comprehensive approach)
 DO $$ 
 DECLARE
     r RECORD;
 BEGIN
-    FOR r IN (SELECT trigger_name, event_object_table FROM information_schema.triggers WHERE trigger_schema = 'public') 
+    -- Drop all triggers on all tables in public schema
+    FOR r IN (
+        SELECT trigger_name, event_object_table, event_object_schema 
+        FROM information_schema.triggers 
+        WHERE trigger_schema = 'public' 
+        AND event_object_schema = 'public'
+    ) 
     LOOP
-        EXECUTE 'DROP TRIGGER IF EXISTS ' || quote_ident(r.trigger_name) || ' ON ' || quote_ident(r.event_object_table);
+        EXECUTE 'DROP TRIGGER IF EXISTS ' || quote_ident(r.trigger_name) || ' ON ' || quote_ident(r.event_object_schema) || '.' || quote_ident(r.event_object_table) || ' CASCADE';
     END LOOP;
 END $$;
 
--- Drop all functions
+-- Drop specific triggers that might be causing issues
+DROP TRIGGER IF EXISTS audit_projects_trigger ON projects CASCADE;
+DROP TRIGGER IF EXISTS audit_change_orders_trigger ON change_orders CASCADE;
+DROP TRIGGER IF EXISTS audit_tasks_trigger ON tasks CASCADE;
+DROP TRIGGER IF EXISTS update_users_updated_at ON users CASCADE;
+DROP TRIGGER IF EXISTS update_divisions_updated_at ON divisions CASCADE;
+DROP TRIGGER IF EXISTS update_projects_updated_at ON projects CASCADE;
+DROP TRIGGER IF EXISTS update_tasks_updated_at ON tasks CASCADE;
+DROP TRIGGER IF EXISTS update_change_orders_updated_at ON change_orders CASCADE;
+DROP TRIGGER IF EXISTS update_documents_updated_at ON documents CASCADE;
+
+-- Drop all functions (with all possible parameter combinations)
 DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
 DROP FUNCTION IF EXISTS audit_trigger_function() CASCADE;
 DROP FUNCTION IF EXISTS get_current_user_id() CASCADE;
+
+-- Drop functions with different parameter signatures
 DROP FUNCTION IF EXISTS user_has_division_role(UUID, UUID, user_role) CASCADE;
+DROP FUNCTION IF EXISTS user_has_division_role(uuid, uuid, user_role) CASCADE;
+DROP FUNCTION IF EXISTS user_has_division_role CASCADE;
+
 DROP FUNCTION IF EXISTS user_has_project_access(UUID, UUID) CASCADE;
+DROP FUNCTION IF EXISTS user_has_project_access(uuid, uuid) CASCADE;
+DROP FUNCTION IF EXISTS user_has_project_access CASCADE;
 
 -- Drop all tables (in correct order due to foreign keys)
 DROP TABLE IF EXISTS audit_logs CASCADE;

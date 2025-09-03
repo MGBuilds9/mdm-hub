@@ -63,7 +63,9 @@ export function ClientTeam() {
 
     const matchesDivision =
       divisionFilter === 'all' ||
-      user.user_divisions?.some(ud => ud.division_id === divisionFilter);
+      user.user_divisions?.some(
+        (ud: { division_id: string }) => ud.division_id === divisionFilter
+      );
 
     return matchesSearch && matchesDivision;
   });
