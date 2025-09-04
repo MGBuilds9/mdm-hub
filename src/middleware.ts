@@ -89,8 +89,33 @@ export async function middleware(request: NextRequest) {
     );
     const isPublicEnvValid = missingPublicVars.length === 0;
 
-    if (!isPublicEnvValid && shouldRedirectToSetup() && pathname !== '/setup') {
-      return NextResponse.redirect(new URL('/setup', request.url));
+    // Handle missing environment variables gracefully
+    if (!isPublicEnvValid) {
+      // Log helpful debugging information in development
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(
+          '⚠️ Missing public environment variables in middleware:',
+          missingPublicVars
+        );
+        console.info('💡 Visit /setup to configure your environment variables');
+      }
+
+      // Only redirect to setup in development mode and if not already on setup page
+      if (shouldRedirectToSetup() && pathname !== '/setup') {
+        console.log(
+          '🔄 Redirecting to setup page due to missing environment variables'
+        );
+        return NextResponse.redirect(new URL('/setup', request.url));
+      }
+
+      // In production, allow the request to continue but log the issue
+      if (process.env.NODE_ENV === 'production') {
+        console.error(
+          '❌ Missing environment variables in production:',
+          missingPublicVars
+        );
+        // Don't block the request in production - let the app handle it gracefully
+      }
     }
 
     // Create response with security headers
@@ -167,23 +192,45 @@ export async function middleware(request: NextRequest) {
       return response;
     }
 
-    // Create Supabase client for middleware
-    const { supabase, response: supabaseResponse } =
-      createMiddlewareSupabaseClient(request);
+    // Create Supabase client for middleware (only if environment is valid)
+    let supabaseResponse = response;
+    let session = null;
 
-    // Get session
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
+    if (isPublicEnvValid) {
+      try {
+        const { supabase, response: supabaseResponseFromClient } =
+          createMiddlewareSupabaseClient(request);
 
-    if (error) {
-      console.error('Error getting session in middleware:', error);
-      telemetry.trackError(error, 'middleware_session_error');
+        // Get session
+        const {
+          data: { session: userSession },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error('Error getting session in middleware:', error);
+          telemetry.trackError(error, 'middleware_session_error');
+        } else {
+          session = userSession;
+          supabaseResponse = supabaseResponseFromClient;
+        }
+      } catch (error) {
+        console.error('Error creating Supabase client in middleware:', error);
+        telemetry.trackError(
+          error as Error,
+          'middleware_supabase_client_error'
+        );
+        // Continue without Supabase client - let the app handle it gracefully
+      }
+    } else {
+      // Skip Supabase operations if environment is not valid
+      console.warn(
+        '⚠️ Skipping Supabase operations due to missing environment variables'
+      );
     }
 
     // Check if session is about to expire (within 5 minutes)
-    if (session?.expires_at) {
+    if (session?.expires_at && isPublicEnvValid) {
       const expiresAt = new Date(session.expires_at * 1000);
       const now = new Date();
       const timeUntilExpiry = expiresAt.getTime() - now.getTime();
@@ -191,6 +238,7 @@ export async function middleware(request: NextRequest) {
       // If session expires within 5 minutes, try to refresh
       if (timeUntilExpiry < 5 * 60 * 1000 && timeUntilExpiry > 0) {
         try {
+          const { supabase } = createMiddlewareSupabaseClient(request);
           const {
             data: { session: refreshedSession },
             error: refreshError,
@@ -214,10 +262,19 @@ export async function middleware(request: NextRequest) {
     }
 
     // Redirect to login if no session and not a public route
-    if (!session && !publicRoutes.includes(pathname)) {
+    // Skip authentication check if environment is not valid
+    if (!session && !publicRoutes.includes(pathname) && isPublicEnvValid) {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
+    }
+
+    // If environment is not valid and trying to access protected routes, redirect to setup
+    if (!isPublicEnvValid && !publicRoutes.includes(pathname)) {
+      console.log(
+        '🔄 Redirecting to setup due to missing environment variables'
+      );
+      return NextResponse.redirect(new URL('/setup', request.url));
     }
 
     // Add user info to headers for server components
@@ -234,9 +291,20 @@ export async function middleware(request: NextRequest) {
         pathname,
         duration,
         hasSession: !!session,
+        isPublicEnvValid,
         userAgent: request.headers.get('user-agent')?.substring(0, 100),
       },
     });
+
+    // Log helpful debugging information in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🔍 Middleware: ${pathname}`, {
+        hasSession: !!session,
+        isPublicEnvValid,
+        duration: `${duration}ms`,
+        missingVars: isPublicEnvValid ? 'none' : missingPublicVars,
+      });
+    }
 
     return supabaseResponse;
   } catch (error) {

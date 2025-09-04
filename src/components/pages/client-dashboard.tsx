@@ -2,21 +2,10 @@
 
 import { useAuth } from '@/contexts/auth-context';
 import { ServerDashboard } from './server-dashboard';
-import { LoginForm } from '@/components/auth/login-form';
-import { Loading } from '@/components/ui/loading';
 import { supabase } from '@/lib/supabase';
 
 export function ClientDashboard() {
-  const { user, supabaseUser, loading } = useAuth();
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  // If no Supabase user, show login form
-  if (!supabaseUser) {
-    return <LoginForm />;
-  }
+  const { user, supabaseUser } = useAuth();
 
   // If Supabase user exists but no profile, show onboarding
   if (!user) {
@@ -73,7 +62,7 @@ export function ClientDashboard() {
                 </div>
                 <div className="text-left">
                   <p className="font-medium text-charcoal-900">
-                    {supabaseUser.email}
+                    {supabaseUser?.email || 'User'}
                   </p>
                   <p className="text-sm text-charcoal-600">
                     Ready to get started
@@ -89,7 +78,7 @@ export function ClientDashboard() {
                   console.log('Creating user profile...');
 
                   // Ensure we have required data
-                  if (!supabaseUser.email || !supabaseUser.id) {
+                  if (!supabaseUser?.email || !supabaseUser?.id) {
                     alert('Missing required user information');
                     return;
                   }

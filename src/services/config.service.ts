@@ -117,21 +117,54 @@ class ConfigService {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    // Validate required environment variables
-    const requiredVars = [
-      'NEXT_PUBLIC_SUPABASE_URL',
-      'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-      'SUPABASE_SERVICE_ROLE_KEY',
-    ];
+    // Check for development vs production configuration
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const isProduction = process.env.NODE_ENV === 'production';
 
-    const missingVars = requiredVars.filter(varName => !process.env[varName]);
-    if (missingVars.length > 0) {
-      errors.push(
-        `Missing required environment variables: ${missingVars.join(', ')}`
-      );
+    // Required Supabase variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    // In production, be more lenient with validation
+    if (isProduction) {
+      // Only check that basic Supabase variables exist
+      if (!supabaseUrl) errors.push('NEXT_PUBLIC_SUPABASE_URL is required');
+      if (!supabaseAnonKey)
+        errors.push('NEXT_PUBLIC_SUPABASE_ANON_KEY is required');
+      if (!supabaseServiceKey)
+        errors.push('SUPABASE_SERVICE_ROLE_KEY is required');
+    } else {
+      // Original strict validation for development
+      if (!supabaseUrl || !supabaseUrl.startsWith('https://')) {
+        errors.push('NEXT_PUBLIC_SUPABASE_URL must be a valid HTTPS URL');
+      }
+
+      if (!supabaseAnonKey || supabaseAnonKey.length < 100) {
+        errors.push('NEXT_PUBLIC_SUPABASE_ANON_KEY appears to be invalid');
+      }
+
+      if (!supabaseServiceKey || supabaseServiceKey.length < 100) {
+        errors.push('SUPABASE_SERVICE_ROLE_KEY appears to be invalid');
+      }
+
+      // Validate URL formats for development
+      if (supabaseUrl && !this.isValidUrl(supabaseUrl)) {
+        errors.push('NEXT_PUBLIC_SUPABASE_URL is not a valid URL');
+      }
+
+      const azureAuthority = process.env.NEXT_PUBLIC_AZURE_AUTHORITY;
+      if (azureAuthority && !this.isValidUrl(azureAuthority)) {
+        errors.push('NEXT_PUBLIC_AZURE_AUTHORITY is not a valid URL');
+      }
+
+      const azureRedirectUri = process.env.NEXT_PUBLIC_AZURE_REDIRECT_URI;
+      if (azureRedirectUri && !this.isValidUrl(azureRedirectUri)) {
+        errors.push('NEXT_PUBLIC_AZURE_REDIRECT_URI is not a valid URL');
+      }
     }
 
-    // Validate Azure AD configuration
+    // Validate Azure AD configuration (warnings only)
     const azureVars = [
       'NEXT_PUBLIC_AZURE_CLIENT_ID',
       'NEXT_PUBLIC_AZURE_TENANT_ID',
@@ -145,26 +178,6 @@ class ConfigService {
         `Azure AD not fully configured: ${missingAzureVars.join(', ')}`
       );
     }
-
-    // Validate URL formats
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (supabaseUrl && !this.isValidUrl(supabaseUrl)) {
-      errors.push('NEXT_PUBLIC_SUPABASE_URL is not a valid URL');
-    }
-
-    const azureAuthority = process.env.NEXT_PUBLIC_AZURE_AUTHORITY;
-    if (azureAuthority && !this.isValidUrl(azureAuthority)) {
-      errors.push('NEXT_PUBLIC_AZURE_AUTHORITY is not a valid URL');
-    }
-
-    const azureRedirectUri = process.env.NEXT_PUBLIC_AZURE_REDIRECT_URI;
-    if (azureRedirectUri && !this.isValidUrl(azureRedirectUri)) {
-      errors.push('NEXT_PUBLIC_AZURE_REDIRECT_URI is not a valid URL');
-    }
-
-    // Check for development vs production configuration
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    const isProduction = process.env.NODE_ENV === 'production';
 
     if (isProduction) {
       // Production-specific validations

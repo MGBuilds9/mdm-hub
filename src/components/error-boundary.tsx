@@ -31,6 +31,10 @@ export enum ErrorType {
   NETWORK = 'network',
   VALIDATION = 'validation',
   PERMISSION = 'permission',
+  CONFIGURATION = 'configuration',
+  ENVIRONMENT = 'environment',
+  SUPABASE = 'supabase',
+  AZURE = 'azure',
   UNKNOWN = 'unknown',
 }
 
@@ -163,6 +167,42 @@ export class ErrorBoundary extends Component<
     const message = error.message.toLowerCase();
     const stack = error.stack?.toLowerCase() || '';
 
+    // Environment variable errors
+    if (
+      message.includes('missing required environment') ||
+      message.includes('environment variable') ||
+      message.includes('env var')
+    ) {
+      return ErrorType.ENVIRONMENT;
+    }
+
+    // Configuration errors
+    if (
+      message.includes('configuration') ||
+      message.includes('config') ||
+      message.includes('setup')
+    ) {
+      return ErrorType.CONFIGURATION;
+    }
+
+    // Supabase specific errors
+    if (
+      message.includes('supabase') ||
+      message.includes('supabase configuration') ||
+      message.includes('supabase client')
+    ) {
+      return ErrorType.SUPABASE;
+    }
+
+    // Azure AD errors
+    if (
+      message.includes('azure') ||
+      message.includes('microsoft') ||
+      message.includes('active directory')
+    ) {
+      return ErrorType.AZURE;
+    }
+
     // Authentication errors
     if (
       message.includes('auth') ||
@@ -176,7 +216,7 @@ export class ErrorBoundary extends Component<
     if (
       message.includes('database') ||
       message.includes('sql') ||
-      message.includes('supabase')
+      message.includes('connection')
     ) {
       return ErrorType.DATABASE;
     }
@@ -213,12 +253,22 @@ export class ErrorBoundary extends Component<
 
   private determineSeverity(error: Error, type: ErrorType): ErrorSeverity {
     // Critical errors that break core functionality
-    if (type === ErrorType.AUTHENTICATION || type === ErrorType.DATABASE) {
+    if (
+      type === ErrorType.AUTHENTICATION ||
+      type === ErrorType.DATABASE ||
+      type === ErrorType.ENVIRONMENT ||
+      type === ErrorType.CONFIGURATION ||
+      type === ErrorType.SUPABASE
+    ) {
       return ErrorSeverity.CRITICAL;
     }
 
-    // High severity for network and permission issues
-    if (type === ErrorType.NETWORK || type === ErrorType.PERMISSION) {
+    // High severity for network, permission, and Azure issues
+    if (
+      type === ErrorType.NETWORK ||
+      type === ErrorType.PERMISSION ||
+      type === ErrorType.AZURE
+    ) {
       return ErrorSeverity.HIGH;
     }
 
@@ -315,6 +365,14 @@ User Agent: ${window.navigator.userAgent}
         return <Globe className="h-8 w-8 text-yellow-500" />;
       case ErrorType.PERMISSION:
         return <User className="h-8 w-8 text-purple-500" />;
+      case ErrorType.ENVIRONMENT:
+        return <AlertTriangle className="h-8 w-8 text-red-600" />;
+      case ErrorType.CONFIGURATION:
+        return <AlertTriangle className="h-8 w-8 text-orange-600" />;
+      case ErrorType.SUPABASE:
+        return <Database className="h-8 w-8 text-green-600" />;
+      case ErrorType.AZURE:
+        return <Shield className="h-8 w-8 text-blue-600" />;
       default:
         return <Bug className="h-8 w-8 text-gray-500" />;
     }
@@ -332,6 +390,14 @@ User Agent: ${window.navigator.userAgent}
         return 'Permission Denied';
       case ErrorType.VALIDATION:
         return 'Validation Error';
+      case ErrorType.ENVIRONMENT:
+        return 'Environment Configuration Error';
+      case ErrorType.CONFIGURATION:
+        return 'Application Configuration Error';
+      case ErrorType.SUPABASE:
+        return 'Supabase Configuration Error';
+      case ErrorType.AZURE:
+        return 'Azure AD Configuration Error';
       default:
         return 'Something went wrong';
     }
@@ -349,6 +415,14 @@ User Agent: ${window.navigator.userAgent}
         return "You don't have permission to access this resource.";
       case ErrorType.VALIDATION:
         return 'The data you provided is invalid. Please check your input and try again.';
+      case ErrorType.ENVIRONMENT:
+        return 'Required environment variables are missing. Please visit the setup page to configure your environment.';
+      case ErrorType.CONFIGURATION:
+        return 'The application configuration is incomplete. Please check your setup and try again.';
+      case ErrorType.SUPABASE:
+        return 'There is an issue with the Supabase configuration. Please verify your Supabase settings.';
+      case ErrorType.AZURE:
+        return 'There is an issue with the Azure Active Directory configuration. Please check your Azure AD settings.';
       default:
         return 'An unexpected error occurred. Our team has been notified.';
     }
@@ -357,8 +431,32 @@ User Agent: ${window.navigator.userAgent}
   private getRecoveryActions(type: ErrorType) {
     const actions = [];
 
-    // Retry action for most error types
-    if (type !== ErrorType.PERMISSION && this.props.allowRetry !== false) {
+    // Setup action for configuration errors
+    if (
+      type === ErrorType.ENVIRONMENT ||
+      type === ErrorType.CONFIGURATION ||
+      type === ErrorType.SUPABASE ||
+      type === ErrorType.AZURE
+    ) {
+      actions.push({
+        label: 'Go to Setup',
+        icon: <AlertTriangle className="h-4 w-4" />,
+        onClick: () => {
+          if (typeof window !== 'undefined') {
+            window.location.href = '/setup';
+          }
+        },
+        variant: 'default' as const,
+      });
+    }
+
+    // Retry action for most error types (except permission and config errors)
+    if (
+      type !== ErrorType.PERMISSION &&
+      type !== ErrorType.ENVIRONMENT &&
+      type !== ErrorType.CONFIGURATION &&
+      this.props.allowRetry !== false
+    ) {
       actions.push({
         label: 'Try Again',
         icon: <RefreshCw className="h-4 w-4" />,
@@ -378,7 +476,12 @@ User Agent: ${window.navigator.userAgent}
     });
 
     // Contact support for critical errors
-    if (type === ErrorType.AUTHENTICATION || type === ErrorType.DATABASE) {
+    if (
+      type === ErrorType.AUTHENTICATION ||
+      type === ErrorType.DATABASE ||
+      type === ErrorType.SUPABASE ||
+      type === ErrorType.AZURE
+    ) {
       actions.push({
         label: 'Contact Support',
         icon: <Mail className="h-4 w-4" />,
@@ -541,3 +644,19 @@ export const ValidationErrorBoundary: React.FC<
 export const PermissionErrorBoundary: React.FC<
   Omit<ErrorBoundaryProps, 'errorType'>
 > = props => <ErrorBoundary {...props} errorType={ErrorType.PERMISSION} />;
+
+export const ConfigurationErrorBoundary: React.FC<
+  Omit<ErrorBoundaryProps, 'errorType'>
+> = props => <ErrorBoundary {...props} errorType={ErrorType.CONFIGURATION} />;
+
+export const EnvironmentErrorBoundary: React.FC<
+  Omit<ErrorBoundaryProps, 'errorType'>
+> = props => <ErrorBoundary {...props} errorType={ErrorType.ENVIRONMENT} />;
+
+export const SupabaseErrorBoundary: React.FC<
+  Omit<ErrorBoundaryProps, 'errorType'>
+> = props => <ErrorBoundary {...props} errorType={ErrorType.SUPABASE} />;
+
+export const AzureErrorBoundary: React.FC<
+  Omit<ErrorBoundaryProps, 'errorType'>
+> = props => <ErrorBoundary {...props} errorType={ErrorType.AZURE} />;
